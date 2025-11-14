@@ -1,0 +1,1010 @@
+{
+    "info": {
+        "name": "Learning Platform API v1.0",
+        "description": "Complete API testing collection for 6-feature learning platform",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. AUTH - REGISTRATION & LOGIN",
+            "item": [
+                {
+                    "name": "Register User (Student)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"student\",\n  \"phone\": \"08123456789\",\n  \"gender\": \"male\",\n  \"birth_date\": \"2000-01-15\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/register",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "register"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Register User (Mentor)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Mentor Expert\",\n  \"email\": \"mentor@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"mentor\",\n  \"phone\": \"08234567890\",\n  \"gender\": \"male\",\n  \"birth_date\": \"1990-05-20\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/register",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "register"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Register User (Corporate)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Corporate Admin\",\n  \"email\": \"corporate@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"corporate\",\n  \"phone\": \"08345678901\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/register",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "register"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/login",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "login"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "2. PROFILE & PORTFOLIO",
+            "item": [
+                {
+                    "name": "Get My Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/auth/profile",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "auth", "profile"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"John Updated\",\n  \"phone\": \"08987654321\",\n  \"bio\": \"I am a student interested in programming\",\n  \"institution\": \"State University\",\n  \"major\": \"Computer Science\",\n  \"education_level\": \"bachelor\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/auth/profile",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "auth", "profile"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Full Portfolio",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/auth/portfolio",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "auth", "portfolio"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Activity History",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/auth/activity-history",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "auth", "activity-history"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "3. COURSES & E-LEARNING",
+            "item": [
+                {
+                    "name": "List All Courses (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8000/api/courses?type=regular&level=beginner&access_type=free",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "courses"],
+                            "query": [
+                                {
+                                    "key": "type",
+                                    "value": "regular"
+                                },
+                                {
+                                    "key": "level",
+                                    "value": "beginner"
+                                },
+                                {
+                                    "key": "access_type",
+                                    "value": "free"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Course Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8000/api/courses/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "courses", "1"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Course (Admin)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ADMIN_TOKEN"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Introduction to Web Development\",\n  \"description\": \"Learn HTML, CSS, and JavaScript basics\",\n  \"type\": \"regular\",\n  \"level\": \"beginner\",\n  \"duration\": \"4 weeks\",\n  \"price\": 99000,\n  \"access_type\": \"regular\",\n  \"video_url\": \"https://example.com/video\",\n  \"total_videos\": 20\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/courses",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "courses"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Enroll in Course",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/enrollments/1/enroll",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "enrollments", "1", "enroll"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Courses",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/enrollments/my-courses",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "enrollments", "my-courses"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Course Progress",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"progress\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/enrollments/1/progress",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "enrollments", "1", "progress"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "4. SCHOLARSHIPS",
+            "item": [
+                {
+                    "name": "List Scholarships (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8000/api/scholarships?status=open&location=Jakarta&study_field=Technology",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "scholarships"],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "open"
+                                },
+                                {
+                                    "key": "location",
+                                    "value": "Jakarta"
+                                },
+                                {
+                                    "key": "study_field",
+                                    "value": "Technology"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Scholarship Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8000/api/scholarships/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "scholarships", "1"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Scholarship (Corporate)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer CORPORATE_TOKEN"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"organization_id\": 1,\n  \"name\": \"Tech Innovation Scholarship 2025\",\n  \"description\": \"Full scholarship for technology students\",\n  \"benefit\": \"Tuition coverage 100% + mentoring\",\n  \"location\": \"Jakarta\",\n  \"status\": \"open\",\n  \"deadline\": \"2025-12-31\",\n  \"study_field\": \"Computer Science\",\n  \"funding_amount\": 50000000,\n  \"requirements\": \"GPA 3.5+, English proficiency\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/scholarships",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "scholarships"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Apply for Scholarship",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "multipart/form-data"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "motivation_letter",
+                                    "type": "file",
+                                    "src": ""
+                                },
+                                {
+                                    "key": "cv_path",
+                                    "type": "file",
+                                    "src": ""
+                                },
+                                {
+                                    "key": "transcript_path",
+                                    "type": "file",
+                                    "src": ""
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/scholarships/1/apply",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "scholarships", "1", "apply"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Applications",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/scholarships/my-applications",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "scholarships", "my-applications"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "5. MENTORING SESSIONS",
+            "item": [
+                {
+                    "name": "List Mentoring Sessions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/mentoring-sessions?status=pending&type=academic",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "mentoring-sessions"],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "pending"
+                                },
+                                {
+                                    "key": "type",
+                                    "value": "academic"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Schedule Mentoring Session",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"mentor_id\": 2,\n  \"member_id\": 1,\n  \"type\": \"academic\",\n  \"schedule\": \"2025-11-20 14:00:00\",\n  \"meeting_link\": \"https://zoom.us/meeting/abc123\",\n  \"payment_method\": \"qris\",\n  \"status\": \"pending\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/mentoring-sessions",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "mentoring-sessions"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Sessions as Mentor",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer MENTOR_TOKEN"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/mentoring-sessions/as-mentor",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "mentoring-sessions", "as-mentor"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Sessions as Student",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/mentoring-sessions/as-student",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "mentoring-sessions", "as-student"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "6. ARTICLES",
+            "item": [
+                {
+                    "name": "List Articles (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8000/api/articles?category=education&status=published",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "articles"],
+                            "query": [
+                                {
+                                    "key": "category",
+                                    "value": "education"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "published"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Article Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8000/api/articles/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "articles", "1"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Article (Admin)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ADMIN_TOKEN"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"author_id\": 1,\n  \"title\": \"How to Learn Programming Effectively\",\n  \"content\": \"This is a comprehensive guide about learning programming...\",\n  \"category\": \"education\",\n  \"slug\": \"how-to-learn-programming\",\n  \"featured_image\": \"https://example.com/image.jpg\",\n  \"published_at\": \"2025-11-13\",\n  \"status\": \"published\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/articles",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "articles"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "7. CORPORATE CONTACTS",
+            "item": [
+                {
+                    "name": "Submit Contact Form (Public)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"PT Teknologi Indonesia\",\n  \"email\": \"hr@teknologi.com\",\n  \"phone\": \"02112345678\",\n  \"company\": \"PT Teknologi Indonesia\",\n  \"subject\": \"Partnership Inquiry\",\n  \"message\": \"We are interested in partnering with your platform\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/corporate-contact",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "corporate-contact"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Contacts (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ADMIN_TOKEN"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/corporate-contacts",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "corporate-contacts"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "8. REVIEWS & RATINGS",
+            "item": [
+                {
+                    "name": "List Reviews (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8000/api/reviews",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "reviews"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Review (Scholarship)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"user_id\": 1,\n  \"reviewable_id\": 1,\n  \"reviewable_type\": \"App\\\\Models\\\\Scholarship\",\n  \"rating\": 5,\n  \"comment\": \"Great scholarship program, very helpful!\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/reviews",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "reviews"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Review (Organization)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"user_id\": 1,\n  \"reviewable_id\": 1,\n  \"reviewable_type\": \"App\\\\Models\\\\Organization\",\n  \"rating\": 4,\n  \"comment\": \"Good organization, professional management\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/reviews",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "reviews"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "9. ACHIEVEMENTS & EXPERIENCES",
+            "item": [
+                {
+                    "name": "Create Achievement",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Best Programming Student 2025\",\n  \"description\": \"Awarded as the best programming student in the batch\",\n  \"organization\": \"State University\",\n  \"year\": 2025\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/achievements",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "achievements"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Achievements",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/achievements",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "achievements"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Experience",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Junior Developer\",\n  \"description\": \"Worked on web development projects\",\n  \"type\": \"work\",\n  \"level\": \"junior\",\n  \"company\": \"Tech Startup ABC\",\n  \"start_date\": \"2024-01-01\",\n  \"end_date\": \"2024-12-31\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/experiences",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "experiences"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Experiences",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer YOUR_TOKEN_HERE"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/experiences",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "experiences"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "10. ADMIN - USER MANAGEMENT",
+            "item": [
+                {
+                    "name": "List All Users (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ADMIN_TOKEN"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/admin/users?role=student&search=john",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "admin", "users"],
+                            "query": [
+                                {
+                                    "key": "role",
+                                    "value": "student"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "john"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User Detail (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ADMIN_TOKEN"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8000/api/admin/users/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "admin", "users", "1"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create User (Admin)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ADMIN_TOKEN"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"New Student\",\n  \"email\": \"newstudent@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"student\",\n  \"phone\": \"08765432101\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/admin/users",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "admin", "users"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update User (Admin)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ADMIN_TOKEN"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@example.com\",\n  \"role\": \"mentor\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8000/api/admin/users/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8000",
+                            "path": ["api", "admin", "users", "1"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}
