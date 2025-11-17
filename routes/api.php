@@ -16,16 +16,9 @@ use App\Http\Controllers\Api\OrganizationController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\CorporateContactController;
 use App\Http\Controllers\Api\TransactionController;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes - Learning Platform v1.0
-|--------------------------------------------------------------------------
-| Base URL: http://localhost:8000/api
-| All endpoints return JSON responses
-| Protected endpoints require 'Authorization: Bearer {token}' header
-|--------------------------------------------------------------------------
-*/
+use App\Http\Controllers\NeedAssessmentController;
+use App\Http\Controllers\CoachingFileController;
+use App\Http\Controllers\ProgressReportController;
 
 
 // PUBLIC ROUTES (No Authentication Required)
@@ -216,28 +209,47 @@ Route::middleware('auth:api')->group(function () {
     });
 
     
-    // TRANSACTIONS
+
+    // NEED ASSESSMENT (for mentoring sessions)
     
-    Route::prefix('transactions')->name('transactions.')->group(function () {
-        // View transactions (any authenticated user)
-        Route::get('/', [TransactionController::class, 'index'])->name('index');
-        Route::get('/{id}', [TransactionController::class, 'show'])->name('show');
-
-        // Create transactions for different types
-        Route::post('/courses/{courseId}', [TransactionController::class, 'createCourseTransaction'])->name('create-course');
-        Route::post('/subscription', [TransactionController::class, 'createSubscriptionTransaction'])->name('create-subscription');
-        Route::post('/mentoring-sessions/{sessionId}', [TransactionController::class, 'createMentoringTransaction'])->name('create-mentoring');
-
-        // User actions
-        Route::post('/{id}/upload-proof', [TransactionController::class, 'uploadPaymentProof'])->name('upload-proof');
-        Route::post('/{id}/refund', [TransactionController::class, 'requestRefund'])->name('request-refund');
-
-        // Admin management
-        Route::middleware('role:admin')->group(function () {
-            Route::post('/{id}/confirm', [TransactionController::class, 'confirmPayment'])->name('confirm');
-            Route::get('/statistics/summary', [TransactionController::class, 'statistics'])->name('statistics');
-        });
+    Route::prefix('mentoring-sessions/{mentoringSessionId}/need-assessments')->name('need-assessments.')->group(function () {
+        Route::get('/', [NeedAssessmentController::class, 'show'])->name('show');
+        Route::post('/', [NeedAssessmentController::class, 'store'])->name('store');
+        Route::put('/mark-completed', [NeedAssessmentController::class, 'markCompleted'])->name('mark-completed');
+        Route::delete('/', [NeedAssessmentController::class, 'destroy'])->name('destroy');
     });
 
+    
+    // COACHING FILES (for mentoring sessions)
+    
+    Route::prefix('mentoring-sessions/{mentoringSessionId}/coaching-files')->name('coaching-files.')->group(function () {
+        Route::get('/', [CoachingFileController::class, 'index'])->name('index');
+        Route::post('/', [CoachingFileController::class, 'store'])->name('store');
+        Route::get('/{fileId}', [CoachingFileController::class, 'show'])->name('show');
+        Route::get('/{fileId}/download', [CoachingFileController::class, 'download'])->name('download');
+        Route::delete('/{fileId}', [CoachingFileController::class, 'destroy'])->name('destroy');
+        Route::delete('/', [CoachingFileController::class, 'destroyAll'])->name('destroy-all');
+    });
+
+    
+    // PROGRESS REPORTS (for enrollments)
+    
+    Route::prefix('progress-reports')->name('progress-reports.')->group(function () {
+        Route::get('/', [ProgressReportController::class, 'index'])->name('index');
+        Route::post('/', [ProgressReportController::class, 'store'])->name('store');
+        Route::get('/due', [ProgressReportController::class, 'getDueReports'])->name('due');
+        Route::get('/{reportId}', [ProgressReportController::class, 'show'])->name('show');
+        Route::put('/{reportId}', [ProgressReportController::class, 'update'])->name('update');
+        Route::delete('/{reportId}', [ProgressReportController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('enrollments/{enrollmentId}/progress-reports')->name('enrollment-progress-reports.')->group(function () {
+        Route::get('/', [ProgressReportController::class, 'getByEnrollment'])->name('index');
+    });
+
+    Route::post('/progress-reports/frequency', [ProgressReportController::class, 'setFrequency'])->name('progress-reports.set-frequency');
+
 });
+
+
 

@@ -15,11 +15,17 @@ class Subscription extends Model
         'start_date',
         'end_date',
         'status',
+        'type',
+        'package_type',
+        'duration',
+        'duration_unit',
+        'courses_ids',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'courses_ids' => 'array',
     ];
 
     // Relationships

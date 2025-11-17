@@ -15,11 +15,16 @@ class Enrollment extends Model
         'progress',
         'completed',
         'certificate_url',
+        'last_progress_report_date',
+        'next_progress_report_date',
+        'report_frequency',
     ];
 
     protected $casts = [
         'completed' => 'boolean',
         'progress' => 'integer',
+        'last_progress_report_date' => 'date',
+        'next_progress_report_date' => 'date',
     ];
 
     // Relationships
@@ -36,5 +41,10 @@ class Enrollment extends Model
     public function transactions()
     {
         return $this->morphMany(Transaction::class, 'transactionable');
+    }
+
+    public function progressReports()
+    {
+        return $this->hasMany(ProgressReport::class);
     }
 }

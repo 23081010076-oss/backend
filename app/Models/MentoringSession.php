@@ -20,6 +20,9 @@ class MentoringSession extends Model
         'meeting_link',
         'payment_method',
         'status',
+        'need_assessment_status',
+        'assessment_form_data',
+        'coaching_files_path',
     ];
 
     protected $casts = [
@@ -45,5 +48,15 @@ class MentoringSession extends Model
     public function transactions()
     {
         return $this->morphMany(Transaction::class, 'transactionable');
+    }
+
+    public function needAssessment()
+    {
+        return $this->hasOne(NeedAssessment::class);
+    }
+
+    public function coachingFiles()
+    {
+        return $this->hasMany(CoachingFile::class);
     }
 }
