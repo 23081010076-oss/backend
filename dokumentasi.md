@@ -19,11 +19,12 @@
 ## Overview
 
 API ini adalah platform mentoring komprehensif dengan fitur:
-- ✅ Sistem penawaran paket
-- ✅ Sistem pembayaran gateway
-- ✅ Assessment pre-mentoring
-- ✅ File upload coaching
-- ✅ Progress tracking bulanan
+
+-   ✅ Sistem penawaran paket
+-   ✅ Sistem pembayaran gateway
+-   ✅ Assessment pre-mentoring
+-   ✅ File upload coaching
+-   ✅ Progress tracking bulanan
 
 **Tech Stack:** Laravel 11 + MySQL + JWT Auth
 
@@ -32,6 +33,7 @@ API ini adalah platform mentoring komprehensif dengan fitur:
 ## Sistem Penawaran
 
 ### Database Schema
+
 ```sql
 ALTER TABLE subscriptions ADD COLUMN (
   package_type ENUM('single_course', 'all_in_one') DEFAULT 'single_course',
@@ -44,13 +46,15 @@ ALTER TABLE subscriptions ADD COLUMN (
 ```
 
 ### Model: Subscription
+
 ```php
-protected $fillable = ['user_id', 'course_id', 'package_type', 'duration', 
+protected $fillable = ['user_id', 'course_id', 'package_type', 'duration',
                        'duration_unit', 'courses_ids', 'price', 'auto_renew'];
 protected $casts = ['courses_ids' => 'array'];
 ```
 
 ### API Endpoints
+
 ```bash
 POST   /api/subscriptions                 # Create subscription package
 GET    /api/subscriptions                 # List all subscriptions
@@ -60,27 +64,29 @@ DELETE /api/subscriptions/{id}            # Cancel subscription
 ```
 
 ### Request Example
+
 ```json
 {
-  "package_type": "all_in_one",
-  "duration": 3,
-  "duration_unit": "months",
-  "courses_ids": [1, 2, 3, 4, 5]
+    "package_type": "all_in_one",
+    "duration": 3,
+    "duration_unit": "months",
+    "courses_ids": [1, 2, 3, 4, 5]
 }
 ```
 
 ### Response Example
+
 ```json
 {
-  "id": 1,
-  "user_id": 10,
-  "package_type": "all_in_one",
-  "duration": 3,
-  "duration_unit": "months",
-  "courses_ids": [1, 2, 3, 4, 5],
-  "price": 450000,
-  "status": "active",
-  "created_at": "2025-11-17T10:00:00Z"
+    "id": 1,
+    "user_id": 10,
+    "package_type": "all_in_one",
+    "duration": 3,
+    "duration_unit": "months",
+    "courses_ids": [1, 2, 3, 4, 5],
+    "price": 450000,
+    "status": "active",
+    "created_at": "2025-11-17T10:00:00Z"
 }
 ```
 
@@ -89,6 +95,7 @@ DELETE /api/subscriptions/{id}            # Cancel subscription
 ## Sistem Pembayaran
 
 ### Database Schema
+
 ```sql
 CREATE TABLE transactions (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -108,9 +115,10 @@ CREATE TABLE transactions (
 ```
 
 ### Model: Transaction
+
 ```php
-protected $fillable = ['subscription_id', 'user_id', 'amount', 'payment_method', 
-                       'payment_status', 'payment_proof', 'payment_date', 
+protected $fillable = ['subscription_id', 'user_id', 'amount', 'payment_method',
+                       'payment_status', 'payment_proof', 'payment_date',
                        'payment_gateway_id', 'refund_reason', 'refund_date'];
 
 // Relationships
@@ -119,6 +127,7 @@ public function user() { return $this->belongsTo(User::class); }
 ```
 
 ### API Endpoints
+
 ```bash
 POST   /api/transactions                  # Create payment transaction
 GET    /api/transactions                  # List transactions
@@ -129,6 +138,7 @@ POST   /api/transactions/{id}/refund      # Process refund
 ```
 
 ### Payment Methods Supported
+
 ```
 - VA Mandiri
 - VA BCA
@@ -139,32 +149,35 @@ POST   /api/transactions/{id}/refund      # Process refund
 ```
 
 ### Request: Create Transaction
+
 ```json
 {
-  "subscription_id": 1,
-  "payment_method": "qris"
+    "subscription_id": 1,
+    "payment_method": "qris"
 }
 ```
 
 ### Request: Upload Proof
+
 ```json
 {
-  "payment_proof": "file.jpg"  // File upload
+    "payment_proof": "file.jpg" // File upload
 }
 ```
 
 ### Response: Transaction
+
 ```json
 {
-  "id": 5,
-  "subscription_id": 1,
-  "user_id": 10,
-  "amount": 450000,
-  "payment_method": "qris",
-  "payment_status": "pending",
-  "payment_gateway_id": "inv_123456",
-  "payment_date": null,
-  "created_at": "2025-11-17T10:05:00Z"
+    "id": 5,
+    "subscription_id": 1,
+    "user_id": 10,
+    "amount": 450000,
+    "payment_method": "qris",
+    "payment_status": "pending",
+    "payment_gateway_id": "inv_123456",
+    "payment_date": null,
+    "created_at": "2025-11-17T10:05:00Z"
 }
 ```
 
@@ -173,13 +186,16 @@ POST   /api/transactions/{id}/refund      # Process refund
 ## Need Assessment
 
 ### Tujuan
+
 Pre-mentoring assessment form untuk memahami:
-- Learning goals
-- Previous experience
-- Challenges faced
-- Expectations
+
+-   Learning goals
+-   Previous experience
+-   Challenges faced
+-   Expectations
 
 ### Database Schema
+
 ```sql
 CREATE TABLE need_assessments (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -192,6 +208,7 @@ CREATE TABLE need_assessments (
 ```
 
 ### Model: NeedAssessment
+
 ```php
 protected $fillable = ['mentoring_session_id', 'form_data', 'completed_at'];
 protected $casts = ['form_data' => 'array', 'completed_at' => 'datetime'];
@@ -202,6 +219,7 @@ public function markCompleted() { $this->update(['completed_at' => now()]); }
 ```
 
 ### API Endpoints
+
 ```bash
 GET    /api/mentoring-sessions/{id}/need-assessments
 POST   /api/mentoring-sessions/{id}/need-assessments
@@ -210,31 +228,33 @@ DELETE /api/mentoring-sessions/{id}/need-assessments
 ```
 
 ### Request: Submit Assessment
+
 ```json
 {
-  "form_data": {
-    "learning_goals": "Ingin bisa full-stack development",
-    "previous_experience": "Sudah tahu basic HTML/CSS",
-    "challenges": "Kesulitan dengan backend logic",
-    "expectations": "Harapan bisa dapat sertifikat"
-  }
+    "form_data": {
+        "learning_goals": "Ingin bisa full-stack development",
+        "previous_experience": "Sudah tahu basic HTML/CSS",
+        "challenges": "Kesulitan dengan backend logic",
+        "expectations": "Harapan bisa dapat sertifikat"
+    }
 }
 ```
 
 ### Response
+
 ```json
 {
-  "id": 1,
-  "mentoring_session_id": 5,
-  "form_data": {
-    "learning_goals": "...",
-    "previous_experience": "...",
-    "challenges": "...",
-    "expectations": "..."
-  },
-  "is_completed": false,
-  "completed_at": null,
-  "created_at": "2025-11-17T10:10:00Z"
+    "id": 1,
+    "mentoring_session_id": 5,
+    "form_data": {
+        "learning_goals": "...",
+        "previous_experience": "...",
+        "challenges": "...",
+        "expectations": "..."
+    },
+    "is_completed": false,
+    "completed_at": null,
+    "created_at": "2025-11-17T10:10:00Z"
 }
 ```
 
@@ -243,13 +263,16 @@ DELETE /api/mentoring-sessions/{id}/need-assessments
 ## Coaching Files
 
 ### Tujuan
+
 Upload & manage file-file coaching:
-- Presentation slides
-- Video materials
-- Documentation
-- Resources
+
+-   Presentation slides
+-   Video materials
+-   Documentation
+-   Resources
 
 ### Database Schema
+
 ```sql
 CREATE TABLE coaching_files (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -265,8 +288,9 @@ CREATE TABLE coaching_files (
 ```
 
 ### Model: CoachingFile
+
 ```php
-protected $fillable = ['mentoring_session_id', 'file_name', 'file_path', 
+protected $fillable = ['mentoring_session_id', 'file_name', 'file_path',
                        'file_type', 'file_size', 'uploaded_by'];
 
 public function mentoringSession() { return $this->belongsTo(MentoringSession::class); }
@@ -275,11 +299,13 @@ public function getFileUrlAttribute() { return '/storage/coaching-files/' . $thi
 ```
 
 ### Storage Path
+
 ```
 /storage/app/public/coaching-files/{mentoringSessionId}/{fileName}
 ```
 
 ### API Endpoints
+
 ```bash
 GET    /api/mentoring-sessions/{id}/coaching-files           # List files
 POST   /api/mentoring-sessions/{id}/coaching-files           # Upload file (max 50MB)
@@ -290,6 +316,7 @@ DELETE /api/mentoring-sessions/{id}/coaching-files           # Delete all files
 ```
 
 ### Request: Upload File
+
 ```
 POST /api/mentoring-sessions/5/coaching-files
 Content-Type: multipart/form-data
@@ -300,24 +327,25 @@ file_type: "pdf"
 ```
 
 ### Response: List Files
+
 ```json
 {
-  "data": [
-    {
-      "id": 1,
-      "mentoring_session_id": 5,
-      "file_name": "Slide-Week-1",
-      "file_type": "pdf",
-      "file_size": 2048000,
-      "file_url": "/storage/coaching-files/5/slide-week-1.pdf",
-      "uploaded_by": {
-        "id": 1,
-        "name": "John Mentor",
-        "email": "john@example.com"
-      },
-      "created_at": "2025-11-17T10:15:00Z"
-    }
-  ]
+    "data": [
+        {
+            "id": 1,
+            "mentoring_session_id": 5,
+            "file_name": "Slide-Week-1",
+            "file_type": "pdf",
+            "file_size": 2048000,
+            "file_url": "/storage/coaching-files/5/slide-week-1.pdf",
+            "uploaded_by": {
+                "id": 1,
+                "name": "John Mentor",
+                "email": "john@example.com"
+            },
+            "created_at": "2025-11-17T10:15:00Z"
+        }
+    ]
 }
 ```
 
@@ -326,13 +354,16 @@ file_type: "pdf"
 ## Progress Reports
 
 ### Tujuan
+
 Track progress mentee dengan laporan berkala:
-- Default: 14 hari (2 minggu)
-- Customizable: 7-30 hari
-- Track: Progress percentage
-- Attachment: Notes & supporting docs
+
+-   Default: 14 hari (2 minggu)
+-   Customizable: 7-30 hari
+-   Track: Progress percentage
+-   Attachment: Notes & supporting docs
 
 ### Database Schema
+
 ```sql
 CREATE TABLE progress_reports (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -349,8 +380,9 @@ CREATE TABLE progress_reports (
 ```
 
 ### Model: ProgressReport
+
 ```php
-protected $fillable = ['enrollment_id', 'report_date', 'progress_percentage', 
+protected $fillable = ['enrollment_id', 'report_date', 'progress_percentage',
                        'notes', 'attachment_url', 'next_report_date', 'frequency'];
 protected $casts = ['report_date' => 'date', 'next_report_date' => 'date'];
 
@@ -366,6 +398,7 @@ public function setNextReportDate() {
 ```
 
 ### API Endpoints
+
 ```bash
 GET    /api/progress-reports                      # List all reports
 GET    /api/progress-reports/{id}                 # Get report detail
@@ -378,45 +411,48 @@ POST   /api/progress-reports/frequency            # Update frequency (7-30)
 ```
 
 ### Request: Create Report
+
 ```json
 {
-  "enrollment_id": 10,
-  "report_date": "2025-11-17",
-  "progress_percentage": 45,
-  "notes": "Sudah paham konsep async-await, next: advanced patterns",
-  "attachment_url": "https://example.com/docs/progress.pdf",
-  "frequency": 14
+    "enrollment_id": 10,
+    "report_date": "2025-11-17",
+    "progress_percentage": 45,
+    "notes": "Sudah paham konsep async-await, next: advanced patterns",
+    "attachment_url": "https://example.com/docs/progress.pdf",
+    "frequency": 14
 }
 ```
 
 ### Response: Report Detail
+
 ```json
 {
-  "id": 1,
-  "enrollment_id": 10,
-  "report_date": "2025-11-17",
-  "progress_percentage": 45,
-  "notes": "Sudah paham konsep async-await, next: advanced patterns",
-  "attachment_url": "https://example.com/docs/progress.pdf",
-  "next_report_date": "2025-12-01",
-  "frequency": 14,
-  "is_due": false,
-  "enrollment": {
-    "id": 10,
-    "user_id": 5,
-    "course_id": 2,
-    "progress": 45,
-    "completed": false
-  },
-  "created_at": "2025-11-17T10:20:00Z"
+    "id": 1,
+    "enrollment_id": 10,
+    "report_date": "2025-11-17",
+    "progress_percentage": 45,
+    "notes": "Sudah paham konsep async-await, next: advanced patterns",
+    "attachment_url": "https://example.com/docs/progress.pdf",
+    "next_report_date": "2025-12-01",
+    "frequency": 14,
+    "is_due": false,
+    "enrollment": {
+        "id": 10,
+        "user_id": 5,
+        "course_id": 2,
+        "progress": 45,
+        "completed": false
+    },
+    "created_at": "2025-11-17T10:20:00Z"
 }
 ```
 
 ### Request: Set Frequency
+
 ```json
 {
-  "enrollment_id": 10,
-  "frequency": 7
+    "enrollment_id": 10,
+    "frequency": 7
 }
 ```
 
@@ -425,6 +461,7 @@ POST   /api/progress-reports/frequency            # Update frequency (7-30)
 ## Database Schema
 
 ### Diagram Hubungan
+
 ```
 Users
 ├── Subscriptions (1-many)
@@ -445,6 +482,7 @@ Organizations
 ```
 
 ### Tabel Baru (3)
+
 ```
 1. need_assessments (mentoring_session_id, form_data, completed_at)
 2. coaching_files (mentoring_session_id, file_*, uploaded_by)
@@ -452,6 +490,7 @@ Organizations
 ```
 
 ### Tabel Update (3)
+
 ```
 1. subscriptions: +package_type, duration, duration_unit, courses_ids
 2. mentoring_sessions: +need_assessment_status, assessment_form_data, coaching_files_path
@@ -463,6 +502,7 @@ Organizations
 ## API Endpoints
 
 ### Authentication
+
 ```bash
 POST   /api/auth/register            # Register user
 POST   /api/auth/login               # Login & get JWT token
@@ -473,6 +513,7 @@ PUT    /api/auth/profile             # Update profile
 ```
 
 ### Subscriptions (4 endpoints)
+
 ```bash
 POST   /api/subscriptions            # Create
 GET    /api/subscriptions            # List
@@ -482,6 +523,7 @@ DELETE /api/subscriptions/{id}       # Delete
 ```
 
 ### Transactions (6 endpoints)
+
 ```bash
 POST   /api/transactions                     # Create
 GET    /api/transactions                     # List
@@ -492,6 +534,7 @@ POST   /api/transactions/{id}/refund         # Refund
 ```
 
 ### Need Assessments (4 endpoints)
+
 ```bash
 GET    /api/mentoring-sessions/{id}/need-assessments
 POST   /api/mentoring-sessions/{id}/need-assessments
@@ -500,6 +543,7 @@ DELETE /api/mentoring-sessions/{id}/need-assessments
 ```
 
 ### Coaching Files (6 endpoints)
+
 ```bash
 GET    /api/mentoring-sessions/{id}/coaching-files
 POST   /api/mentoring-sessions/{id}/coaching-files
@@ -510,6 +554,7 @@ DELETE /api/mentoring-sessions/{id}/coaching-files
 ```
 
 ### Progress Reports (8 endpoints)
+
 ```bash
 GET    /api/progress-reports                      # List all
 GET    /api/progress-reports/{id}                 # Detail
@@ -522,6 +567,7 @@ POST   /api/progress-reports/frequency            # Set frequency
 ```
 
 ### Existing Features (60+ endpoints)
+
 ```bash
 GET    /api/courses               # Courses
 GET    /api/scholarships          # Scholarships
@@ -539,6 +585,7 @@ GET    /api/organizations         # Organizations
 ## Testing Checklist
 
 ### Pre-Testing Setup
+
 ```bash
 # 1. Run migrations
 php artisan migrate
@@ -551,6 +598,7 @@ php artisan serve
 ```
 
 ### Test 1: Subscriptions
+
 ```bash
 1. POST /api/subscriptions
    ✓ Valid data (single_course, 1 month)
@@ -578,6 +626,7 @@ php artisan serve
 ```
 
 ### Test 2: Transactions
+
 ```bash
 1. POST /api/transactions
    ✓ Valid data (VA, QRIS, E-wallet)
@@ -598,6 +647,7 @@ php artisan serve
 ```
 
 ### Test 3: Need Assessments
+
 ```bash
 1. POST /api/mentoring-sessions/{id}/need-assessments
    ✓ Submit form with all 4 fields
@@ -618,6 +668,7 @@ php artisan serve
 ```
 
 ### Test 4: Coaching Files
+
 ```bash
 1. POST /api/mentoring-sessions/{id}/coaching-files
    ✓ Upload PDF (small file)
@@ -647,6 +698,7 @@ php artisan serve
 ```
 
 ### Test 5: Progress Reports
+
 ```bash
 1. POST /api/progress-reports
    ✓ Create with frequency=14 (default)
@@ -684,6 +736,7 @@ php artisan serve
 ```
 
 ### Test 6: Authorization
+
 ```bash
 ✓ All endpoints require JWT token
 ✓ Invalid token returns 401
@@ -699,18 +752,18 @@ php artisan serve
 
 ## Summary
 
-| Item | Count | Status |
-|------|-------|--------|
-| Database Tables (New) | 3 | ✅ |
-| Database Tables (Updated) | 3 | ✅ |
-| Models (New) | 3 | ✅ |
-| Models (Updated) | 3 | ✅ |
-| Controllers (New) | 3 | ✅ |
-| API Endpoints (New) | 16 | ✅ |
-| FormRequest Classes | 5 | ✅ |
-| Resource Classes | 3 | ✅ |
-| Total API Endpoints | 89+ | ✅ |
-| Test Cases | 50+ | ✅ |
+| Item                      | Count | Status |
+| ------------------------- | ----- | ------ |
+| Database Tables (New)     | 3     | ✅     |
+| Database Tables (Updated) | 3     | ✅     |
+| Models (New)              | 3     | ✅     |
+| Models (Updated)          | 3     | ✅     |
+| Controllers (New)         | 3     | ✅     |
+| API Endpoints (New)       | 16    | ✅     |
+| FormRequest Classes       | 5     | ✅     |
+| Resource Classes          | 3     | ✅     |
+| Total API Endpoints       | 89+   | ✅     |
+| Test Cases                | 50+   | ✅     |
 
 **Status: 100% READY FOR PRODUCTION** ✅
 
