@@ -13,7 +13,7 @@ class ArticleController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Article::with('authorUser');
+        $query = Article::with('author');
 
         // Filter by category
         if ($request->has('category')) {
@@ -60,8 +60,8 @@ class ArticleController extends Controller
      */
     public function show($id)
     {
-        $article = Article::with('authorUser')->findOrFail($id);
-        
+        $article = Article::with('author')->findOrFail($id);
+
         return response()->json([
             'data' => $article
         ]);
