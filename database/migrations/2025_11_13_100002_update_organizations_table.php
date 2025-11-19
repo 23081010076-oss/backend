@@ -21,11 +21,11 @@ return new class extends Migration
             if (!Schema::hasColumn('organizations', 'website')) {
                 $table->string('website')->nullable()->after('phone');
             }
-            // Drop user_id constraint if it exists and make organizations independent
-            if (Schema::hasColumn('organizations', 'user_id')) {
-                $table->dropForeign(['user_id']);
-                $table->dropColumn('user_id');
-            }
+            // // Drop user_id constraint if it exists and make organizations independent
+            // if (Schema::hasColumn('organizations', 'user_id')) {
+            //     $table->dropForeign(['user_id']);
+            //     $table->dropColumn('user_id');
+            // }
         });
     }
 
