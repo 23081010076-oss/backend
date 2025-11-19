@@ -1,4 +1,5 @@
 # 🧪 Complete API Testing Guide - All Features
+
 **Learning Platform Backend**  
 **Base URL:** `http://localhost:8000/api`
 
@@ -7,6 +8,7 @@
 ## 📋 Quick Reference - All Endpoints
 
 ### 1️⃣ AUTHENTICATION
+
 ```bash
 # Register
 POST /register
@@ -33,6 +35,7 @@ Headers: Authorization: Bearer {token}
 ---
 
 ### 2️⃣ USER MANAGEMENT
+
 ```bash
 # Get Profile
 GET /auth/profile
@@ -76,6 +79,7 @@ Middleware: role:admin
 ---
 
 ### 3️⃣ COURSES & E-LEARNING
+
 ```bash
 # List Courses (Public)
 GET /courses?page=1&level=beginner&access_type=premium&search=Laravel
@@ -139,6 +143,7 @@ Headers: Authorization: Bearer {user_token}
 ---
 
 ### 4️⃣ SUBSCRIPTION & PACKAGES
+
 ```bash
 # List Subscriptions
 GET /subscriptions
@@ -174,6 +179,7 @@ Headers: Authorization: Bearer {user_token}
 ---
 
 ### 5️⃣ SCHOLARSHIPS
+
 ```bash
 # List Scholarships (Public)
 GET /scholarships?page=1&study_field=IT&location=Jakarta
@@ -264,6 +270,7 @@ Headers: Authorization: Bearer {user_token}
 ---
 
 ### 6️⃣ MENTORING SESSIONS
+
 ```bash
 # List Mentoring Sessions
 GET /mentoring-sessions
@@ -371,6 +378,7 @@ Headers: Authorization: Bearer {user_token}
 ---
 
 ### 7️⃣ TRANSACTIONS & PAYMENTS
+
 ```bash
 # List My Transactions
 GET /transactions?page=1&type=course_enrollment&status=pending
@@ -429,6 +437,7 @@ Headers: Authorization: Bearer {admin_token}
 ---
 
 ### 8️⃣ ARTICLES & CONTENT
+
 ```bash
 # List Articles (Public)
 GET /articles?page=1&category=edukasi
@@ -463,6 +472,7 @@ Headers: Authorization: Bearer {user_token}
 ---
 
 ### 9️⃣ CORPORATE SERVICES
+
 ```bash
 # Public: Submit Contact Form
 POST /corporate-contact
@@ -497,6 +507,7 @@ Headers: Authorization: Bearer {admin_token}
 ---
 
 ### 🔟 ORGANIZATIONS
+
 ```bash
 # List Organizations
 GET /organizations
@@ -536,6 +547,7 @@ Headers: Authorization: Bearer {user_token}
 ---
 
 ### 1️⃣1️⃣ ACHIEVEMENTS
+
 ```bash
 # List Achievements
 GET /achievements
@@ -571,6 +583,7 @@ Headers: Authorization: Bearer {user_token}
 ---
 
 ### 1️⃣2️⃣ EXPERIENCES
+
 ```bash
 # List Experiences
 GET /experiences
@@ -611,6 +624,7 @@ Headers: Authorization: Bearer {user_token}
 ## 🔑 Important Notes
 
 ### Headers Required:
+
 ```
 Content-Type: application/json
 Accept: application/json
@@ -618,6 +632,7 @@ Authorization: Bearer {token}  (untuk protected routes)
 ```
 
 ### Status Codes:
+
 ```
 200 OK              - Success
 201 Created         - Resource created
@@ -630,6 +645,7 @@ Authorization: Bearer {token}  (untuk protected routes)
 ```
 
 ### Pagination:
+
 ```
 GET /courses?page=1&per_page=15
 Response includes:
@@ -645,6 +661,7 @@ Response includes:
 ```
 
 ### Filtering Examples:
+
 ```
 # Courses
 GET /courses?level=beginner&access_type=premium&search=Laravel
@@ -660,12 +677,13 @@ GET /mentoring-sessions?type=academic
 ```
 
 ### Error Response:
+
 ```json
 {
-  "message": "Error message",
-  "errors": {
-    "field": ["Error detail"]
-  }
+    "message": "Error message",
+    "errors": {
+        "field": ["Error detail"]
+    }
 }
 ```
 
@@ -674,6 +692,7 @@ GET /mentoring-sessions?type=academic
 ## 🧪 Testing Workflow
 
 ### Step 1: Register & Login
+
 ```bash
 1. POST /register → Create account
 2. POST /login → Get access_token
@@ -681,12 +700,14 @@ GET /mentoring-sessions?type=academic
 ```
 
 ### Step 2: Setup Profile
+
 ```bash
 1. PUT /auth/profile → Update biodata
 2. POST /auth/profile/photo → Upload foto
 ```
 
 ### Step 3: Browse & Enroll
+
 ```bash
 1. GET /courses → List courses
 2. GET /courses/{id} → View details
@@ -695,6 +716,7 @@ GET /mentoring-sessions?type=academic
 ```
 
 ### Step 4: Mentoring
+
 ```bash
 1. GET /mentoring-sessions → List mentors
 2. POST /mentoring-sessions → Book session
@@ -703,6 +725,7 @@ GET /mentoring-sessions?type=academic
 ```
 
 ### Step 5: Scholarship
+
 ```bash
 1. GET /scholarships → List scholarships
 2. GET /scholarships/{id} → View details
@@ -714,24 +737,24 @@ GET /mentoring-sessions?type=academic
 
 ## 📦 Complete Feature Checklist
 
-- [x] User Registration & Login
-- [x] Profile Management
-- [x] Courses & E-Learning
-- [x] Enrollment & Progress
-- [x] Subscriptions
-- [x] Scholarships & Applications
-- [x] Mentoring Sessions
-- [x] Need Assessment
-- [x] Coaching Files
-- [x] Transactions & Payments
-- [x] Articles & Content
-- [x] Corporate Services
-- [x] Organizations
-- [x] Achievements
-- [x] Experiences
-- [x] Reviews & Ratings
-- [x] Role-based Access
-- [x] Admin Controls
+-   [x] User Registration & Login
+-   [x] Profile Management
+-   [x] Courses & E-Learning
+-   [x] Enrollment & Progress
+-   [x] Subscriptions
+-   [x] Scholarships & Applications
+-   [x] Mentoring Sessions
+-   [x] Need Assessment
+-   [x] Coaching Files
+-   [x] Transactions & Payments
+-   [x] Articles & Content
+-   [x] Corporate Services
+-   [x] Organizations
+-   [x] Achievements
+-   [x] Experiences
+-   [x] Reviews & Ratings
+-   [x] Role-based Access
+-   [x] Admin Controls
 
 ---
 
