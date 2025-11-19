@@ -18,7 +18,6 @@ use App\Http\Controllers\Api\CorporateContactController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\NeedAssessmentController;
 use App\Http\Controllers\CoachingFileController;
-use App\Http\Controllers\ProgressReportController;
 
 
 // PUBLIC ROUTES (No Authentication Required)
@@ -231,25 +230,8 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/', [CoachingFileController::class, 'destroyAll'])->name('destroy-all');
     });
 
-    
-    // PROGRESS REPORTS (for enrollments)
-    
-    Route::prefix('progress-reports')->name('progress-reports.')->group(function () {
-        Route::get('/', [ProgressReportController::class, 'index'])->name('index');
-        Route::post('/', [ProgressReportController::class, 'store'])->name('store');
-        Route::get('/due', [ProgressReportController::class, 'getDueReports'])->name('due');
-        Route::get('/{reportId}', [ProgressReportController::class, 'show'])->name('show');
-        Route::put('/{reportId}', [ProgressReportController::class, 'update'])->name('update');
-        Route::delete('/{reportId}', [ProgressReportController::class, 'destroy'])->name('destroy');
-    });
-
-    Route::prefix('enrollments/{enrollmentId}/progress-reports')->name('enrollment-progress-reports.')->group(function () {
-        Route::get('/', [ProgressReportController::class, 'getByEnrollment'])->name('index');
-    });
-
-    Route::post('/progress-reports/frequency', [ProgressReportController::class, 'setFrequency'])->name('progress-reports.set-frequency');
-
 });
+
 
 
 
