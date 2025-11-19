@@ -209,6 +209,31 @@ Route::middleware('auth:api')->group(function () {
 
     
 
+    // TRANSACTIONS MANAGEMENT
+    
+    Route::prefix('transactions')->name('transactions.')->group(function () {
+        // List user's transactions
+        Route::get('/', [TransactionController::class, 'index'])->name('index');
+        
+        // Get single transaction
+        Route::get('/{id}', [TransactionController::class, 'show'])->name('show');
+        
+        // Create transactions
+        Route::post('/courses/{courseId}', [TransactionController::class, 'createCourseTransaction'])->name('course.store');
+        Route::post('/subscriptions', [TransactionController::class, 'createSubscriptionTransaction'])->name('subscription.store');
+        Route::post('/mentoring-sessions/{sessionId}', [TransactionController::class, 'createMentoringTransaction'])->name('mentoring.store');
+        
+        // Payment operations
+        Route::post('/{id}/payment-proof', [TransactionController::class, 'uploadPaymentProof'])->name('payment-proof.upload');
+        Route::post('/{id}/refund', [TransactionController::class, 'requestRefund'])->name('refund.request');
+        
+        // Admin only
+        Route::middleware('role:admin')->group(function () {
+            Route::post('/{id}/confirm', [TransactionController::class, 'confirmPayment'])->name('confirm-payment');
+            Route::get('/statistics', [TransactionController::class, 'statistics'])->name('statistics');
+        });
+    });
+
     // NEED ASSESSMENT (for mentoring sessions)
     
     Route::prefix('mentoring-sessions/{mentoringSessionId}/need-assessments')->name('need-assessments.')->group(function () {
