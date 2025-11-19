@@ -16,9 +16,15 @@ class DatabaseSeeder extends Seeder
         // Run Admin Seeder FIRST (create admin users)
         $this->call([
             AdminSeeder::class,
+            UserSeeder::class,      // Create sample users (students, mentors, corporate)
+            CourseSeeder::class,    // Create courses
+            ScholarshipSeeder::class, // Create scholarships
+            OrganizationSeeder::class, // Create organizations (depends on users)
+            ExperienceSeeder::class,   // Create experiences (depends on users)
+            AchievementSeeder::class,  // Create achievements (depends on users)
+            ArticleSeeder::class,      // Create articles (depends on users)
         ]);
 
-        // Only run AdminSeeder for now
-        // TestDataSeeder can be added later
+        $this->command->info('All seeders completed successfully! 🎉');
     }
 }
