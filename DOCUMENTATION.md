@@ -52,7 +52,7 @@ This is the backend REST API for the Education & Career Development Platform. It
     ```bash
     php artisan key:generate
     php artisan jwt:secret
-    php artisan migrate
+    php artisan migrate --seed
     ```
 
 5.  **Run Server**
@@ -84,18 +84,20 @@ The API uses **Bearer Token** authentication.
 
 ## 4. API Reference
 
-### 4.1 User Management
+### 4.1 User Management & Profile
 
-| Method | Endpoint              | Description                                            | Auth |
-| :----- | :-------------------- | :----------------------------------------------------- | :--- |
-| POST   | `/register`           | Register new user (`role`: student, mentor, corporate) | No   |
-| POST   | `/login`              | Login and get JWT token                                | No   |
-| POST   | `/auth/logout`        | Invalidate token                                       | Yes  |
-| GET    | `/auth/profile`       | Get current user details                               | Yes  |
-| PUT    | `/auth/profile`       | Update profile (bio, education, etc.)                  | Yes  |
-| POST   | `/auth/profile/photo` | Upload profile photo                                   | Yes  |
-| POST   | `/experiences`        | Add work/education experience (Portfolio)              | Yes  |
-| POST   | `/achievements`       | Add achievement (Portfolio)                            | Yes  |
+| Method | Endpoint                 | Description                                            | Auth |
+| :----- | :----------------------- | :----------------------------------------------------- | :--- |
+| POST   | `/register`              | Register new user (`role`: student, mentor, corporate) | No   |
+| POST   | `/login`                 | Login and get JWT token                                | No   |
+| POST   | `/auth/logout`           | Invalidate token                                       | Yes  |
+| GET    | `/auth/profile`          | Get current user details                               | Yes  |
+| PUT    | `/auth/profile`          | Update profile (bio, education, etc.)                  | Yes  |
+| POST   | `/auth/profile/photo`    | Upload profile photo                                   | Yes  |
+| POST   | `/auth/profile/cv`       | Upload CV (PDF/Doc)                                    | Yes  |
+| GET    | `/auth/portfolio`        | Get complete portfolio (Experiences, Achievements)     | Yes  |
+| GET    | `/auth/recommendations`  | Get course recommendations based on major              | Yes  |
+| GET    | `/auth/activity-history` | Get summary of user activities                         | Yes  |
 
 ### 4.2 E-Learning & Bootcamp
 
@@ -143,7 +145,45 @@ The API uses **Bearer Token** authentication.
 
 ---
 
-## 5. Frontend Integration Guide
+## 5. Detailed Feature Descriptions
+
+### 5.1 User Management
+
+The system supports multiple roles with distinct capabilities.
+
+-   **Student**: The primary learner. Can build a portfolio, enroll in courses, and apply for scholarships.
+-   **Mentor**: Professionals who offer guidance. They can manage their availability and upload coaching resources.
+-   **Corporate**: Companies or organizations. They manage their **Organization Profile** (separate from the user account) and post scholarship opportunities.
+-   **Admin**: Oversees the entire platform, verifies payments, and manages content.
+
+### 5.2 My Profile & Portfolio
+
+A centralized hub for user career development.
+
+-   **CV Upload**: Users can upload their CVs (`/auth/profile/cv`) for easy access during applications.
+-   **Portfolio**: Automatically aggregates Experiences (Work/Internship) and Achievements.
+-   **Certificates**: Users can upload certificates for their work experiences to validate their skills.
+-   **Recommendations**: The system suggests courses based on the user's `major` (field of study).
+
+### 5.3 E-Learning
+
+-   **Subscription Models**: Users can choose between buying a single course or an "All-in-One" subscription for unlimited access.
+-   **Progress Tracking**: Granular tracking of course completion.
+-   **Automatic Certification**: Upon reaching 100% progress, a certificate URL is generated.
+
+### 5.4 Scholarship Portal
+
+-   **Organization-Centric**: Scholarships are linked to Organizations. This allows students to view the company profile before applying.
+-   **Application Tracking**: Students can track the status of their applications (Submitted -> Review -> Accepted/Rejected).
+
+### 5.5 Mentoring
+
+-   **Need Assessment**: A pre-session form ensures mentors understand the student's goals before the meeting.
+-   **Coaching Files**: A dedicated file sharing system for mentors to provide resources to their mentees.
+
+---
+
+## 6. Frontend Integration Guide
 
 ### CORS Configuration
 
@@ -154,14 +194,13 @@ The backend is configured to accept requests from:
 
 ### Handling File Uploads
 
-For endpoints requiring file uploads (e.g., Scholarship Application, Profile Photo), use `FormData` in JavaScript:
+For endpoints requiring file uploads (e.g., Scholarship Application, Profile Photo, CV), use `FormData` in JavaScript:
 
 ```javascript
 const formData = new FormData();
-formData.append("cv_path", fileInput.files[0]);
-formData.append("motivation_letter", "I want to join...");
+formData.append("cv", fileInput.files[0]); // For CV upload
 
-axios.post("/api/scholarships/1/apply", formData, {
+axios.post("/api/auth/profile/cv", formData, {
     headers: {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
@@ -175,7 +214,7 @@ When a course progress reaches **100%**, the backend automatically generates a P
 
 ---
 
-## 6. Testing
+## 7. Testing
 
 A complete API test suite is available in `feature_tests.http`.
 
@@ -183,121 +222,6 @@ A complete API test suite is available in `feature_tests.http`.
 2.  Open `feature_tests.http`.
 3.  Run requests sequentially (Register -> Login -> Create Data -> Transact).
 
-### Endpoints
-
-| Method | Endpoint                     | Description                                               | Auth | Role    |
-| :----- | :--------------------------- | :-------------------------------------------------------- | :--- | :------ |
-| GET    | `/courses`                   | List all courses                                          | No   | -       |
-| GET    | `/courses/{id}`              | Get course details                                        | No   | -       |
-| POST   | `/courses`                   | Create a course                                           | Yes  | Admin   |
-| PUT    | `/courses/{id}`              | Update a course                                           | Yes  | Admin   |
-| DELETE | `/courses/{id}`              | Delete a course                                           | Yes  | Admin   |
-| POST   | `/courses/{id}/enroll`       | Enroll in a course                                        | Yes  | Student |
-| GET    | `/my-courses`                | List enrolled courses                                     | Yes  | Student |
-| PUT    | `/enrollments/{id}/progress` | Update progress (0-100). **Triggers Certificate at 100%** | Yes  | Student |
-
-### Flow: Course Completion
-
-1.  **Enroll:** `POST /courses/{id}/enroll`
-2.  **Pay:** (If paid course) See Transactions section.
-3.  **Learn:** User watches videos/reads materials.
-4.  **Update Progress:** `PUT /enrollments/{id}/progress` with `progress=100`.
-5.  **Get Certificate:** Response includes `certificate_url`.
-
----
-
-## 3. Scholarship Portal
-
-**Features:** Scholarship listing, Application submission, Status tracking.
-
-### Endpoints
-
-| Method | Endpoint                                | Description                             | Auth | Role       |
-| :----- | :-------------------------------------- | :-------------------------------------- | :--- | :--------- |
-| GET    | `/scholarships`                         | List scholarships                       | No   | -          |
-| GET    | `/scholarships/{id}`                    | Get scholarship details                 | No   | -          |
-| POST   | `/scholarships`                         | Create scholarship                      | Yes  | Admin/Corp |
-| POST   | `/scholarships/{id}/apply`              | Apply for scholarship (Upload CV, etc.) | Yes  | Student    |
-| GET    | `/my-applications`                      | List my applications                    | Yes  | Student    |
-| PUT    | `/scholarship-applications/{id}/status` | Update application status               | Yes  | Admin/Corp |
-
----
-
-## 4. My Mentor (Mentoring)
-
-**Features:** Mentor booking, Scheduling, Need Assessment, Coaching Files.
-
-### Endpoints
-
-| Method | Endpoint                            | Description                       | Auth | Role         |
-| :----- | :---------------------------------- | :-------------------------------- | :--- | :----------- |
-| GET    | `/mentoring-sessions`               | List available sessions           | Yes  | -            |
-| POST   | `/mentoring-sessions`               | Create/Request a session          | Yes  | Student      |
-| POST   | `/mentoring-sessions/{id}/schedule` | Set schedule (Zoom link, time)    | Yes  | Mentor       |
-| PUT    | `/mentoring-sessions/{id}/status`   | Update status (pending/completed) | Yes  | Mentor/Admin |
-| GET    | `/my-mentoring-sessions`            | List my sessions                  | Yes  | -            |
-
-### Need Assessment & Coaching Files
-
-| Method | Endpoint                                    | Description          | Auth | Role    |
-| :----- | :------------------------------------------ | :------------------- | :--- | :------ |
-| GET    | `/mentoring-sessions/{id}/need-assessments` | Get assessment form  | Yes  | -       |
-| POST   | `/mentoring-sessions/{id}/need-assessments` | Submit assessment    | Yes  | Student |
-| GET    | `/mentoring-sessions/{id}/coaching-files`   | List coaching files  | Yes  | -       |
-| POST   | `/mentoring-sessions/{id}/coaching-files`   | Upload coaching file | Yes  | Mentor  |
-
-### Flow: Mentoring
-
-1.  **Request:** Student creates session `POST /mentoring-sessions`.
-2.  **Pay:** See Transactions section.
-3.  **Assessment:** Student fills `POST .../need-assessments`.
-4.  **Schedule:** Mentor sets time/link `POST .../schedule`.
-5.  **Coaching:** Mentor uploads files `POST .../coaching-files`.
-6.  **Complete:** Mentor updates status `PUT .../status`.
-
----
-
-## 5. Article & Corporate Services
-
-**Features:** Educational content, Corporate partnership inquiries.
-
-### Endpoints
-
-| Method | Endpoint                    | Description                | Auth | Role       |
-| :----- | :-------------------------- | :------------------------- | :--- | :--------- |
-| GET    | `/articles`                 | List articles              | No   | -          |
-| GET    | `/articles/{id}`            | Read article               | No   | -          |
-| POST   | `/articles`                 | Publish article            | Yes  | Admin/Corp |
-| POST   | `/corporate-contact`        | Submit partnership inquiry | No   | -          |
-| GET    | `/admin/corporate-contacts` | View inquiries             | Yes  | Admin      |
-
----
-
-## 6. Transactions & Payments
-
-**Features:** Payment processing for Courses, Subscriptions, and Mentoring.
-
-### Endpoints
-
-| Method | Endpoint                                | Description                         | Auth | Role  |
-| :----- | :-------------------------------------- | :---------------------------------- | :--- | :---- |
-| GET    | `/transactions`                         | List my transactions                | Yes  | -     |
-| POST   | `/transactions/courses/{id}`            | Create transaction for Course       | Yes  | -     |
-| POST   | `/transactions/subscriptions`           | Create transaction for Subscription | Yes  | -     |
-| POST   | `/transactions/mentoring-sessions/{id}` | Create transaction for Mentoring    | Yes  | -     |
-| POST   | `/transactions/{id}/payment-proof`      | Upload proof of payment             | Yes  | -     |
-| POST   | `/transactions/{id}/confirm`            | Confirm payment (Activate service)  | Yes  | Admin |
-
----
-
-## 7. Master Data (Profile Components)
-
-**Features:** Manage achievements, experiences, organizations.
-
-### Endpoints
-
--   `/achievements` (CRUD)
--   `/experiences` (CRUD)
 -   `/organizations` (CRUD)
 -   `/subscriptions` (CRUD)
 -   `/reviews` (CRUD)

@@ -55,6 +55,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
         Route::match(['put', 'patch'], '/profile', [AuthController::class, 'updateProfile'])->name('update-profile');
         Route::post('/profile/photo', [AuthController::class, 'uploadProfilePhoto'])->name('upload-photo');
+        Route::post('/profile/cv', [AuthController::class, 'uploadCv'])->name('upload-cv');
+        Route::get('/recommendations', [AuthController::class, 'recommendations'])->name('recommendations');
         Route::get('/portfolio', [AuthController::class, 'portfolio'])->name('portfolio');
         Route::get('/activity-history', [AuthController::class, 'activityHistory'])->name('activity-history');
     });

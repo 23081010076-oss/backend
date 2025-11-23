@@ -166,6 +166,59 @@ class AuthController extends Controller
     }
 
     /**
+     * Upload CV
+     */
+    public function uploadCv(Request $request)
+    {
+        $request->validate([
+            'cv' => 'required|file|mimes:pdf,doc,docx|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        if ($request->hasFile('cv')) {
+            $path = $request->file('cv')->store('cvs', 'public');
+            $user->cv_path = $path;
+            $user->save();
+        }
+
+        return response()->json([
+            'message' => 'CV uploaded successfully',
+            'cv_path' => $user->cv_path,
+        ]);
+    }
+
+    /**
+     * Get recommendations based on user profile
+     */
+    public function recommendations(Request $request)
+    {
+        $user = $request->user();
+        $major = $user->major;
+        $interests = $user->bio; // Assuming bio might contain keywords
+
+        // Basic recommendation logic
+        $recommendedCourses = \App\Models\Course::query();
+
+        if ($major) {
+            $recommendedCourses->where('title', 'like', '%' . $major . '%')
+                               ->orWhere('description', 'like', '%' . $major . '%');
+        }
+
+        // If no specific matches, return popular/random courses
+        $recommendations = $recommendedCourses->limit(5)->get();
+
+        if ($recommendations->isEmpty()) {
+            $recommendations = \App\Models\Course::inRandomOrder()->limit(5)->get();
+        }
+
+        return response()->json([
+            'message' => 'Recommendations retrieved successfully',
+            'data' => $recommendations
+        ]);
+    }
+
+    /**
      * Get user's complete portfolio
      */
     public function portfolio(Request $request)
@@ -194,6 +247,7 @@ class AuthController extends Controller
                 'education_level' => $user->education_level,
                 'bio' => $user->bio,
                 'profile_photo' => $user->profile_photo,
+                'cv_path' => $user->cv_path,
                 'gender' => $user->gender,
                 'birth_date' => $user->birth_date,
             ],

@@ -30,11 +30,17 @@ class ExperienceController extends Controller
             'company' => 'nullable|string',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'certificate_url' => 'nullable|string',
+            'certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        $validated['user_id'] = $request->user()->id;
-        $experience = Experience::create($validated);
+        $data = $validated;
+        $data['user_id'] = $request->user()->id;
+
+        if ($request->hasFile('certificate')) {
+            $data['certificate_url'] = $request->file('certificate')->store('certificates', 'public');
+        }
+
+        $experience = Experience::create($data);
 
         return response()->json([
             'message' => 'Experience created successfully',
@@ -66,10 +72,16 @@ class ExperienceController extends Controller
             'company' => 'nullable|string',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'certificate_url' => 'nullable|string',
+            'certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        $experience->update($validated);
+        $data = $validated;
+
+        if ($request->hasFile('certificate')) {
+            $data['certificate_url'] = $request->file('certificate')->store('certificates', 'public');
+        }
+
+        $experience->update($data);
 
         return response()->json([
             'message' => 'Experience updated successfully',
