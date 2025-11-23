@@ -3,9 +3,9 @@
 @acceptHeader = application/json
 @multipartBoundary = WebKitFormBoundary7MA4YWxkTrZu0gW
 
-### ==================================================================================
+
 ### 1. AUTHENTICATION & SETUP
-### ==================================================================================
+
 
 ### 1.1 Register Admin
 # @name registerAdmin
@@ -117,9 +117,9 @@ Accept: {{acceptHeader}}
 
 @corporateToken = {{loginCorporate.response.body.data.token}}
 
-### ==================================================================================
+
 ### 2. TABLE: USERS (Profile Management)
-### ==================================================================================
+
 
 ### 2.1 Update User Profile (Complete Fields)
 PUT {{baseUrl}}/users/{{studentId}}
@@ -139,9 +139,9 @@ Accept: {{acceptHeader}}
     "bio": "Passionate learner and developer."
 }
 
-### ==================================================================================
+
 ### 3. TABLE: EXPERIENCES & ACHIEVEMENTS (Portfolio)
-### ==================================================================================
+
 
 ### 3.1 Add Experience
 POST {{baseUrl}}/experiences
@@ -173,9 +173,9 @@ Accept: {{acceptHeader}}
     "year": 2024
 }
 
-### ==================================================================================
+
 ### 4. TABLE: ORGANIZATIONS (Corporate Profile)
-### ==================================================================================
+
 
 ### 4.1 Create Organization Profile
 # @name createOrg
@@ -198,9 +198,9 @@ Accept: {{acceptHeader}}
 
 @orgId = {{createOrg.response.body.data.id}}
 
-### ==================================================================================
+
 ### 5. TABLE: SCHOLARSHIPS
-### ==================================================================================
+
 
 ### 5.1 Create Scholarship
 # @name createScholarship
@@ -225,9 +225,9 @@ Accept: {{acceptHeader}}
 
 @scholarshipId = {{createScholarship.response.body.data.id}}
 
-### ==================================================================================
+
 ### 6. TABLE: SCHOLARSHIP_APPLICATIONS
-### ==================================================================================
+
 
 ### 6.1 Apply for Scholarship (Multipart)
 POST {{baseUrl}}/scholarships/{{scholarshipId}}/apply
@@ -252,9 +252,9 @@ Content-Type: application/pdf
 [PDF CONTENT SIMULATION]
 --{{multipartBoundary}}--
 
-### ==================================================================================
+
 ### 7. TABLE: REVIEWS
-### ==================================================================================
+
 
 ### 7.1 Create Review for Scholarship
 POST {{baseUrl}}/reviews
@@ -268,9 +268,9 @@ Accept: {{acceptHeader}}
     "comment": "Excellent opportunity and very responsive committee."
 }
 
-### ==================================================================================
+
 ### 8. TABLE: COURSES
-### ==================================================================================
+
 
 ### 8.1 Create Course
 # @name createCourse
@@ -296,9 +296,9 @@ Accept: {{acceptHeader}}
 
 @courseId = {{createCourse.response.body.data.id}}
 
-### ==================================================================================
+
 ### 9. TABLE: SUBSCRIPTIONS
-### ==================================================================================
+
 
 ### 9.1 Create Subscription (Buy Premium Package)
 POST {{baseUrl}}/subscriptions
@@ -317,9 +317,9 @@ Accept: {{acceptHeader}}
     "status": "active"
 }
 
-### ==================================================================================
+
 ### 10. TABLE: ENROLLMENTS
-### ==================================================================================
+
 
 ### 10.1 Enroll in Course
 # @name enrollCourse
@@ -340,9 +340,9 @@ Accept: {{acceptHeader}}
     "completed": true
 }
 
-### ==================================================================================
+
 ### 11. TABLE: MENTORING_SESSIONS
-### ==================================================================================
+
 
 ### 11.1 Schedule Mentoring Session
 # @name createSession
@@ -364,9 +364,9 @@ Accept: {{acceptHeader}}
 
 @sessionId = {{createSession.response.body.data.id}}
 
-### ==================================================================================
+
 ### 12. TABLE: NEED_ASSESSMENTS
-### ==================================================================================
+
 
 ### 12.1 Submit Need Assessment
 POST {{baseUrl}}/mentoring-sessions/{{sessionId}}/assessment
@@ -382,9 +382,9 @@ Accept: {{acceptHeader}}
     }
 }
 
-### ==================================================================================
+
 ### 13. TABLE: COACHING_FILES
-### ==================================================================================
+
 
 ### 13.1 Upload Coaching File (Multipart)
 POST {{baseUrl}}/coaching-files
@@ -407,9 +407,9 @@ Content-Type: application/pdf
 [PDF CONTENT SIMULATION]
 --{{multipartBoundary}}--
 
-### ==================================================================================
+
 ### 14. TABLE: ARTICLES
-### ==================================================================================
+
 
 ### 14.1 Create Article
 POST {{baseUrl}}/articles
@@ -426,9 +426,9 @@ Accept: {{acceptHeader}}
     "status": "published"
 }
 
-### ==================================================================================
+
 ### 15. TABLE: CORPORATE_CONTACTS
-### ==================================================================================
+
 
 ### 15.1 Submit Corporate Contact
 POST {{baseUrl}}/corporate-contacts
@@ -444,9 +444,9 @@ Accept: {{acceptHeader}}
     "message": "We are interested in hiring your bootcamp graduates."
 }
 
-### ==================================================================================
+
 ### 16. TABLE: TRANSACTIONS
-### ==================================================================================
+
 
 ### 16.1 List User Transactions
 GET {{baseUrl}}/transactions

@@ -17,9 +17,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminSeeder::class,
             UserSeeder::class,      // Create sample users (students, mentors, corporate)
-            CourseSeeder::class,    // Create courses
-            ScholarshipSeeder::class, // Create scholarships
             OrganizationSeeder::class, // Create organizations (depends on users)
+            CourseSeeder::class,    // Create courses
+            ScholarshipSeeder::class, // Create scholarships (depends on organizations)
             ExperienceSeeder::class,   // Create experiences (depends on users)
             AchievementSeeder::class,  // Create achievements (depends on users)
             ArticleSeeder::class,      // Create articles (depends on users)

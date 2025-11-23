@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('website')->nullable();
             $table->string('contact_email')->nullable();
             $table->string('phone')->nullable();
-            $table->year('founded_year')->nullable();
+            $table->integer('founded_year')->nullable();
             $table->string('logo_url')->nullable();
             $table->timestamps();
         });

@@ -13,96 +13,74 @@ class OrganizationSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::where('role', ['student', 'mentor', 'corporate'])->get();
-
+        // Get corporate users to assign as owners of organizations
+        $corporateUsers = User::where('role', 'corporate')->get();
+        
         $organizations = [
             [
-                'name' => 'Google Developer Student Club',
-                'role' => 'President',
-                'description' => 'Leading university tech community focused on Google technologies and developer skills',
+                'name' => 'Google Indonesia',
+                'type' => 'company',
+                'description' => 'Google mission is to organize the world information and make it universally accessible and useful.',
                 'location' => 'Jakarta, Indonesia',
-                'contact_email' => 'gdsc.ui@gmail.com',
-                'phone' => '+62 21 7863333',
-                'website' => 'https://gdsc.community.dev/university-of-indonesia/',
-                'start_date' => '2022-08-01',
-                'end_date' => '2023-07-31',
+                'website' => 'https://about.google/',
+                'contact_email' => 'contact@google.com',
+                'phone' => '+62 21 2358 8000',
+                'founded_year' => 1998,
+                'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg',
             ],
             [
-                'name' => 'Himpunan Mahasiswa Teknik Informatika',
-                'role' => 'Secretary',
-                'description' => 'Student association for Computer Science majors promoting academic and professional development',
-                'location' => 'Bandung, Indonesia',
-                'contact_email' => 'hmti@itb.ac.id',
-                'phone' => '+62 22 2511568',
-                'website' => 'https://hmti.itb.ac.id',
-                'start_date' => '2021-01-01',
-                'end_date' => '2022-12-31',
+                'name' => 'LPDP (Lembaga Pengelola Dana Pendidikan)',
+                'type' => 'government',
+                'description' => 'Lembaga Pengelola Dana Pendidikan yang berada di bawah Kementerian Keuangan Republik Indonesia.',
+                'location' => 'Jakarta, Indonesia',
+                'website' => 'https://lpdp.kemenkeu.go.id/',
+                'contact_email' => 'bantuan@lpdp.kemenkeu.go.id',
+                'phone' => '1500652',
+                'founded_year' => 2012,
+                'logo_url' => 'https://lpdp.kemenkeu.go.id/static/images/logo-lpdp.png',
             ],
             [
-                'name' => 'Indonesia Student Startup Community',
-                'role' => 'Vice President',
-                'description' => 'National community connecting student entrepreneurs and startup enthusiasts',
-                'location' => 'Indonesia',
-                'contact_email' => 'info@issc.id',
-                'phone' => '+62 811 9999 888',
-                'website' => 'https://issc.id',
-                'start_date' => '2021-06-01',
-                'end_date' => '2022-05-31',
+                'name' => 'Universitas Indonesia',
+                'type' => 'university',
+                'description' => 'A modern, comprehensive, open-minded, multi-culture, and humanism campus that covers wide arrays of scientific disciplines.',
+                'location' => 'Depok, Indonesia',
+                'website' => 'https://www.ui.ac.id/',
+                'contact_email' => 'humas-ui@ui.ac.id',
+                'phone' => '+62 21 786 7222',
+                'founded_year' => 1849,
+                'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Makara_of_Universitas_Indonesia.svg/1200px-Makara_of_Universitas_Indonesia.svg.png',
             ],
             [
-                'name' => 'IEEE Computer Society',
-                'role' => 'Technical Committee Member',
-                'description' => 'International professional organization for computer science and engineering',
-                'location' => 'Global',
-                'contact_email' => 'ieee.cs@ieee.org',
-                'phone' => '+1 732 981 0060',
-                'website' => 'https://www.computer.org',
-                'start_date' => '2020-09-01',
-                'end_date' => null,
+                'name' => 'Ruangguru',
+                'type' => 'company',
+                'description' => 'The largest education technology company in Southeast Asia.',
+                'location' => 'Jakarta, Indonesia',
+                'website' => 'https://ruangguru.com/',
+                'contact_email' => 'info@ruangguru.com',
+                'phone' => '+62 21 2854 3000',
+                'founded_year' => 2014,
+                'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Ruangguru_Logo.png/640px-Ruangguru_Logo.png',
             ],
             [
-                'name' => 'Komunitas Programmer Indonesia',
-                'role' => 'Event Coordinator',
-                'description' => 'Largest programming community in Indonesia focusing on knowledge sharing',
-                'location' => 'Indonesia',
-                'contact_email' => 'admin@kpi.org',
-                'phone' => '+62 21 5555 4444',
-                'website' => 'https://kpi.org',
-                'start_date' => '2021-03-01',
-                'end_date' => '2023-02-28',
-            ],
-            [
-                'name' => 'Techno Creative Association',
-                'role' => 'Project Manager',
-                'description' => 'Creative technology organization promoting innovation in digital arts',
-                'location' => 'Yogyakarta, Indonesia',
-                'contact_email' => 'hello@technocreative.org',
-                'phone' => '+62 274 123456',
-                'website' => 'https://technocreative.org',
-                'start_date' => '2020-01-01',
-                'end_date' => '2021-12-31',
+                'name' => 'Bank Rakyat Indonesia (BRI)',
+                'type' => 'company',
+                'description' => 'Salah satu bank milik pemerintah yang terbesar di Indonesia.',
+                'location' => 'Jakarta, Indonesia',
+                'website' => 'https://bri.co.id/',
+                'contact_email' => 'callbri@bri.co.id',
+                'phone' => '14017',
+                'founded_year' => 1895,
+                'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/BANK_BRI_logo.svg/1200px-BANK_BRI_logo.svg.png',
             ],
         ];
 
-        foreach ($users as $user) {
-            // Create 1-2 organizations per user
-            $numOrganizations = rand(1, 2);
-            $selectedOrgs = collect($organizations)->random($numOrganizations);
-
-            foreach ($selectedOrgs as $org) {
-                Organization::create([
-                    'user_id' => $user->id,
-                    'name' => $org['name'],
-                    'role' => $org['role'],
-                    'description' => $org['description'],
-                    'location' => $org['location'],
-                    'contact_email' => $org['contact_email'],
-                    'phone' => $org['phone'],
-                    'website' => $org['website'],
-                    'start_date' => $org['start_date'],
-                    'end_date' => $org['end_date'],
-                ]);
+        foreach ($organizations as $index => $orgData) {
+            // Assign a corporate user if available, cycling through them
+            if ($corporateUsers->count() > 0) {
+                $orgData['user_id'] = $corporateUsers[$index % $corporateUsers->count()]->id;
             }
+            
+            Organization::create($orgData);
         }
 
         $this->command->info('Organization seeder completed successfully!');

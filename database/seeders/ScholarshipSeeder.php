@@ -126,7 +126,13 @@ class ScholarshipSeeder extends Seeder
             ],
         ];
 
-        foreach ($scholarships as $scholarship) {
+        $organizations = Organization::all();
+
+        foreach ($scholarships as $index => $scholarship) {
+            // Assign a random organization if available
+            if ($organizations->count() > 0) {
+                $scholarship['organization_id'] = $organizations->random()->id;
+            }
             Scholarship::create($scholarship);
         }
 
