@@ -2,9 +2,9 @@
 
 ## 1. Project Overview
 
-This is the backend REST API for the Education & Career Development Platform. It is built using **Laravel 11** and serves as the core logic for User Management, E-Learning, Scholarship Portal, Mentoring, and Corporate Services.
+This is the backend REST API for the Education & Career Development Platform. It is built using **Laravel 12** and serves as the core logic for User Management, E-Learning, Scholarship Portal, Mentoring, and Corporate Services.
 
--   **Framework**: Laravel 11
+-   **Framework**: Laravel 12
 -   **Database**: MySQL
 -   **Authentication**: JWT (JSON Web Token)
 -   **API Testing**: REST Client (`.http` files)
@@ -77,7 +77,7 @@ The API uses **Bearer Token** authentication.
 
 -   `student`: Can enroll in courses, apply for scholarships, book mentors.
 -   `mentor`: Can manage mentoring sessions, upload coaching files.
--   `corporate`: Can post scholarships, manage organization profile.
+-   `corporate`: Can post scholarships and manage their **Organization Profile** (separate entity from User Profile).
 -   `admin`: Full access to manage users, courses, articles.
 
 ---
