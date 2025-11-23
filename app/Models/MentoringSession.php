@@ -21,8 +21,6 @@ class MentoringSession extends Model
         'payment_method',
         'status',
         'need_assessment_status',
-        'assessment_form_data',
-        'coaching_files_path',
     ];
 
     protected $casts = [

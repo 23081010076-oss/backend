@@ -11,6 +11,7 @@ class Scholarship extends Model
 
     protected $fillable = [
         'organization_id',
+        'provider_id',
         'name',
         'description',
         'benefit',

@@ -24,12 +24,25 @@ class SubscriptionController extends Controller
     {
         $validated = $request->validate([
             'plan' => 'required|in:free,regular,premium',
+            'package_type' => 'required|in:single_course,all_in_one',
+            'courses_ids' => 'nullable|array',
+            'courses_ids.*' => 'exists:courses,id',
+            'duration' => 'required|integer|min:1',
+            'duration_unit' => 'required|in:months,years',
+            'price' => 'required|numeric|min:0',
+            'auto_renew' => 'boolean',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after:start_date',
             'status' => 'required|in:active,expired,cancelled',
         ]);
 
         $validated['user_id'] = $request->user()->id;
+
+        // If package_type is single_course, ensure courses_ids is present
+        if ($validated['package_type'] === 'single_course' && empty($validated['courses_ids'])) {
+             return response()->json(['message' => 'Course selection is required for single course package'], 422);
+        }
+
         $subscription = Subscription::create($validated);
 
         return response()->json([

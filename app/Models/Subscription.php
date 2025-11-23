@@ -15,11 +15,12 @@ class Subscription extends Model
         'start_date',
         'end_date',
         'status',
-        'type',
         'package_type',
         'duration',
         'duration_unit',
         'courses_ids',
+        'price',
+        'auto_renew',
     ];
 
     protected $casts = [

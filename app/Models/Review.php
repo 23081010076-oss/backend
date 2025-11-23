@@ -31,9 +31,4 @@ class Review extends Model
     {
         return $this->morphTo();
     }
-
-    public function scholarship()
-    {
-        return $this->belongsTo(Scholarship::class);
-    }
 }

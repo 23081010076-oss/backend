@@ -53,7 +53,7 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
-        Route::put('/profile', [AuthController::class, 'updateProfile'])->name('update-profile');
+        Route::match(['put', 'patch'], '/profile', [AuthController::class, 'updateProfile'])->name('update-profile');
         Route::post('/profile/photo', [AuthController::class, 'uploadProfilePhoto'])->name('upload-photo');
         Route::get('/portfolio', [AuthController::class, 'portfolio'])->name('portfolio');
         Route::get('/activity-history', [AuthController::class, 'activityHistory'])->name('activity-history');

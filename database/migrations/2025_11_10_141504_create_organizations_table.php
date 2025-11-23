@@ -13,13 +13,16 @@ return new class extends Migration
     {
         Schema::create('organizations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->string('name');
-            $table->string('role')->nullable();
+            $table->string('type')->nullable(); // university, company, ngo
             $table->text('description')->nullable();
             $table->string('location')->nullable();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
+            $table->string('website')->nullable();
+            $table->string('contact_email')->nullable();
+            $table->string('phone')->nullable();
+            $table->year('founded_year')->nullable();
+            $table->string('logo_url')->nullable();
             $table->timestamps();
         });
     }

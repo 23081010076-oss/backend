@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Enrollment;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class EnrollmentController extends Controller
 {
@@ -105,8 +107,24 @@ class EnrollmentController extends Controller
         // Auto-complete if progress is 100%
         if ($validated['progress'] >= 100) {
             $enrollment->completed = true;
-            // Generate certificate URL
-            $enrollment->certificate_url = 'certificates/' . $enrollment->id . '-' . time() . '.pdf';
+            
+            // Generate Certificate
+            try {
+                $pdf = Pdf::loadView('certificates.course_completion', [
+                    'user' => $enrollment->user,
+                    'course' => $enrollment->course,
+                    'date' => now()->format('F d, Y'),
+                ]);
+
+                $fileName = 'certificates/' . $enrollment->id . '-' . time() . '.pdf';
+                Storage::disk('public')->put($fileName, $pdf->output());
+                
+                // Generate full URL
+                $enrollment->certificate_url = url(Storage::url($fileName));
+            } catch (\Exception $e) {
+                // Log error but don't fail the request, maybe set a flag to retry later
+                \Illuminate\Support\Facades\Log::error('Certificate generation failed: ' . $e->getMessage());
+            }
         }
 
         $enrollment->save();

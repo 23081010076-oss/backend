@@ -51,14 +51,15 @@ class ScholarshipController extends Controller
     {
         // Only organizations can create scholarships
         $user = auth()->user();
-        if (!$user->hasRole('corporate')) {
+        if (!$user->hasRole(['corporate', 'admin'])) {
             return response()->json([
-                'message' => 'Only corporate partners can create scholarships'
+                'message' => 'Only corporate partners or admins can create scholarships'
             ], 403);
         }
 
         $validated = $request->validate([
-            'organization_id' => 'required|exists:organizations,id',
+            'organization_id' => 'nullable|exists:organizations,id',
+            'provider_id' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'benefit' => 'nullable|string',

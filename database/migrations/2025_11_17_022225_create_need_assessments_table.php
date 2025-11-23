@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('need_assessments', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('mentoring_session_id')->constrained()->onDelete('cascade');
+            $table->json('form_data');
+            $table->timestamp('completed_at')->nullable();
             $table->timestamps();
         });
     }

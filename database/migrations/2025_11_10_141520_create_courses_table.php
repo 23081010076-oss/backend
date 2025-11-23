@@ -16,11 +16,15 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->enum('type', ['bootcamp', 'course'])->default('course');
+            $table->string('instructor')->nullable();
             $table->enum('level', ['beginner', 'intermediate', 'advanced'])->default('beginner');
             $table->string('duration')->nullable(); // e.g., "4 weeks", "20 hours"
             $table->decimal('price', 10, 2)->default(0);
             $table->enum('access_type', ['free', 'regular', 'premium'])->default('free');
             $table->string('certificate_url')->nullable();
+            $table->text('video_url')->nullable()->comment('Video embed URL or path');
+            $table->string('video_duration')->nullable()->comment('Video duration HH:MM:SS');
+            $table->integer('total_videos')->default(0)->comment('Total number of videos in course');
             $table->timestamps();
         });
     }

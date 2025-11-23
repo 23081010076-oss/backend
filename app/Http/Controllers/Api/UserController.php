@@ -80,11 +80,16 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified user (Admin only)
+     * Update the specified user (Admin only or Self)
      */
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
+
+        // Allow user to update their own profile or admin to update any
+        if ($request->user()->id !== $user->id && !$request->user()->hasRole('admin')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -99,10 +104,20 @@ class UserController extends Controller
             'major' => 'nullable|string|max:255',
             'education_level' => 'nullable|in:sma,d3,s1,s2,s3',
             'bio' => 'nullable|string',
+            'profile_photo' => 'nullable|image|max:2048', // Max 2MB
         ]);
 
         if (isset($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
+        }
+
+        // Handle profile photo upload
+        if ($request->hasFile('profile_photo')) {
+            // Delete old photo if exists
+            if ($user->profile_photo) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+            }
+            $validated['profile_photo'] = $request->file('profile_photo')->store('profile-photos', 'public');
         }
 
         $user->update($validated);

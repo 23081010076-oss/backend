@@ -18,6 +18,7 @@ class Course extends Model
         'price',
         'access_type',
         'certificate_url',
+        'instructor',
         'video_url',
         'video_duration',
         'total_videos',

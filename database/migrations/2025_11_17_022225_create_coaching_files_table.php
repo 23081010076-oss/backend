@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('coaching_files', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('mentoring_session_id')->constrained()->onDelete('cascade');
+            $table->string('file_name');
+            $table->string('file_path');
+            $table->string('file_type')->nullable();
+            $table->foreignId('uploaded_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

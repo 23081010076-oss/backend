@@ -14,12 +14,9 @@ return new class extends Migration
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('organization_id')->nullable()->constrained()->onDelete('cascade');
-            $table->string('name')->nullable();
-            $table->string('login')->nullable();
-            $table->text('description')->nullable();
-            $table->integer('focus_area')->nullable();
-            $table->year('founded_year')->nullable();
+            $table->morphs('reviewable'); // Bisa untuk Organization, Course, atau Mentor (User)
+            $table->integer('rating')->comment('1-5 stars');
+            $table->text('comment')->nullable();
             $table->timestamps();
         });
     }

@@ -1,0 +1,454 @@
+@baseUrl = http://localhost:8000/api
+@contentType = application/json
+@acceptHeader = application/json
+@multipartBoundary = WebKitFormBoundary7MA4YWxkTrZu0gW
+
+### ==================================================================================
+### 1. AUTHENTICATION & SETUP
+### ==================================================================================
+
+### 1.1 Register Admin
+# @name registerAdmin
+POST {{baseUrl}}/register
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "name": "Super Admin",
+    "email": "admin_complete@example.com",
+    "password": "password",
+    "password_confirmation": "password",
+    "role": "admin"
+}
+
+### 1.2 Login Admin
+# @name loginAdmin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "email": "admin_complete@example.com",
+    "password": "password"
+}
+
+@adminToken = {{loginAdmin.response.body.data.token}}
+
+### 1.3 Register Student
+# @name registerStudent
+POST {{baseUrl}}/register
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "name": "John Student",
+    "email": "student_complete@example.com",
+    "password": "password",
+    "password_confirmation": "password",
+    "role": "student"
+}
+
+### 1.4 Login Student
+# @name loginStudent
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "email": "student_complete@example.com",
+    "password": "password"
+}
+
+@studentToken = {{loginStudent.response.body.data.token}}
+@studentId = {{loginStudent.response.body.data.user.id}}
+
+### 1.5 Register Mentor
+# @name registerMentor
+POST {{baseUrl}}/register
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "name": "Jane Mentor",
+    "email": "mentor_complete@example.com",
+    "password": "password",
+    "password_confirmation": "password",
+    "role": "mentor"
+}
+
+### 1.6 Login Mentor
+# @name loginMentor
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "email": "mentor_complete@example.com",
+    "password": "password"
+}
+
+@mentorToken = {{loginMentor.response.body.data.token}}
+@mentorId = {{loginMentor.response.body.data.user.id}}
+
+### 1.7 Register Corporate
+# @name registerCorporate
+POST {{baseUrl}}/register
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "name": "Tech Corp",
+    "email": "corporate_complete@example.com",
+    "password": "password",
+    "password_confirmation": "password",
+    "role": "corporate"
+}
+
+### 1.8 Login Corporate
+# @name loginCorporate
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "email": "corporate_complete@example.com",
+    "password": "password"
+}
+
+@corporateToken = {{loginCorporate.response.body.data.token}}
+
+### ==================================================================================
+### 2. TABLE: USERS (Profile Management)
+### ==================================================================================
+
+### 2.1 Update User Profile (Complete Fields)
+PUT {{baseUrl}}/users/{{studentId}}
+Authorization: Bearer {{studentToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "name": "John Student Updated",
+    "gender": "male",
+    "birth_date": "2000-01-01",
+    "phone": "081234567890",
+    "address": "123 Student Street, Jakarta",
+    "institution": "University of Technology",
+    "major": "Computer Science",
+    "education_level": "s1",
+    "bio": "Passionate learner and developer."
+}
+
+### ==================================================================================
+### 3. TABLE: EXPERIENCES & ACHIEVEMENTS (Portfolio)
+### ==================================================================================
+
+### 3.1 Add Experience
+POST {{baseUrl}}/experiences
+Authorization: Bearer {{studentToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "title": "Junior Developer",
+    "description": "Developed backend services using Laravel.",
+    "type": "fulltime",
+    "level": "junior",
+    "company": "Tech Solutions Inc.",
+    "start_date": "2023-01-01",
+    "end_date": "2023-12-31",
+    "certificate_url": "https://example.com/cert.pdf"
+}
+
+### 3.2 Add Achievement
+POST {{baseUrl}}/achievements
+Authorization: Bearer {{studentToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "title": "Best Coder 2024",
+    "description": "Awarded for best algorithm implementation.",
+    "organization": "National Coding League",
+    "year": 2024
+}
+
+### ==================================================================================
+### 4. TABLE: ORGANIZATIONS (Corporate Profile)
+### ==================================================================================
+
+### 4.1 Create Organization Profile
+# @name createOrg
+POST {{baseUrl}}/organizations
+Authorization: Bearer {{corporateToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "name": "Tech Corp Foundation",
+    "type": "foundation",
+    "description": "Non-profit arm of Tech Corp focusing on education.",
+    "location": "Jakarta, Indonesia",
+    "website": "https://foundation.techcorp.com",
+    "contact_email": "contact@foundation.techcorp.com",
+    "phone": "021-555-0123",
+    "founded_year": 2010,
+    "logo_url": "https://example.com/logo.png"
+}
+
+@orgId = {{createOrg.response.body.data.id}}
+
+### ==================================================================================
+### 5. TABLE: SCHOLARSHIPS
+### ==================================================================================
+
+### 5.1 Create Scholarship
+# @name createScholarship
+POST {{baseUrl}}/scholarships
+Authorization: Bearer {{corporateToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "organization_id": {{orgId}},
+    "provider_id": "PROV-001",
+    "name": "Future Tech Leaders Scholarship 2025",
+    "description": "Full scholarship for computer science students.",
+    "benefit": "Tuition fee + Monthly allowance",
+    "location": "Indonesia",
+    "status": "open",
+    "deadline": "2025-12-31",
+    "study_field": "Computer Science, Information Technology",
+    "funding_amount": 10000000,
+    "requirements": "GPA > 3.5, Active in organizations"
+}
+
+@scholarshipId = {{createScholarship.response.body.data.id}}
+
+### ==================================================================================
+### 6. TABLE: SCHOLARSHIP_APPLICATIONS
+### ==================================================================================
+
+### 6.1 Apply for Scholarship (Multipart)
+POST {{baseUrl}}/scholarships/{{scholarshipId}}/apply
+Authorization: Bearer {{studentToken}}
+Content-Type: multipart/form-data; boundary={{multipartBoundary}}
+Accept: {{acceptHeader}}
+
+--{{multipartBoundary}}
+Content-Disposition: form-data; name="motivation_letter"; filename="letter.txt"
+Content-Type: text/plain
+
+I am highly motivated to join this program because...
+--{{multipartBoundary}}
+Content-Disposition: form-data; name="cv_path"; filename="cv.pdf"
+Content-Type: application/pdf
+
+[PDF CONTENT SIMULATION]
+--{{multipartBoundary}}
+Content-Disposition: form-data; name="transcript_path"; filename="transcript.pdf"
+Content-Type: application/pdf
+
+[PDF CONTENT SIMULATION]
+--{{multipartBoundary}}--
+
+### ==================================================================================
+### 7. TABLE: REVIEWS
+### ==================================================================================
+
+### 7.1 Create Review for Scholarship
+POST {{baseUrl}}/reviews
+Authorization: Bearer {{studentToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "scholarship_id": {{scholarshipId}},
+    "rating": 5,
+    "comment": "Excellent opportunity and very responsive committee."
+}
+
+### ==================================================================================
+### 8. TABLE: COURSES
+### ==================================================================================
+
+### 8.1 Create Course
+# @name createCourse
+POST {{baseUrl}}/courses
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "title": "Advanced Laravel Architecture",
+    "description": "Deep dive into Laravel internals and design patterns.",
+    "type": "course",
+    "level": "advanced",
+    "duration": "10 hours",
+    "price": 500000,
+    "access_type": "premium",
+    "certificate_url": "https://example.com/cert-template.pdf",
+    "instructor": "Expert Instructor",
+    "video_url": "https://vimeo.com/123456",
+    "video_duration": "600 mins",
+    "total_videos": 20
+}
+
+@courseId = {{createCourse.response.body.data.id}}
+
+### ==================================================================================
+### 9. TABLE: SUBSCRIPTIONS
+### ==================================================================================
+
+### 9.1 Create Subscription (Buy Premium Package)
+POST {{baseUrl}}/subscriptions
+Authorization: Bearer {{studentToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "plan": "premium",
+    "package_type": "all_in_one",
+    "duration": 1,
+    "duration_unit": "years",
+    "price": 1200000,
+    "auto_renew": true,
+    "start_date": "2025-11-24",
+    "status": "active"
+}
+
+### ==================================================================================
+### 10. TABLE: ENROLLMENTS
+### ==================================================================================
+
+### 10.1 Enroll in Course
+# @name enrollCourse
+POST {{baseUrl}}/enrollments/{{courseId}}/enroll
+Authorization: Bearer {{studentToken}}
+Accept: {{acceptHeader}}
+
+@enrollmentId = {{enrollCourse.response.body.data.id}}
+
+### 10.2 Update Enrollment Progress
+PUT {{baseUrl}}/enrollments/{{enrollmentId}}/progress
+Authorization: Bearer {{studentToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "progress": 100,
+    "completed": true
+}
+
+### ==================================================================================
+### 11. TABLE: MENTORING_SESSIONS
+### ==================================================================================
+
+### 11.1 Schedule Mentoring Session
+# @name createSession
+POST {{baseUrl}}/mentoring-sessions
+Authorization: Bearer {{studentToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "mentor_id": {{mentorId}},
+    "member_id": {{studentId}},
+    "session_id": "SESS-001",
+    "type": "academic",
+    "schedule": "2025-12-01 14:00:00",
+    "meeting_link": "https://zoom.us/j/123456789",
+    "payment_method": "qris",
+    "status": "pending"
+}
+
+@sessionId = {{createSession.response.body.data.id}}
+
+### ==================================================================================
+### 12. TABLE: NEED_ASSESSMENTS
+### ==================================================================================
+
+### 12.1 Submit Need Assessment
+POST {{baseUrl}}/mentoring-sessions/{{sessionId}}/assessment
+Authorization: Bearer {{studentToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "form_data": {
+        "topic": "System Design",
+        "questions": ["How to scale DB?", "Microservices vs Monolith"],
+        "background": "Building a large e-commerce app"
+    }
+}
+
+### ==================================================================================
+### 13. TABLE: COACHING_FILES
+### ==================================================================================
+
+### 13.1 Upload Coaching File (Multipart)
+POST {{baseUrl}}/coaching-files
+Authorization: Bearer {{mentorToken}}
+Content-Type: multipart/form-data; boundary={{multipartBoundary}}
+Accept: {{acceptHeader}}
+
+--{{multipartBoundary}}
+Content-Disposition: form-data; name="mentoring_session_id"
+
+{{sessionId}}
+--{{multipartBoundary}}
+Content-Disposition: form-data; name="file_name"
+
+Mentoring_Notes.pdf
+--{{multipartBoundary}}
+Content-Disposition: form-data; name="file_path"; filename="notes.pdf"
+Content-Type: application/pdf
+
+[PDF CONTENT SIMULATION]
+--{{multipartBoundary}}--
+
+### ==================================================================================
+### 14. TABLE: ARTICLES
+### ==================================================================================
+
+### 14.1 Create Article
+POST {{baseUrl}}/articles
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "title": "The Future of AI in Education",
+    "content": "Artificial Intelligence is revolutionizing how we learn...",
+    "category": "education",
+    "slug": "future-of-ai-education",
+    "featured_image": "https://example.com/ai-edu.jpg",
+    "status": "published"
+}
+
+### ==================================================================================
+### 15. TABLE: CORPORATE_CONTACTS
+### ==================================================================================
+
+### 15.1 Submit Corporate Contact
+POST {{baseUrl}}/corporate-contacts
+Content-Type: {{contentType}}
+Accept: {{acceptHeader}}
+
+{
+    "company_name": "Innovate Corp",
+    "contact_person": "Alice Manager",
+    "email": "alice@innovate.com",
+    "phone": "+628123456789",
+    "subject": "Partnership Proposal",
+    "message": "We are interested in hiring your bootcamp graduates."
+}
+
+### ==================================================================================
+### 16. TABLE: TRANSACTIONS
+### ==================================================================================
+
+### 16.1 List User Transactions
+GET {{baseUrl}}/transactions
+Authorization: Bearer {{studentToken}}
+Accept: {{acceptHeader}}

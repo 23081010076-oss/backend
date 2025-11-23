@@ -58,6 +58,10 @@ class CourseController extends Controller
             'price' => 'nullable|numeric|min:0',
             'access_type' => 'required|in:free,regular,premium',
             'certificate_url' => 'nullable|string',
+            'instructor' => 'nullable|string',
+            'video_url' => 'nullable|string',
+            'video_duration' => 'nullable|string',
+            'total_videos' => 'nullable|integer|min:0',
         ]);
 
         $course = Course::create($validated);
