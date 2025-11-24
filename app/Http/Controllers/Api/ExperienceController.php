@@ -30,6 +30,7 @@ class ExperienceController extends Controller
             'company' => 'nullable|string',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
+            'certificate_url' => 'nullable|string|url',
             'certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
@@ -39,6 +40,8 @@ class ExperienceController extends Controller
         if ($request->hasFile('certificate')) {
             $data['certificate_url'] = $request->file('certificate')->store('certificates', 'public');
         }
+        // If certificate_url is provided in request, it stays in $data. 
+        // If file is provided, it overwrites certificate_url in $data.
 
         $experience = Experience::create($data);
 
@@ -72,6 +75,7 @@ class ExperienceController extends Controller
             'company' => 'nullable|string',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
+            'certificate_url' => 'nullable|string|url',
             'certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 

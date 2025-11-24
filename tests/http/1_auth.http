@@ -1,0 +1,144 @@
+@baseUrl = http://localhost:8000/api
+@studentEmail = student@example.com
+@studentPassword = password
+@mentorEmail = mentor@example.com
+@mentorPassword = password
+@adminEmail = admin@example.com
+@adminPassword = password
+@corporateEmail = corporate@example.com
+@corporatePassword = password
+
+### ------------------------------------------------------------------------
+### AUTHENTICATION (ALL ROLES)
+### ------------------------------------------------------------------------
+
+### Register Student
+POST {{baseUrl}}/register
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Student User",
+    "email": "{{studentEmail}}",
+    "password": "{{studentPassword}}",
+    "password_confirmation": "{{studentPassword}}",
+    "role": "student"
+}
+
+### Login Student
+# @name loginStudent
+POST {{baseUrl}}/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "{{studentEmail}}",
+    "password": "{{studentPassword}}"
+}
+
+@studentToken = {{loginStudent.response.body.token}}
+
+### Register Mentor
+POST {{baseUrl}}/register
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Mentor User",
+    "email": "{{mentorEmail}}",
+    "password": "{{mentorPassword}}",
+    "password_confirmation": "{{mentorPassword}}",
+    "role": "mentor"
+}
+
+### Login Mentor
+# @name loginMentor
+POST {{baseUrl}}/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "{{mentorEmail}}",
+    "password": "{{mentorPassword}}"
+}
+
+@mentorToken = {{loginMentor.response.body.token}}
+
+### Register Admin
+POST {{baseUrl}}/register
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Admin User",
+    "email": "{{adminEmail}}",
+    "password": "{{adminPassword}}",
+    "password_confirmation": "{{adminPassword}}",
+    "role": "admin"
+}
+
+### Login Admin
+# @name loginAdmin
+POST {{baseUrl}}/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "{{adminEmail}}",
+    "password": "{{adminPassword}}"
+}
+
+@adminToken = {{loginAdmin.response.body.token}}
+
+### Register Corporate
+POST {{baseUrl}}/register
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Corporate User",
+    "email": "{{corporateEmail}}",
+    "password": "{{corporatePassword}}",
+    "password_confirmation": "{{corporatePassword}}",
+    "role": "corporate"
+}
+
+### Login Corporate
+# @name loginCorporate
+POST {{baseUrl}}/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "{{corporateEmail}}",
+    "password": "{{corporatePassword}}"
+}
+
+@corporateToken = {{loginCorporate.response.body.token}}
+
+### Get Profile (Student)
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{studentToken}}
+Accept: application/json
+
+### Update Profile (Student)
+PUT {{baseUrl}}/auth/profile
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "phone": "08123456789",
+    "bio": "I am a passionate learner.",
+    "address": "Jl. Sudirman No. 1",
+    "institution": "University of Technology",
+    "major": "Computer Science",
+    "education_level": "Bachelor",
+    "gender": "male",
+    "birth_date": "2000-01-01"
+}
+
+### Logout
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{studentToken}}
+Accept: application/json

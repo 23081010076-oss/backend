@@ -30,15 +30,13 @@ class CorporateContactController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'company_name' => 'required|string|max:255',
-            'contact_person' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'email' => 'required|email',
-            'phone' => 'required|string|max:20',
             'message' => 'required|string',
         ]);
 
-        $validated['user_id'] = $request->user() ? $request->user()->id : null;
-        $validated['status'] = 'pending';
+        // 'status' is not in migration, removing it.
+        // 'org_id' is in migration, but not used here.
 
         $contact = CorporateContact::create($validated);
 

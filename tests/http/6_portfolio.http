@@ -1,0 +1,41 @@
+@baseUrl = http://localhost:8000/api
+@studentToken = ...
+@adminToken = ...
+
+### ------------------------------------------------------------------------
+### PROFILE & PORTFOLIO (STUDENT)
+### ------------------------------------------------------------------------
+
+### Add Achievement
+POST {{baseUrl}}/achievements
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "title": "Hackathon Winner",
+    "year": 2025,
+    "organization": "Tech Community",
+    "description": "1st Place in National Hackathon"
+}
+
+### Add Experience
+POST {{baseUrl}}/experiences
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "title": "Junior Developer",
+    "company": "Tech Corp",
+    "start_date": "2024-01-01",
+    "end_date": "2024-12-31",
+    "type": "work",
+    "level": "Junior",
+    "description": "Backend development"
+}
+
+### Get Portfolio (Public/Private)
+GET {{baseUrl}}/auth/portfolio
+Authorization: Bearer {{studentToken}}
+Accept: application/json

@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:8000/api
+@adminToken = ...
+
+### ------------------------------------------------------------------------
+### ARTICLE & CORPORATE SERVICES (ADMIN & PUBLIC)
+### ------------------------------------------------------------------------
+
+### Create Article (Admin)
+POST {{baseUrl}}/articles
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "title": "Top 10 Scholarship Tips",
+    "content": "Here are the tips...",
+    "category": "scholarship"
+}
+
+### List Articles (Public)
+GET {{baseUrl}}/articles
+Accept: application/json
+
+### Submit Corporate Contact (Public Company)
+POST {{baseUrl}}/corporate-contact
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Big Tech Company",
+    "email": "partnerships@bigtech.com",
+    "message": "We want to collaborate on a bootcamp."
+}
+
+### List Corporate Contacts (Admin)
+GET {{baseUrl}}/corporate-contacts
+Authorization: Bearer {{adminToken}}
+Accept: application/json

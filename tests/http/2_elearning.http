@@ -1,0 +1,66 @@
+@baseUrl = http://localhost:8000/api
+@adminToken = ...
+@studentToken = ...
+
+### ------------------------------------------------------------------------
+### E-LEARNING & BOOTCAMP (ADMIN & STUDENT)
+### ------------------------------------------------------------------------
+
+### Create Course (Admin)
+POST {{baseUrl}}/courses
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "title": "Laravel Mastery Bootcamp",
+    "description": "Intensive bootcamp to master Laravel.",
+    "type": "bootcamp",
+    "level": "intermediate",
+    "price": 500000,
+    "access_type": "premium",
+    "instructor": "John Doe",
+    "duration": "4 weeks",
+    "video_url": "https://example.com/video.mp4",
+    "video_duration": "10:00:00",
+    "total_videos": 20
+}
+
+### List Courses (Public)
+GET {{baseUrl}}/courses
+Accept: application/json
+
+### Get Course Details (Public)
+GET {{baseUrl}}/courses/1
+Accept: application/json
+
+### Enroll in Course (Student)
+# Requires Subscription or Payment first usually, but for free courses:
+POST {{baseUrl}}/courses/1/enroll
+Authorization: Bearer {{studentToken}}
+Accept: application/json
+
+### My Courses (Student)
+GET {{baseUrl}}/my-courses
+Authorization: Bearer {{studentToken}}
+Accept: application/json
+
+### Update Progress (Student)
+PUT {{baseUrl}}/enrollments/1/progress
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "progress": 50
+}
+
+### Complete Course (Student - Triggers Certificate)
+PUT {{baseUrl}}/enrollments/1/progress
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "progress": 100
+}

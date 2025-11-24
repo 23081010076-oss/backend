@@ -9,15 +9,16 @@ use Illuminate\Http\Request;
 class ReviewController extends Controller
 {
     /**
-     * Display reviews for a scholarship
+     * Display reviews
      */
     public function index(Request $request)
     {
-        $query = Review::with(['user', 'scholarship']);
+        $query = Review::with(['user', 'reviewable']);
 
-        // Filter by scholarship
-        if ($request->has('scholarship_id')) {
-            $query->where('scholarship_id', $request->scholarship_id);
+        // Filter by reviewable
+        if ($request->has('reviewable_id') && $request->has('reviewable_type')) {
+            $query->where('reviewable_id', $request->reviewable_id)
+                  ->where('reviewable_type', $request->reviewable_type);
         }
 
         // Filter by rating
@@ -35,19 +36,21 @@ class ReviewController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'scholarship_id' => 'required|exists:scholarships,id',
+            'reviewable_id' => 'required|integer',
+            'reviewable_type' => 'required|string',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'required|string',
         ]);
 
-        // Check if user already reviewed this scholarship
+        // Check if user already reviewed this item
         $existingReview = Review::where('user_id', $request->user()->id)
-            ->where('scholarship_id', $validated['scholarship_id'])
+            ->where('reviewable_id', $validated['reviewable_id'])
+            ->where('reviewable_type', $validated['reviewable_type'])
             ->first();
 
         if ($existingReview) {
             return response()->json([
-                'message' => 'You have already reviewed this scholarship'
+                'message' => 'You have already reviewed this item'
             ], 422);
         }
 
@@ -56,7 +59,7 @@ class ReviewController extends Controller
 
         return response()->json([
             'message' => 'Review submitted successfully',
-            'data' => $review->load(['user', 'scholarship'])
+            'data' => $review->load(['user', 'reviewable'])
         ], 201);
     }
 
@@ -65,7 +68,7 @@ class ReviewController extends Controller
      */
     public function show($id)
     {
-        $review = Review::with(['user', 'scholarship'])->findOrFail($id);
+        $review = Review::with(['user', 'reviewable'])->findOrFail($id);
         return response()->json(['data' => $review]);
     }
 
@@ -85,7 +88,7 @@ class ReviewController extends Controller
 
         return response()->json([
             'message' => 'Review updated successfully',
-            'data' => $review->load(['user', 'scholarship'])
+            'data' => $review->load(['user', 'reviewable'])
         ]);
     }
 

@@ -1,0 +1,83 @@
+@baseUrl = http://localhost:8000/api
+@corporateToken = ...
+@studentToken = ...
+@adminToken = ...
+
+### ------------------------------------------------------------------------
+### SCHOLARSHIP PORTAL (CORPORATE & STUDENT)
+### ------------------------------------------------------------------------
+
+### Create Organization (Corporate/Admin)
+POST {{baseUrl}}/organizations
+Authorization: Bearer {{corporateToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Tech Foundation",
+    "type": "ngo",
+    "description": "Supporting tech education.",
+    "location": "Jakarta",
+    "website": "https://techfoundation.org",
+    "contact_email": "contact@techfoundation.org",
+    "phone": "021-1234567",
+    "founded_year": 2010,
+    "logo_url": "https://via.placeholder.com/150"
+}
+
+### Create Scholarship (Corporate)
+POST {{baseUrl}}/scholarships
+Authorization: Bearer {{corporateToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "organization_id": 1,
+    "name": "Future Tech Leader Scholarship",
+    "description": "Full scholarship for CS students.",
+    "benefit": "Tuition + Living Allowance",
+    "location": "Indonesia",
+    "status": "open",
+    "deadline": "2025-12-31",
+    "study_field": "Computer Science",
+    "funding_amount": 10000000,
+    "requirements": "GPA > 3.5"
+}
+
+### List Scholarships (Public)
+GET {{baseUrl}}/scholarships
+Accept: application/json
+
+### Get Scholarship Details (Public - Includes Organization Profile)
+GET {{baseUrl}}/scholarships/1
+Accept: application/json
+
+### Get Organization Profile (Public - Company Page)
+GET {{baseUrl}}/organizations/1
+Accept: application/json
+
+### Apply for Scholarship (Student)
+POST {{baseUrl}}/scholarships/1/apply
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "motivation_letter": "I want to change the world with code."
+    // Files would be uploaded as multipart/form-data in real scenario
+}
+
+### My Applications (Student)
+GET {{baseUrl}}/my-applications
+Authorization: Bearer {{studentToken}}
+Accept: application/json
+
+### Update Application Status (Corporate/Admin)
+PUT {{baseUrl}}/scholarship-applications/1/status
+Authorization: Bearer {{corporateToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "status": "accepted"
+}

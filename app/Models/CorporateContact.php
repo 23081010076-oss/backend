@@ -10,14 +10,10 @@ class CorporateContact extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'company_name',
-        'contact_person',
+        'org_id',
+        'name',
         'email',
-        'phone',
-        'subject',
         'message',
-        'status',
     ];
 
     // Relationships

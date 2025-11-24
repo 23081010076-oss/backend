@@ -1,0 +1,69 @@
+@baseUrl = http://localhost:8000/api
+@studentToken = ...
+@mentorToken = ...
+
+### ------------------------------------------------------------------------
+### MY MENTOR (STUDENT & MENTOR)
+### ------------------------------------------------------------------------
+
+### Request Mentoring Session (Student)
+POST {{baseUrl}}/mentoring-sessions
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "mentor_id": 2, 
+    "type": "academic",
+    "schedule": "2025-12-01 10:00:00"
+}
+
+### List My Sessions (Student)
+GET {{baseUrl}}/my-mentoring-sessions
+Authorization: Bearer {{studentToken}}
+Accept: application/json
+
+### Update Session Status (Mentor)
+PUT {{baseUrl}}/mentoring-sessions/1/status
+Authorization: Bearer {{mentorToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "status": "scheduled"
+}
+
+### Submit Need Assessment (Student - Pre-mentoring)
+POST {{baseUrl}}/mentoring-sessions/1/need-assessments
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "form_data": {
+        "learning_goals": "Improve architecture skills",
+        "previous_experience": "Built 2 apps",
+        "challenges": "Scaling",
+        "expectations": "Code review"
+    }
+}
+
+### Upload Coaching File (Mentor)
+# Note: In VS Code REST Client, file uploads are tricky. 
+# This is a simulation of the endpoint structure.
+POST {{baseUrl}}/mentoring-sessions/1/coaching-files
+Authorization: Bearer {{mentorToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "file_name": "Roadmap.pdf",
+    "file_type": "pdf",
+    "uploaded_by": 2
+    // "file": (binary data)
+}
+
+### List Coaching Files (Student)
+GET {{baseUrl}}/mentoring-sessions/1/coaching-files
+Authorization: Bearer {{studentToken}}
+Accept: application/json

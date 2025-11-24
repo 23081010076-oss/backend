@@ -14,7 +14,7 @@ class OrganizationController extends Controller
     public function index()
     {
         $organizations = Organization::where('user_id', request()->user()->id)
-            ->orderBy('start_date', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get();
         
         return response()->json(['data' => $organizations]);
@@ -27,11 +27,13 @@ class OrganizationController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'role' => 'required|string|max:255',
+            'type' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'location' => 'nullable|string|max:255',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after:start_date',
+            'website' => 'nullable|url',
+            'contact_email' => 'nullable|email',
+            'phone' => 'nullable|string',
+            'founded_year' => 'nullable|integer',
         ]);
 
         $validated['user_id'] = $request->user()->id;
