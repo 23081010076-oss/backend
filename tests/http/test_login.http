@@ -1,0 +1,5 @@
+### Test Login Admin
+POST http://127.0.0.1:8000/api/login HTTP/1.1
+Content-Type: application/json
+
+{"email": "admin@learningplatform.com", "password": "AdminPassword123!"}

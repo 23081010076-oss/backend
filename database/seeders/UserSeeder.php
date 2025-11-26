@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Ahmad Rizki',
                 'email' => 'ahmad.rizki@student.com',
-                'password' => Hash::make('password123'),
+                'password' => 'password123',
                 'role' => 'student',
                 'gender' => 'male',
                 'birth_date' => '2001-05-15',
@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Sari Dewi',
                 'email' => 'sari.dewi@student.com',
-                'password' => Hash::make('password123'),
+                'password' => 'password123',
                 'role' => 'student',
                 'gender' => 'female',
                 'birth_date' => '2002-08-22',
@@ -48,7 +48,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Budi Hartono',
                 'email' => 'budi.hartono@student.com',
-                'password' => Hash::make('password123'),
+                'password' => 'password123',
                 'role' => 'student',
                 'gender' => 'male',
                 'birth_date' => '2000-12-10',
@@ -64,7 +64,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Dr. Maya Sari',
                 'email' => 'maya.sari@mentor.com',
-                'password' => Hash::make('password123'),
+                'password' => 'password123',
                 'role' => 'mentor',
                 'gender' => 'female',
                 'birth_date' => '1985-03-18',
@@ -79,7 +79,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Prof. Agus Prasetyo',
                 'email' => 'agus.prasetyo@mentor.com',
-                'password' => Hash::make('password123'),
+                'password' => 'password123',
                 'role' => 'mentor',
                 'gender' => 'male',
                 'birth_date' => '1978-11-25',
@@ -94,7 +94,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Rina Kartika',
                 'email' => 'rina.kartika@mentor.com',
-                'password' => Hash::make('password123'),
+                'password' => 'password123',
                 'role' => 'mentor',
                 'gender' => 'female',
                 'birth_date' => '1990-07-12',
@@ -110,7 +110,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Doni Pratama',
                 'email' => 'doni.pratama@corporate.com',
-                'password' => Hash::make('password123'),
+                'password' => 'password123',
                 'role' => 'corporate',
                 'gender' => 'male',
                 'birth_date' => '1982-09-05',

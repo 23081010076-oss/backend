@@ -52,6 +52,9 @@ Route::middleware('auth:api')->group(function () {
     
     Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::get('/me', [AuthController::class, 'me'])->name('me');
+        Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
+        Route::put('/change-password', [AuthController::class, 'changePassword'])->name('change-password');
         Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
         Route::match(['put', 'patch'], '/profile', [AuthController::class, 'updateProfile'])->name('update-profile');
         Route::post('/profile/photo', [AuthController::class, 'uploadProfilePhoto'])->name('upload-photo');

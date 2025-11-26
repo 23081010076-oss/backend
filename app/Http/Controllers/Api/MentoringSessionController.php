@@ -105,6 +105,30 @@ class MentoringSessionController extends Controller
     }
 
     /**
+     * Schedule/Reschedule a mentoring session
+     */
+    public function schedule(Request $request, $id)
+    {
+        $session = MentoringSession::findOrFail($id);
+
+        $validated = $request->validate([
+            'schedule' => 'required|date|after:now',
+            'meeting_link' => 'nullable|url',
+        ]);
+
+        $session->update([
+            'schedule' => $validated['schedule'],
+            'meeting_link' => $validated['meeting_link'] ?? $session->meeting_link,
+            'status' => 'scheduled',
+        ]);
+
+        return response()->json([
+            'message' => 'Mentoring session scheduled successfully',
+            'data' => $session->load(['mentor', 'member'])
+        ]);
+    }
+
+    /**
      * Update session status
      */
     public function updateStatus(Request $request, $id)
