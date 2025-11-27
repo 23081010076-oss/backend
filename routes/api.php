@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\CorporateContactController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\NeedAssessmentController;
 use App\Http\Controllers\CoachingFileController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 
 
 // PUBLIC ROUTES (No Authentication Required)
@@ -26,6 +27,8 @@ use App\Http\Controllers\CoachingFileController;
 // Authentication endpoints
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirectToGoogle'])->name('auth.google.redirect');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 // Public resources (read-only) - Anyone can view
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');

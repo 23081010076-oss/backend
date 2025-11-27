@@ -25,6 +25,11 @@
             "key": "mentorToken",
             "value": "",
             "type": "string"
+        },
+        {
+            "key": "corporateToken",
+            "value": "",
+            "type": "string"
         }
     ],
     "item": [
@@ -146,7 +151,59 @@
                     }
                 },
                 {
-                    "name": "1.5 Get Current User Profile",
+                    "name": "1.5 Login Corporate",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.data && jsonData.data.token) {",
+                                    "    pm.collectionVariables.set('corporateToken', jsonData.data.token);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"doni.pratama@corporate.com\",\n    \"password\": \"password123\"\n}"
+                        },
+                        "url": "{{baseUrl}}/login"
+                    }
+                },
+                {
+                    "name": "1.6 Google Login Redirect",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "url": "{{baseUrl}}/auth/google/redirect"
+                    }
+                },
+                {
+                    "name": "1.7 Google Login Callback",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "url": "{{baseUrl}}/auth/google/callback"
+                    }
+                },
+                {
+                    "name": "1.8 Get Current User Profile",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -160,7 +217,7 @@
                     }
                 },
                 {
-                    "name": "1.6 Update Profile",
+                    "name": "1.9 Update Profile",
                     "request": {
                         "method": "PUT",
                         "header": [
@@ -182,7 +239,7 @@
                     }
                 },
                 {
-                    "name": "1.7 Change Password",
+                    "name": "1.10 Change Password",
                     "request": {
                         "method": "PUT",
                         "header": [
@@ -204,7 +261,7 @@
                     }
                 },
                 {
-                    "name": "1.8 Refresh Token",
+                    "name": "1.11 Refresh Token",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -218,7 +275,7 @@
                     }
                 },
                 {
-                    "name": "1.9 Logout",
+                    "name": "1.12 Logout",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -232,7 +289,7 @@
                     }
                 },
                 {
-                    "name": "1.10 Admin - Get All Users",
+                    "name": "1.13 Admin - Get All Users",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -246,7 +303,7 @@
                     }
                 },
                 {
-                    "name": "1.11 Admin - Get Single User",
+                    "name": "1.14 Admin - Get Single User",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -260,7 +317,7 @@
                     }
                 },
                 {
-                    "name": "1.12 Admin - Create User",
+                    "name": "1.15 Admin - Create User",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -282,7 +339,7 @@
                     }
                 },
                 {
-                    "name": "1.13 Admin - Update User",
+                    "name": "1.16 Admin - Update User",
                     "request": {
                         "method": "PUT",
                         "header": [
@@ -304,7 +361,7 @@
                     }
                 },
                 {
-                    "name": "1.14 Admin - Delete User",
+                    "name": "1.17 Admin - Delete User",
                     "request": {
                         "method": "DELETE",
                         "header": [
