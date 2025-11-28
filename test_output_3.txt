@@ -1,0 +1,95 @@
+﻿
+   PASS  Tests\Unit\ExampleTest
+  Γ£ô that trueΓÇª 0.01s  
+
+   PASS  Tests\Feature\AchievementTest
+  Γ£ô user canΓÇª  1.79s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.03s  
+
+   PASS  Tests\Feature\ArticleTest
+  Γ£ô can listΓÇª  0.04s  
+  Γ£ô admin canΓÇª 0.03s  
+  Γ£ô can showΓÇª  0.03s  
+
+   PASS  Tests\Feature\AuthTest
+  Γ£ô user canΓÇª  0.04s  
+  Γ£ô user canΓÇª  0.04s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.06s  
+
+   PASS  Tests\Feature\CoachingFileTest
+  Γ£ô can uploaΓÇª 0.07s  
+  Γ£ô can listΓÇª  0.04s  
+
+   PASS  Tests\Feature\CorporateContactTest
+  Γ£ô can submiΓÇª 0.04s  
+
+   PASS  Tests\Feature\CourseTest
+  Γ£ô can listΓÇª  0.03s  
+  Γ£ô can showΓÇª  0.03s  
+  Γ£ô admin canΓÇª 0.05s  
+  Γ£ô non adminΓÇª 0.04s  
+  Γ£ô admin canΓÇª 0.05s  
+  Γ£ô admin canΓÇª 0.03s  
+
+   PASS  Tests\Feature\EnrollmentTest
+  Γ£ô can enrolΓÇª 0.04s  
+  Γ£ô cannot enΓÇª 0.03s  
+  Γ£ô can updatΓÇª 0.05s  
+
+   PASS  Tests\Feature\ExampleTest
+  Γ£ô the appliΓÇª 0.03s  
+
+   PASS  Tests\Feature\ExperienceTest
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.04s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.04s  
+
+   PASS  Tests\Feature\MentoringSessionTest
+  Γ£ô can listΓÇª  0.06s  
+  Γ£ô student cΓÇª 0.04s  
+  Γ£ô mentor caΓÇª 0.05s  
+
+   PASS  Tests\Feature\NeedAssessmentTest
+  Γ£ô can submiΓÇª 0.04s  
+  Γ£ô can viewΓÇª  0.05s  
+
+   PASS  Tests\Feature\OrganizationTest
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.04s  
+
+   PASS  Tests\Feature\ReviewTest
+  Γ£ô can listΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.05s  
+
+   PASS  Tests\Feature\ScholarshipTest
+  Γ£ô can listΓÇª  0.05s  
+  Γ£ô corporateΓÇª 0.05s  
+  Γ£ô student cΓÇª 0.04s  
+
+   PASS  Tests\Feature\SubscriptionTest
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.03s  
+
+   PASS  Tests\Feature\TransactionTest
+  Γ£ô can creatΓÇª 0.06s  
+  Γ£ô can listΓÇª  0.03s  
+
+   PASS  Tests\Feature\UserManagementTest
+  Γ£ô admin canΓÇª 0.06s  
+  Γ£ô admin canΓÇª 0.05s  
+  Γ£ô admin canΓÇª 0.04s  
+  Γ£ô admin canΓÇª 0.05s  
+  Γ£ô non adminΓÇª 0.03s  
+
+  Tests:    55 passed (176 assertions)
+  Duration: 4.21s
+

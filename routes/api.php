@@ -19,9 +19,13 @@ use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\NeedAssessmentController;
 use App\Http\Controllers\CoachingFileController;
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Api\MidtransWebhookController;
 
 
 // PUBLIC ROUTES (No Authentication Required)
+
+// Midtrans Webhook (must be public for Midtrans to access)
+Route::post('/midtrans/webhook', [MidtransWebhookController::class, 'handleNotification'])->name('midtrans.webhook');
 
 
 // Authentication endpoints

@@ -26,13 +26,14 @@ class TransactionTest extends TestCase
         ]);
 
         $response = $this->postJson("/api/transactions/courses/{$course->id}", [
-            'payment_method' => 'qris',
+            'payment_method' => 'manual',
         ], [
             'Authorization' => 'Bearer ' . $token,
         ]);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
+                'message',
                 'data' => [
                     'id',
                     'transaction_code',

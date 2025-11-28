@@ -1420,7 +1420,47 @@
                             "mode": "raw",
                             "raw": "{\n    \"status\": \"paid\"\n}"
                         },
-                        "url": "{{baseUrl}}/transactions/1/confirm"
+                    "url": "{{baseUrl}}/transactions/1/confirm"
+                    }
+                },
+                {
+                    "name": "10.7 Request Refund",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            { "key": "Accept", "value": "application/json" },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{studentToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"reason\": \"Course tidak sesuai dengan ekspektasi\"\n}"
+                        },
+                        "url": "{{baseUrl}}/transactions/1/refund"
+                    }
+                },
+                {
+                    "name": "10.8 Simulate Midtrans Webhook (Testing)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            { "key": "Accept", "value": "application/json" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"order_id\": \"TRX20251128ABC123\",\n    \"transaction_status\": \"settlement\",\n    \"status_code\": \"200\",\n    \"gross_amount\": \"500000\",\n    \"signature_key\": \"your-signature-here\",\n    \"payment_type\": \"qris\",\n    \"transaction_time\": \"2025-11-28 13:00:00\"\n}"
+                        },
+                        "url": "{{baseUrl}}/midtrans/webhook"
                     }
                 }
             ]

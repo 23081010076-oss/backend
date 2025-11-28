@@ -1,0 +1,248 @@
+﻿\u003c?php
+
+namespace Tests\\Feature;
+
+use App\\Models\\User;
+use Illuminate\\Foundation\\Testing\\RefreshDatabase;
+use Illuminate\\Foundation\\Testing\\WithFaker;
+use Tests\\TestCase;
+use Tymon\\JWTAuth\\Facades\\JWTAuth;
+
+class AuthTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_user_can_register()
+    {
+        $response = $this-\u003epostJson('/api/register', [
+            'name' =\u003e 'Test User',
+            'email' =\u003e 'test@example.com',
+            'password' =\u003e 'password',
+            'password_confirmation' =\u003e 'password',
+            'role' =\u003e 'student',
+        ]);
+
+        $response-\u003eassertStatus(201)
+            -\u003eassertJsonStructure([
+                'message',
+                'data' =\u003e [
+                    'id',
+                    'name',
+                    'email',
+                    'role',
+                ],
+            ]);
+
+        $this-\u003eassertDatabaseHas('users', [
+            'email' =\u003e 'test@example.com',
+        ]);
+    }
+
+    public function test_user_can_login()
+    {
+        $user = User::factory()-\u003ecreate([
+            'password' =\u003e bcrypt('password'),
+        ]);
+
+        $response = $this-\u003epostJson('/api/login', [
+            'email' =\u003e $user-\u003eemail,
+            'password' =\u003e 'password',
+        ]);
+
+        $response-\u003eassertStatus(200)
+            -\u003eassertJsonStructure([
+                'message',
+                'data' =\u003e [
+                    'user',
+                    'token',
+                ],
+            ]);
+    }
+
+    public function test_user_can_logout()
+    {
+        $user = User::factory()-\u003ecreate();
+        $token = JWTAuth::fromUser($user);
+
+        $response = $this-\u003epostJson('/api/auth/logout', [], [
+            'Authorization' =\u003e 'Bearer ' . $token,
+        ]);
+
+        $response-\u003eassertStatus(200)
+            -\u003eassertJson(['message' =\u003e 'Logout successful']);
+    }
+
+    public function test_user_can_view_profile()
+    {
+        $user = User::factory()-\u003ecreate();
+        $token = JWTAuth::fromUser($user);
+
+        $response = $this-\u003egetJson('/api/auth/profile', [
+            'Authorization' =\u003e 'Bearer ' . $token,
+        ]);
+
+        $response-\u003eassertStatus(200)
+            -\u003eassertJsonStructure([
+                'message',
+                'data' =\u003e [
+                    'user' =\u003e [
+                        'id',
+                        'name',
+                        'email',
+                    ],
+                ],
+            ]);
+    }
+}
+
+   WARN  Class AuthTest cannot be found in D:\final project\tests\Feature\AuthTest.php
+\u003c?php
+
+namespace Tests\\Feature;
+
+use App\\Models\\Course;
+use App\\Models\\User;
+use Illuminate\\Foundation\\Testing\\RefreshDatabase;
+use Tests\\TestCase;
+use Tymon\\JWTAuth\\Facades\\JWTAuth;
+
+class TransactionTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_can_create_course_transaction()
+    {
+        $user = User::factory()-\u003ecreate();
+        $token = JWTAuth::fromUser($user);
+
+        $course = Course::create([
+            'title' =\u003e 'Test Course',
+            'price' =\u003e 100000,
+            'type' =\u003e 'course',
+            'level' =\u003e 'beginner',
+            'access_type' =\u003e 'regular',
+        ]);
+
+        $response = $this-\u003epostJson("/api/transactions/courses/{$course-\u003eid}", [
+            'payment_method' =\u003e 'manual',
+        ], [
+            'Authorization' =\u003e 'Bearer ' . $token,
+        ]);
+
+        $response-\u003eassertStatus(201)
+            -\u003eassertJsonStructure([
+                'message',
+                'data' =\u003e [
+                    'id',
+                    'transaction_code',
+                    'amount',
+                    'status',
+                ],
+            ]);
+        
+        $this-\u003eassertDatabaseHas('transactions', [
+            'user_id' =\u003e $user-\u003eid,
+            'amount' =\u003e 100000,
+            'type' =\u003e 'course_enrollment',
+        ]);
+    }
+
+    public function test_can_list_transactions()
+    {
+        $user = User::factory()-\u003ecreate();
+        $token = JWTAuth::fromUser($user);
+
+        $response = $this-\u003egetJson('/api/transactions', [
+            'Authorization' =\u003e 'Bearer ' . $token,
+        ]);
+
+        $response-\u003eassertStatus(200);
+    }
+}
+
+   WARN  Class TransactionTest cannot be found in D:\final project\tests\Feature\TransactionTest.php
+
+   PASS  Tests\Unit\ExampleTest
+  Γ£ô that trueΓÇª 0.01s  
+
+   PASS  Tests\Feature\AchievementTest
+  Γ£ô user canΓÇª  4.49s  
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.05s  
+
+   PASS  Tests\Feature\ArticleTest
+  Γ£ô can listΓÇª  0.03s  
+  Γ£ô admin canΓÇª 0.03s  
+  Γ£ô can showΓÇª  0.02s  
+
+   PASS  Tests\Feature\CoachingFileTest
+  Γ£ô can uploaΓÇª 0.06s  
+  Γ£ô can listΓÇª  0.04s  
+
+   PASS  Tests\Feature\CorporateContactTest
+  Γ£ô can submiΓÇª 0.03s  
+
+   PASS  Tests\Feature\CourseTest
+  Γ£ô can listΓÇª  0.03s  
+  Γ£ô can showΓÇª  0.03s  
+  Γ£ô admin canΓÇª 0.06s  
+  Γ£ô non adminΓÇª 0.03s  
+  Γ£ô admin canΓÇª 0.03s  
+  Γ£ô admin canΓÇª 0.10s  
+
+   PASS  Tests\Feature\EnrollmentTest
+  Γ£ô can enrolΓÇª 0.21s  
+  Γ£ô cannot enΓÇª 0.03s  
+  Γ£ô can updatΓÇª 0.04s  
+
+   PASS  Tests\Feature\ExampleTest
+  Γ£ô the appliΓÇª 0.03s  
+
+   PASS  Tests\Feature\ExperienceTest
+  Γ£ô user canΓÇª  0.04s  
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.05s  
+
+   PASS  Tests\Feature\MentoringSessionTest
+  Γ£ô can listΓÇª  0.04s  
+  Γ£ô student cΓÇª 0.06s  
+  Γ£ô mentor caΓÇª 0.03s  
+
+   PASS  Tests\Feature\NeedAssessmentTest
+  Γ£ô can submiΓÇª 0.07s  
+  Γ£ô can viewΓÇª  0.05s  
+
+   PASS  Tests\Feature\OrganizationTest
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.04s  
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.03s  
+
+   PASS  Tests\Feature\ReviewTest
+  Γ£ô can listΓÇª  0.04s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.04s  
+
+   PASS  Tests\Feature\ScholarshipTest
+  Γ£ô can listΓÇª  0.03s  
+  Γ£ô corporateΓÇª 0.03s  
+  Γ£ô student cΓÇª 0.04s  
+
+   PASS  Tests\Feature\SubscriptionTest
+  Γ£ô user canΓÇª  0.47s  
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.03s  
+
+   PASS  Tests\Feature\UserManagementTest
+  Γ£ô admin canΓÇª 0.04s  
+  Γ£ô admin canΓÇª 0.05s  
+  Γ£ô admin canΓÇª 0.03s  
+  Γ£ô admin canΓÇª 0.05s  
+  Γ£ô non adminΓÇª 0.04s  
+
+  Tests:    49 passed (145 assertions)
+  Duration: 7.27s
+

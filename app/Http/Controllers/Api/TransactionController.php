@@ -8,11 +8,19 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Subscription;
 use App\Models\MentoringSession;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
+    protected $midtransService;
+
+    public function __construct(MidtransService $midtransService)
+    {
+        $this->midtransService = $midtransService;
+    }
+
     /**
      * Display user's transactions
      */
@@ -68,10 +76,13 @@ class TransactionController extends Controller
                 'completed' => false,
             ]);
 
+            // Generate transaction code
+            $transactionCode = Transaction::generateTransactionCode();
+
             // Create transaction
             $transaction = Transaction::create([
                 'user_id' => $user->id,
-                'transaction_code' => Transaction::generateTransactionCode(),
+                'transaction_code' => $transactionCode,
                 'type' => 'course_enrollment',
                 'transactionable_id' => $enrollment->id,
                 'transactionable_type' => Enrollment::class,
@@ -81,11 +92,54 @@ class TransactionController extends Controller
                 'expired_at' => now()->addHours(24), // 24 hours to pay
             ]);
 
+            // Generate Midtrans Snap token (skip for manual payment)
+            $snapToken = null;
+            $redirectUrl = null;
+
+            if ($validated['payment_method'] !== 'manual') {
+                $midtransParams = $this->midtransService->buildTransactionParams(
+                    $transactionCode,
+                    (int) $course->price,
+                    [
+                        [
+                            'id' => $course->id,
+                            'price' => (int) $course->price,
+                            'quantity' => 1,
+                            'name' => $course->title,
+                        ]
+                    ],
+                    [
+                        'first_name' => $user->name,
+                        'email' => $user->email,
+                        'phone' => $user->phone ?? '08123456789',
+                    ]
+                );
+
+                $snapResponse = $this->midtransService->createTransaction($midtransParams);
+
+                if ($snapResponse['success']) {
+                    $snapToken = $snapResponse['snap_token'];
+                    $redirectUrl = $snapResponse['redirect_url'];
+
+                    // Save snap token to payment_details
+                    $transaction->payment_details = ['snap_token' => $snapToken];
+                    $transaction->save();
+                } else {
+                    DB::rollBack();
+                    return response()->json([
+                        'message' => 'Failed to create payment',
+                        'error' => $snapResponse['message']
+                    ], 500);
+                }
+            }
+
             DB::commit();
 
             return response()->json([
                 'message' => 'Transaction created successfully',
-                'data' => $transaction->load('transactionable')
+                'data' => $transaction->load('transactionable'),
+                'snap_token' => $snapToken,
+                'redirect_url' => $redirectUrl,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();

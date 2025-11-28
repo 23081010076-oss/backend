@@ -1,0 +1,126 @@
+﻿
+   PASS  Tests\Unit\ExampleTest
+  Γ£ô that trueΓÇª 0.01s  
+
+   PASS  Tests\Feature\AchievementTest
+  Γ£ô user canΓÇª  1.53s  
+  Γ£ô user canΓÇª  0.04s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.05s  
+
+   PASS  Tests\Feature\ArticleTest
+  Γ£ô can listΓÇª  0.04s  
+  Γ£ô admin canΓÇª 0.03s  
+  Γ£ô can showΓÇª  0.03s  
+
+   FAIL  Tests\Feature\AuthTest
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.04s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ¿» user canΓÇª  0.13s  
+
+   PASS  Tests\Feature\CoachingFileTest
+  Γ£ô can uploaΓÇª 0.10s  
+  Γ£ô can listΓÇª  0.03s  
+
+   PASS  Tests\Feature\CorporateContactTest
+  Γ£ô can submiΓÇª 0.04s  
+
+   PASS  Tests\Feature\CourseTest
+  Γ£ô can listΓÇª  0.03s  
+  Γ£ô can showΓÇª  0.02s  
+  Γ£ô admin canΓÇª 0.03s  
+  Γ£ô non adminΓÇª 0.05s  
+  Γ£ô admin canΓÇª 0.05s  
+  Γ£ô admin canΓÇª 0.04s  
+
+   PASS  Tests\Feature\EnrollmentTest
+  Γ£ô can enrolΓÇª 0.05s  
+  Γ£ô cannot enΓÇª 0.03s  
+  Γ£ô can updatΓÇª 0.03s  
+
+   PASS  Tests\Feature\ExampleTest
+  Γ£ô the appliΓÇª 0.03s  
+
+   PASS  Tests\Feature\ExperienceTest
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.04s  
+  Γ£ô user canΓÇª  0.03s  
+
+   PASS  Tests\Feature\MentoringSessionTest
+  Γ£ô can listΓÇª  0.06s  
+  Γ£ô student cΓÇª 0.04s  
+  Γ£ô mentor caΓÇª 0.03s  
+
+   PASS  Tests\Feature\NeedAssessmentTest
+  Γ£ô can submiΓÇª 0.05s  
+  Γ£ô can viewΓÇª  0.03s  
+
+   PASS  Tests\Feature\OrganizationTest
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.04s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.05s  
+
+   PASS  Tests\Feature\ReviewTest
+  Γ£ô can listΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.03s  
+  Γ£ô user canΓÇª  0.03s  
+
+   PASS  Tests\Feature\ScholarshipTest
+  Γ£ô can listΓÇª  0.06s  
+  Γ£ô corporateΓÇª 0.05s  
+  Γ£ô student cΓÇª 0.04s  
+
+   PASS  Tests\Feature\SubscriptionTest
+  Γ£ô user canΓÇª  0.06s  
+  Γ£ô user canΓÇª  0.05s  
+  Γ£ô user canΓÇª  0.05s  
+
+   FAIL  Tests\Feature\TransactionTest
+  Γ¿» can creatΓÇª 0.67s  
+  Γ£ô can listΓÇª  0.11s  
+
+   PASS  Tests\Feature\UserManagementTest
+  Γ£ô admin canΓÇª 0.08s  
+  Γ£ô admin canΓÇª 0.06s  
+  Γ£ô admin canΓÇª 0.05s  
+  Γ£ô admin canΓÇª 0.06s  
+  Γ£ô non adminΓÇª 0.04s  
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\FΓÇª   
+  Failed asserting that an array has the key 'user'.
+
+  at tests\Feature\AuthTest.php:85
+     81Γûò             'Authorization' => 'Bearer ' . $token,
+     82Γûò         ]);
+     83Γûò 
+     84Γûò         $response->assertStatus(200)
+  Γ₧£  85Γûò             ->assertJsonStructure([
+     86Γûò                 'user' => [
+     87Γûò                     'id',
+     88Γûò                     'name',
+     89Γûò                     'email',
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\FΓÇª   
+  Expected response status code [201] but received 500.
+Failed asserting that 500 is identical to 201.
+
+  at tests\Feature\TransactionTest.php:34
+     30Γûò         ], [
+     31Γûò             'Authorization' => 'Bearer ' . $token,
+     32Γûò         ]);
+     33Γûò 
+  Γ₧£  34Γûò         $response->assertStatus(201)
+     35Γûò             ->assertJsonStructure([
+     36Γûò                 'data' => [
+     37Γûò                     'id',
+     38Γûò                     'transaction_code',
+
+
+  Tests:    2 failed, 53 passed (164 assertions)
+  Duration: 4.79s
+
