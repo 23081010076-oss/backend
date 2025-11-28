@@ -754,10 +754,6 @@
                     "request": {
                         "method": "POST",
                         "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            },
                             { "key": "Accept", "value": "application/json" },
                             {
                                 "key": "Authorization",
@@ -765,8 +761,29 @@
                             }
                         ],
                         "body": {
-                            "mode": "raw",
-                            "raw": "{}"
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "cv_path",
+                                    "type": "file",
+                                    "src": []
+                                },
+                                {
+                                    "key": "motivation_letter",
+                                    "type": "file",
+                                    "src": []
+                                },
+                                {
+                                    "key": "transcript_path",
+                                    "type": "file",
+                                    "src": []
+                                },
+                                {
+                                    "key": "recommendation_path",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
                         },
                         "url": "{{baseUrl}}/scholarships/1/apply"
                     }
@@ -1043,7 +1060,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"mentor_id\": 7,\n    \"type\": \"academic\",\n    \"payment_method\": \"qris\"\n}"
+                            "raw": "{\n    \"mentor_id\": 7,\n    \"member_id\": 4,\n    \"type\": \"academic\",\n    \"payment_method\": \"qris\",\n    \"schedule\": \"2025-12-20 10:00:00\",\n    \"status\": \"pending\"\n}"
                         },
                         "url": "{{baseUrl}}/mentoring-sessions"
                     }
@@ -1065,7 +1082,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"mentor_id\": 8,\n    \"type\": \"life_plan\",\n    \"payment_method\": \"bank_transfer\"\n}"
+                            "raw": "{\n    \"mentor_id\": 8,\n    \"member_id\": 4,\n    \"type\": \"life_plan\",\n    \"payment_method\": \"bank_transfer\",\n    \"schedule\": \"2025-12-21 14:00:00\",\n    \"status\": \"pending\"\n}"
                         },
                         "url": "{{baseUrl}}/mentoring-sessions"
                     }
