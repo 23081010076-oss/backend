@@ -26,8 +26,8 @@ class ReviewController extends Controller
             $query->where('rating', $request->rating);
         }
 
-        $reviews = $query->orderBy('created_at', 'desc')->get();
-        return response()->json(['data' => $reviews]);
+        $reviews = $query->orderBy('created_at', 'desc')->paginate(15);
+        return response()->json($reviews);
     }
 
     /**

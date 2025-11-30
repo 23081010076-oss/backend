@@ -158,11 +158,9 @@ class ScholarshipController extends Controller
     {
         $applications = ScholarshipApplication::with('scholarship')
             ->where('user_id', auth()->id())
-            ->get();
+            ->paginate(15);
 
-        return response()->json([
-            'data' => $applications
-        ]);
+        return response()->json($applications);
     }
 
     /**

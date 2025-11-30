@@ -77,11 +77,9 @@ class EnrollmentController extends Controller
         $user = auth()->user();
         $enrollments = Enrollment::with('course')
             ->where('user_id', $user->id)
-            ->get();
+            ->paginate(15);
 
-        return response()->json([
-            'data' => $enrollments
-        ]);
+        return response()->json($enrollments);
     }
 
     /**

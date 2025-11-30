@@ -10,8 +10,8 @@ class AchievementController extends Controller
 {
     public function index()
     {
-        $achievements = Achievement::where('user_id', auth()->id())->get();
-        return response()->json(['data' => $achievements]);
+        $achievements = Achievement::where('user_id', auth()->id())->paginate(15);
+        return response()->json($achievements);
     }
 
     public function store(Request $request)

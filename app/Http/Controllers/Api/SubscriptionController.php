@@ -13,8 +13,8 @@ class SubscriptionController extends Controller
      */
     public function index()
     {
-        $subscriptions = Subscription::where('user_id', request()->user()->id)->get();
-        return response()->json(['data' => $subscriptions]);
+        $subscriptions = Subscription::where('user_id', request()->user()->id)->paginate(15);
+        return response()->json($subscriptions);
     }
 
     /**

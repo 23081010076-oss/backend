@@ -15,9 +15,9 @@ class OrganizationController extends Controller
     {
         $organizations = Organization::where('user_id', request()->user()->id)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
         
-        return response()->json(['data' => $organizations]);
+        return response()->json($organizations);
     }
 
     /**

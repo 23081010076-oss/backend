@@ -25,8 +25,8 @@ class MentoringSessionController extends Controller
             $query->where('type', $request->type);
         }
 
-        $sessions = $query->orderBy('schedule', 'desc')->get();
-        return response()->json(['data' => $sessions]);
+        $sessions = $query->orderBy('schedule', 'desc')->paginate(15);
+        return response()->json($sessions);
     }
 
     /**
@@ -99,9 +99,9 @@ class MentoringSessionController extends Controller
                       ->orWhere('member_id', $userId);
             })
             ->orderBy('schedule', 'desc')
-            ->get();
+            ->paginate(15);
 
-        return response()->json(['data' => $sessions]);
+        return response()->json($sessions);
     }
 
     /**
@@ -157,4 +157,5 @@ class MentoringSessionController extends Controller
 
         return response()->json(['message' => 'Mentoring session deleted successfully']);
     }
+    
 }
