@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "mymentor-api-by-role-v1",
-		"name": "MyMentor API (By Role)",
+		"_postman_id": "student-app-flow-v1",
+		"name": "Student App Flow",
 		"description": "Complete API collection for Learning Platform Backend, organized by User Roles.\n\n## Authentication\n- Admin: admin@learningplatform.com / AdminPassword123!\n- Student: ahmad.rizki@student.com / password123\n- Mentor: maya.sari@mentor.com / password123\n- Corporate: doni.pratama@corporate.com / password123\n\n## Database IDs\n- Users: 1-10 (admin: 1-3, students: 4-6, mentors: 7-9, corporate: 10)\n- Courses: 2-10\n- Subscriptions: 2-4 (user_id 4)\n- Organizations: 1-5\n- Scholarships: 1-10\n- Articles: 1-6\n- Achievements: 1-8\n- Experiences: 1-10",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
