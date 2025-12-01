@@ -4,10 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\NeedAssessment;
 use App\Models\MentoringSession;
-use App\Http\Requests\StoreNeedAssessmentRequest;
+use App\Http\Requests\Assessment\StoreNeedAssessmentRequest;
 use App\Http\Resources\NeedAssessmentResource;
 use Illuminate\Http\Response;
 
+/**
+ * ==========================================================================
+ * NEED ASSESSMENT CONTROLLER (Controller untuk Penilaian Kebutuhan)
+ * ==========================================================================
+ * 
+ * FUNGSI: Menangani operasi untuk need assessment
+ * - Lihat assessment
+ * - Submit assessment
+ * - Tandai selesai
+ * - Hapus assessment
+ */
 class NeedAssessmentController extends Controller
 {
     /**

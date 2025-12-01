@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreReviewRequest;
-use App\Http\Requests\UpdateReviewRequest;
+use App\Http\Requests\Review\StoreReviewRequest;
+use App\Http\Requests\Review\UpdateReviewRequest;
 use App\Models\Review;
 use App\Services\ReviewService;
 use App\Traits\ApiResponse;
@@ -13,10 +13,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Class ReviewController
+ * ==========================================================================
+ * REVIEW CONTROLLER (Controller untuk Review/Ulasan)
+ * ==========================================================================
  * 
- * Handles HTTP requests related to reviews.
- * Uses ReviewService for business logic and ReviewPolicy for authorization.
+ * FUNGSI: Menangani operasi CRUD untuk review
+ * - Lihat daftar review
+ * - Tambah review baru
+ * - Update review
+ * - Hapus review
  * 
  * @package App\Http\Controllers\Api
  */

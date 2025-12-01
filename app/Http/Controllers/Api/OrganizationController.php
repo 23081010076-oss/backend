@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreOrganizationRequest;
-use App\Http\Requests\UpdateOrganizationRequest;
+use App\Http\Requests\Organization\StoreOrganizationRequest;
+use App\Http\Requests\Organization\UpdateOrganizationRequest;
 use App\Models\Organization;
 use App\Services\OrganizationService;
 use App\Traits\ApiResponse;
@@ -12,10 +12,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Class OrganizationController
+ * ==========================================================================
+ * ORGANIZATION CONTROLLER (Controller untuk Organisasi)
+ * ==========================================================================
  * 
- * Handles HTTP requests related to organizations.
- * Uses OrganizationService for business logic and OrganizationPolicy for authorization.
+ * FUNGSI: Menangani operasi CRUD untuk organisasi
+ * - Lihat daftar organisasi user
+ * - Tambah organisasi baru
+ * - Update organisasi
+ * - Hapus organisasi
  * 
  * @package App\Http\Controllers\Api
  */

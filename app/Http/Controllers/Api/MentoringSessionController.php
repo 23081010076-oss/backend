@@ -4,158 +4,200 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
+use App\Services\MentoringService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
+// Import Request Classes
+use App\Http\Requests\Mentoring\StoreMentoringSessionRequest;
+use App\Http\Requests\Mentoring\UpdateMentoringSessionRequest;
+use App\Http\Requests\Mentoring\FeedbackRequest;
+
+/**
+ * ==========================================================================
+ * MENTORING SESSION CONTROLLER (Controller untuk Sesi Mentoring)
+ * ==========================================================================
+ * 
+ * FUNGSI: Mengelola sesi mentoring (booking, jadwal, feedback).
+ * 
+ * STRUKTUR CLEAN CODE:
+ * - Controller  : Hanya handle request/response (file ini)
+ * - Service     : Business logic → app/Services/MentoringService.php
+ * - Policy      : Authorization  → app/Policies/MentoringSessionPolicy.php
+ * - Request     : Validation     → app/Http/Requests/Mentoring/
+ */
 class MentoringSessionController extends Controller
 {
+    use ApiResponse;
+
     /**
-     * Display a listing of mentoring sessions
+     * Service untuk business logic
      */
-    public function index(Request $request)
+    protected MentoringService $mentoringService;
+
+    /**
+     * Constructor - Inject service
+     */
+    public function __construct(MentoringService $mentoringService)
     {
-        $query = MentoringSession::with(['mentor', 'member']);
+        $this->mentoringService = $mentoringService;
+    }
 
-        // Filter by status
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | List & Retrieve Methods
+    |--------------------------------------------------------------------------
+    */
 
-        // Filter by type
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
-        }
+    /**
+     * Tampilkan daftar sesi mentoring
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $sessions = $this->mentoringService->getSessions(
+            Auth::user(),
+            $request->all()
+        );
 
-        $sessions = $query->orderBy('schedule', 'desc')->paginate(15);
-        return response()->json($sessions);
+        return $this->paginatedResponse($sessions, 'Daftar sesi mentoring berhasil diambil');
     }
 
     /**
-     * Schedule a new mentoring session
+     * Tampilkan detail sesi mentoring
      */
-    public function store(Request $request)
+    public function show(int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'mentor_id' => 'required|exists:users,id',
-            'member_id' => 'required|exists:users,id',
-            'session_id' => 'nullable|string|max:255',
-            'type' => 'required|in:academic,life_plan',
-            'schedule' => 'required|date|after:now',
-            'meeting_link' => 'nullable|url',
-            'payment_method' => 'nullable|in:qris,bank,va,manual',
-            'status' => 'required|in:pending,scheduled,completed,cancelled,refunded',
-        ]);
+        $session = MentoringSession::with(['user', 'mentor'])->findOrFail($id);
 
-        $session = MentoringSession::create($validated);
+        // Cek akses dengan Policy
+        $this->authorize('view', $session);
 
-        return response()->json([
-            'message' => 'Mentoring session scheduled successfully',
-            'data' => $session
-        ], 201);
+        return $this->successResponse($session, 'Detail sesi mentoring berhasil diambil');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create & Update Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Buat sesi mentoring baru
+     * 
+     * Validasi di: app/Http/Requests/Mentoring/StoreMentoringSessionRequest.php
+     */
+    public function store(StoreMentoringSessionRequest $request): JsonResponse
+    {
+        // Cek akses dengan Policy
+        $this->authorize('create', MentoringSession::class);
+
+        $session = $this->mentoringService->createSession(
+            Auth::user(),
+            $request->validated()
+        );
+
+        return $this->createdResponse($session, 'Sesi mentoring berhasil dibuat');
     }
 
     /**
-     * Display the specified mentoring session
+     * Update sesi mentoring
+     * 
+     * Validasi di: app/Http/Requests/Mentoring/UpdateMentoringSessionRequest.php
      */
-    public function show($id)
-    {
-        $session = MentoringSession::with(['mentor', 'member'])->findOrFail($id);
-        return response()->json(['data' => $session]);
-    }
-
-    /**
-     * Update the specified mentoring session
-     */
-    public function update(Request $request, $id)
+    public function update(UpdateMentoringSessionRequest $request, int $id): JsonResponse
     {
         $session = MentoringSession::findOrFail($id);
 
-        $validated = $request->validate([
-            'session_id' => 'sometimes|string|max:255',
-            'type' => 'sometimes|in:academic,life_plan',
-            'schedule' => 'sometimes|date|after:now',
-            'meeting_link' => 'nullable|url',
-            'payment_method' => 'nullable|in:qris,bank,va,manual',
-            'status' => 'sometimes|in:pending,scheduled,completed,cancelled,refunded',
-        ]);
+        // Cek akses dengan Policy
+        $this->authorize('update', $session);
 
-        $session->update($validated);
+        $session = $this->mentoringService->updateSession(
+            $session,
+            $request->validated()
+        );
 
-        return response()->json([
-            'message' => 'Mentoring session updated successfully',
-            'data' => $session
-        ]);
+        return $this->successResponse($session, 'Sesi mentoring berhasil diupdate');
     }
 
     /**
-     * Get sessions for authenticated user (as mentor or student)
+     * Hapus sesi mentoring
      */
-    public function mySessions()
-    {
-        $userId = request()->user()->id;
-        
-        $sessions = MentoringSession::with(['mentor', 'member'])
-            ->where(function($query) use ($userId) {
-                $query->where('mentor_id', $userId)
-                      ->orWhere('member_id', $userId);
-            })
-            ->orderBy('schedule', 'desc')
-            ->paginate(15);
-
-        return response()->json($sessions);
-    }
-
-    /**
-     * Schedule/Reschedule a mentoring session
-     */
-    public function schedule(Request $request, $id)
+    public function destroy(int $id): JsonResponse
     {
         $session = MentoringSession::findOrFail($id);
 
-        $validated = $request->validate([
-            'schedule' => 'required|date|after:now',
-            'meeting_link' => 'nullable|url',
-        ]);
+        // Cek akses dengan Policy
+        $this->authorize('delete', $session);
 
-        $session->update([
-            'schedule' => $validated['schedule'],
-            'meeting_link' => $validated['meeting_link'] ?? $session->meeting_link,
-            'status' => 'scheduled',
-        ]);
-
-        return response()->json([
-            'message' => 'Mentoring session scheduled successfully',
-            'data' => $session->load(['mentor', 'member'])
-        ]);
-    }
-
-    /**
-     * Update session status
-     */
-    public function updateStatus(Request $request, $id)
-    {
-        $session = MentoringSession::findOrFail($id);
-
-        $validated = $request->validate([
-            'status' => 'required|in:pending,scheduled,completed,cancelled,refunded',
-        ]);
-
-        $session->update(['status' => $validated['status']]);
-
-        return response()->json([
-            'message' => 'Session status updated successfully',
-            'data' => $session
-        ]);
-    }
-
-    /**
-     * Remove the specified mentoring session
-     */
-    public function destroy($id)
-    {
-        $session = MentoringSession::findOrFail($id);
         $session->delete();
 
-        return response()->json(['message' => 'Mentoring session deleted successfully']);
+        return $this->successResponse(null, 'Sesi mentoring berhasil dihapus');
     }
-    
+
+    /*
+    |--------------------------------------------------------------------------
+    | Status & Feedback Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Update status sesi
+     */
+    public function updateStatus(Request $request, int $id): JsonResponse
+    {
+        $session = MentoringSession::findOrFail($id);
+
+        // Cek akses dengan Policy
+        $this->authorize('updateStatus', $session);
+
+        $validated = $request->validate([
+            'status' => 'required|in:pending,confirmed,completed,cancelled',
+        ], [
+            'status.required' => 'Status harus diisi',
+            'status.in'       => 'Status harus salah satu dari: pending, confirmed, completed, cancelled',
+        ]);
+
+        $session = $this->mentoringService->updateStatus($session, $validated['status']);
+
+        return $this->successResponse($session, 'Status sesi berhasil diupdate');
+    }
+
+    /**
+     * Berikan feedback untuk sesi yang sudah selesai
+     * 
+     * Validasi di: app/Http/Requests/Mentoring/FeedbackRequest.php
+     */
+    public function feedback(FeedbackRequest $request, int $id): JsonResponse
+    {
+        $session = MentoringSession::findOrFail($id);
+
+        // Cek akses dengan Policy
+        $this->authorize('giveFeedback', $session);
+
+        if ($session->status !== 'completed') {
+            return $this->errorResponse('Feedback hanya bisa diberikan untuk sesi yang sudah selesai', 400);
+        }
+
+        $session = $this->mentoringService->giveFeedback($session, $request->validated());
+
+        return $this->successResponse($session, 'Feedback berhasil dikirim');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Schedule Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Lihat jadwal mentor tertentu
+     */
+    public function schedule(Request $request, int $mentorId): JsonResponse
+    {
+        $schedule = $this->mentoringService->getMentorSchedule($mentorId, $request->all());
+
+        return $this->successResponse($schedule, 'Jadwal mentor berhasil diambil');
+    }
 }

@@ -4,499 +4,432 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
+// ============================================================================
+// IMPORT REQUEST & RESOURCE CLASSES
+// ============================================================================
+// Request = untuk validasi input (agar controller lebih bersih)
+// Resource = untuk format output (agar response konsisten)
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ChangePasswordRequest;
+use App\Http\Requests\Auth\UpdateProfileRequest;
+use App\Http\Resources\UserResource;
+
+/**
+ * ==========================================================================
+ * AUTH CONTROLLER (Controller untuk Autentikasi)
+ * ==========================================================================
+ * 
+ * FUNGSI: Menangani semua hal tentang akun pengguna:
+ * - Daftar akun baru (register)
+ * - Masuk/Login
+ * - Keluar/Logout  
+ * - Ganti password
+ * - Kelola profil pengguna
+ * - Upload foto dan CV
+ * - Melihat portofolio
+ * 
+ * CATATAN PENTING:
+ * - Validasi input sudah dipindahkan ke folder app/Http/Requests
+ * - Format output sudah dipindahkan ke folder app/Http/Resources
+ * - Ini membuat controller lebih mudah dibaca dan dipahami
+ */
 class AuthController extends Controller
 {
+    use ApiResponse;
+
+    /*
+    |--------------------------------------------------------------------------
+    | BAGIAN 1: AUTENTIKASI (Login, Register, Logout)
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Register a new user
+     * DAFTAR AKUN BARU
+     * 
+     * Endpoint: POST /api/auth/register
+     * 
+     * PERHATIKAN:
+     * - Sebelum: public function register(Request $request)
+     * - Sesudah: public function register(RegisterRequest $request)
+     * 
+     * Dengan pakai RegisterRequest:
+     * - Validasi otomatis dijalankan SEBELUM masuk ke function ini
+     * - Jika validasi gagal, langsung return error 422
+     * - Kita tidak perlu tulis $request->validate([...]) lagi
+     * 
+     * Lihat validasinya di: app/Http/Requests/RegisterRequest.php
      */
-    public function register(Request $request)
+    public function register(RegisterRequest $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8|confirmed',
-                'role' => 'required|in:student,mentor,admin,corporate',
-                'phone' => 'nullable|string',
-                'gender' => 'nullable|in:male,female,other',
-                'birth_date' => 'nullable|date',
-            ]);
-
+            // $request->validated() = ambil data yang sudah lolos validasi
+            // Data yang tidak ada di rules() akan dibuang
+            $validated = $request->validated();
+            
+            // Buat user baru di database
             $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'role' => $validated['role'],
-                'phone' => $validated['phone'] ?? null,
-                'gender' => $validated['gender'] ?? null,
+                'name'       => $validated['name'],
+                'email'      => $validated['email'],
+                'password'   => Hash::make($validated['password']),  // Enkripsi password
+                'role'       => $validated['role'],
+                'phone'      => $validated['phone'] ?? null,
+                'gender'     => $validated['gender'] ?? null,
                 'birth_date' => $validated['birth_date'] ?? null,
             ]);
 
-            return response()->json([
-                'message' => 'Registration successful. Please login to continue.',
-                'data' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                ]
-            ], 201);
+            // Return response dengan UserResource
+            // UserResource akan format data user secara konsisten
+            return $this->createdResponse(
+                new UserResource($user),
+                'Pendaftaran berhasil. Silakan login untuk melanjutkan.'
+            );
+
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Registration failed',
-                'error' => $e->getMessage()
-            ], 500);
+            return $this->serverErrorResponse('Pendaftaran gagal', $e->getMessage());
         }
     }
 
     /**
-     * Login user
+     * LOGIN / MASUK
+     * 
+     * Endpoint: POST /api/auth/login
+     * 
+     * PERHATIKAN:
+     * - Pakai LoginRequest untuk validasi
+     * - Validasinya ada di: app/Http/Requests/LoginRequest.php
      */
-    public function login(Request $request)
+    public function login(LoginRequest $request): JsonResponse
     {
         try {
-            $request->validate([
-                'email' => 'required|email',
-                'password' => 'required',
-            ]);
-
+            // Data sudah divalidasi oleh LoginRequest
+            // Cari user berdasarkan email
             $user = User::where('email', $request->email)->first();
 
+            // Cek apakah user ada dan password benar
             if (!$user || !Hash::check($request->password, $user->password)) {
-                return response()->json([
-                    'message' => 'Invalid credentials',
-                    'error' => 'The provided credentials are incorrect.'
-                ], 401);
+                return $this->unauthorizedResponse('Email atau password salah');
             }
 
+            // Buat token JWT untuk user
             $token = JWTAuth::fromUser($user);
-            $ttl = config('jwt.ttl', 60); // Default 60 minutes
+            $ttl = config('jwt.ttl', 60);  // Waktu expired (menit)
 
-            return response()->json([
-                'message' => 'Login successful',
-                'data' => [
-                    'user' => [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'role' => $user->role,
-                    ],
-                    'token' => $token,
-                    'token_type' => 'Bearer',
-                    'expires_in' => $ttl * 60,
-                ]
-            ]);
+            // Return data user dan token
+            return $this->successResponse([
+                'user'       => new UserResource($user),  // Pakai UserResource
+                'token'      => $token,
+                'token_type' => 'Bearer',
+                'expires_in' => $ttl * 60,  // Dalam detik
+            ], 'Login berhasil');
+
         } catch (JWTException $e) {
-            return response()->json([
-                'message' => 'Could not create token',
-                'error' => $e->getMessage()
-            ], 500);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Login failed',
-                'error' => $e->getMessage()
-            ], 500);
+            return $this->serverErrorResponse('Gagal membuat token', $e->getMessage());
         }
     }
 
     /**
-     * Logout user
+     * LOGOUT / KELUAR
+     * 
+     * Endpoint: POST /api/auth/logout
+     * 
+     * Header: Authorization: Bearer {token}
      */
-    public function logout(Request $request)
+    public function logout(): JsonResponse
     {
         try {
             JWTAuth::invalidate(JWTAuth::getToken());
+            return $this->successResponse(null, 'Logout berhasil');
         } catch (JWTException $e) {
-            return response()->json(['error' => 'Token invalidation failed'], 500);
-        }
-
-        return response()->json([
-            'message' => 'Logout successful',
-        ]);
-    }
-
-    /**
-     * Get current authenticated user (me)
-     */
-    public function me(Request $request)
-    {
-        try {
-            $user = $request->user();
-            
-            return response()->json([
-                'message' => 'User retrieved successfully',
-                'data' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                    'phone' => $user->phone,
-                    'address' => $user->address,
-                    'institution' => $user->institution,
-                    'major' => $user->major,
-                    'education_level' => $user->education_level,
-                    'bio' => $user->bio,
-                    'profile_photo' => $user->profile_photo,
-                    'gender' => $user->gender,
-                    'birth_date' => $user->birth_date,
-                    'created_at' => $user->created_at,
-                    'updated_at' => $user->updated_at,
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to retrieve user',
-                'error' => $e->getMessage()
-            ], 500);
+            return $this->serverErrorResponse('Gagal logout');
         }
     }
 
     /**
-     * Refresh JWT token
+     * PERBARUI TOKEN
+     * 
+     * Endpoint: POST /api/auth/refresh
+     * 
+     * Gunakan ketika token hampir expired
      */
-    public function refresh(Request $request)
+    public function refresh(): JsonResponse
     {
         try {
             $newToken = JWTAuth::refresh(JWTAuth::getToken());
             $ttl = config('jwt.ttl', 60);
-            
-            return response()->json([
-                'message' => 'Token refreshed successfully',
-                'data' => [
-                    'token' => $newToken,
-                    'token_type' => 'Bearer',
-                    'expires_in' => $ttl * 60,
-                ]
-            ]);
+
+            return $this->successResponse([
+                'token'      => $newToken,
+                'token_type' => 'Bearer',
+                'expires_in' => $ttl * 60,
+            ], 'Token berhasil diperbarui');
+
         } catch (JWTException $e) {
-            return response()->json([
-                'message' => 'Could not refresh token',
-                'error' => $e->getMessage()
-            ], 401);
+            return $this->unauthorizedResponse('Gagal memperbarui token');
         }
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | BAGIAN 2: PROFIL PENGGUNA
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Change user password
+     * LIHAT DATA SAYA (User yang sedang login)
+     * 
+     * Endpoint: GET /api/auth/me
+     * 
+     * PERHATIKAN: Pakai UserResource untuk format output
      */
-    public function changePassword(Request $request)
+    public function me(Request $request): JsonResponse
     {
-        try {
-            $request->validate([
-                'current_password' => 'required|string',
-                'new_password' => 'required|string|min:8|confirmed',
-            ]);
+        // new UserResource($user) akan format data sesuai yang ada di UserResource
+        return $this->successResponse(
+            new UserResource($request->user()),
+            'Data pengguna berhasil diambil'
+        );
+    }
 
-            $user = $request->user();
+    /**
+     * LIHAT PROFIL LENGKAP (dengan achievement, pengalaman, dll)
+     * 
+     * Endpoint: GET /api/auth/profile
+     */
+    public function profile(Request $request): JsonResponse
+    {
+        // Load user beserta relasi-relasinya
+        $user = $request->user()->load(['achievements', 'experiences', 'subscriptions']);
 
-            // Verify current password
-            if (!Hash::check($request->current_password, $user->password)) {
-                return response()->json([
-                    'message' => 'Current password is incorrect',
-                    'error' => 'The provided current password does not match our records.'
-                ], 401);
+        return $this->successResponse([
+            'user' => new UserResource($user),
+            'achievements' => $user->achievements,
+            'experiences' => $user->experiences,
+            'subscriptions' => $user->subscriptions,
+        ], 'Profil berhasil diambil');
+    }
+
+    /**
+     * UPDATE PROFIL
+     * 
+     * Endpoint: PUT /api/auth/profile
+     * 
+     * Validasi di: app/Http/Requests/UpdateProfileRequest.php
+     */
+    public function updateProfile(UpdateProfileRequest $request): JsonResponse
+    {
+        // $request->validated() = data yang sudah lolos validasi
+        $user = $request->user();
+        $user->update($request->validated());
+
+        return $this->successResponse(
+            new UserResource($user->fresh()),
+            'Profil berhasil diupdate'
+        );
+    }
+
+    /**
+     * GANTI PASSWORD
+     * 
+     * Endpoint: PUT /api/auth/change-password
+     * 
+     * PERHATIKAN:
+     * - Pakai ChangePasswordRequest untuk validasi
+     * - Validasinya ada di: app/Http/Requests/ChangePasswordRequest.php
+     */
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
+    {
+        // Data sudah divalidasi oleh ChangePasswordRequest
+        $user = $request->user();
+
+        // Cek apakah password lama benar
+        if (!Hash::check($request->current_password, $user->password)) {
+            return $this->unauthorizedResponse('Password lama tidak sesuai');
+        }
+
+        // Update password
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return $this->successResponse(null, 'Password berhasil diubah');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | BAGIAN 3: UPLOAD FILE
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * UPLOAD FOTO PROFIL
+     * 
+     * Endpoint: POST /api/auth/profile/photo
+     * 
+     * Data: photo (jpeg, png, jpg, gif) max 2MB
+     */
+    public function uploadProfilePhoto(Request $request): JsonResponse
+    {
+        $request->validate([
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        if ($request->hasFile('photo')) {
+            // Hapus foto lama
+            if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
+                Storage::disk('public')->delete($user->profile_photo);
             }
 
-            // Update password
-            $user->password = Hash::make($request->new_password);
+            // Simpan foto baru
+            $path = $request->file('photo')->store('profile-photos', 'public');
+            $user->profile_photo = $path;
             $user->save();
-
-            return response()->json([
-                'message' => 'Password changed successfully'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to change password',
-                'error' => $e->getMessage()
-            ], 500);
         }
+
+        return $this->successResponse([
+            'profile_photo'     => $user->profile_photo,
+            'profile_photo_url' => $user->profile_photo ? asset('storage/' . $user->profile_photo) : null,
+        ], 'Foto profil berhasil diupload');
     }
 
     /**
-     * Get authenticated user profile
+     * UPLOAD CV (Curriculum Vitae)
+     * 
+     * Endpoint: POST /api/auth/profile/cv
+     * 
+     * Data: cv (pdf, doc, docx) max 2MB
      */
-    public function profile(Request $request)
+    public function uploadCv(Request $request): JsonResponse
     {
-        try {
-            $user = $request->user()->load(['achievements', 'experiences', 'subscriptions']);
-            
-            return response()->json([
-                'message' => 'Profile retrieved successfully',
-                'data' => [
-                    'user' => $user
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to retrieve profile',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+        $request->validate([
+            'cv' => 'required|file|mimes:pdf,doc,docx|max:2048',
+        ]);
 
-    /**
-     * Update authenticated user profile
-     */
-    public function updateProfile(Request $request)
-    {
-        try {
-            $user = $request->user();
+        $user = $request->user();
 
-            $validated = $request->validate([
-                'name' => 'sometimes|string|max:255',
-                'phone' => 'nullable|string',
-                'address' => 'nullable|string',
-                'institution' => 'nullable|string',
-                'major' => 'nullable|string',
-                'education_level' => 'nullable|string',
-                'bio' => 'nullable|string',
-                'gender' => 'nullable|in:male,female,other',
-                'birth_date' => 'nullable|date',
-            ]);
-
-            $user->update($validated);
-
-            return response()->json([
-                'message' => 'Profile updated successfully',
-                'data' => [
-                    'user' => $user->fresh()
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to update profile',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Upload profile photo
-     */
-    public function uploadProfilePhoto(Request $request)
-    {
-        try {
-            $request->validate([
-                'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            ]);
-
-            $user = $request->user();
-
-            if ($request->hasFile('photo')) {
-                // Delete old photo if exists
-                if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
-                    Storage::disk('public')->delete($user->profile_photo);
-                }
-
-                $path = $request->file('photo')->store('profile-photos', 'public');
-                $user->profile_photo = $path;
-                $user->save();
+        if ($request->hasFile('cv')) {
+            // Hapus CV lama
+            if ($user->cv_path && Storage::disk('public')->exists($user->cv_path)) {
+                Storage::disk('public')->delete($user->cv_path);
             }
 
-            return response()->json([
-                'message' => 'Profile photo uploaded successfully',
-                'data' => [
-                    'profile_photo' => $user->profile_photo,
-                    'profile_photo_url' => $user->profile_photo ? asset('storage/' . $user->profile_photo) : null
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to upload profile photo',
-                'error' => $e->getMessage()
-            ], 500);
+            // Simpan CV baru
+            $path = $request->file('cv')->store('cvs', 'public');
+            $user->cv_path = $path;
+            $user->save();
         }
+
+        return $this->successResponse([
+            'cv_path' => $user->cv_path,
+            'cv_url'  => $user->cv_path ? asset('storage/' . $user->cv_path) : null,
+        ], 'CV berhasil diupload');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | BAGIAN 4: DASHBOARD & PORTOFOLIO
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * REKOMENDASI KURSUS
+     * 
+     * Endpoint: GET /api/auth/recommendations
+     */
+    public function recommendations(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $major = $user->major;
+
+        $recommendedCourses = \App\Models\Course::query();
+
+        if ($major) {
+            $recommendedCourses->where(function ($query) use ($major) {
+                $query->where('title', 'like', '%' . $major . '%')
+                      ->orWhere('description', 'like', '%' . $major . '%');
+            });
+            $recommendations = $recommendedCourses->limit(5)->get();
+        } else {
+            $recommendations = collect();
+        }
+
+        if ($recommendations->isEmpty()) {
+            $recommendations = \App\Models\Course::inRandomOrder()->limit(5)->get();
+        }
+
+        return $this->successResponse($recommendations, 'Rekomendasi kursus berhasil diambil');
     }
 
     /**
-     * Upload CV
+     * LIHAT PORTOFOLIO LENGKAP
+     * 
+     * Endpoint: GET /api/auth/portfolio
      */
-    public function uploadCv(Request $request)
+    public function portfolio(Request $request): JsonResponse
     {
-        try {
-            $request->validate([
-                'cv' => 'required|file|mimes:pdf,doc,docx|max:2048',
-            ]);
+        $user = $request->user()->load([
+            'achievements',
+            'experiences',
+            'organizations',
+            'enrollments.course',
+            'scholarshipApplications.scholarship',
+            'mentoringSessionsAsStudent',
+            'mentoringSessionsAsMentor',
+            'subscriptions',
+        ]);
 
-            $user = $request->user();
-
-            if ($request->hasFile('cv')) {
-                // Delete old CV if exists
-                if ($user->cv_path && Storage::disk('public')->exists($user->cv_path)) {
-                    Storage::disk('public')->delete($user->cv_path);
-                }
-
-                $path = $request->file('cv')->store('cvs', 'public');
-                $user->cv_path = $path;
-                $user->save();
-            }
-
-            return response()->json([
-                'message' => 'CV uploaded successfully',
-                'data' => [
-                    'cv_path' => $user->cv_path,
-                    'cv_url' => $user->cv_path ? asset('storage/' . $user->cv_path) : null
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to upload CV',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return $this->successResponse([
+            'profile'            => new UserResource($user),  // Pakai UserResource
+            'prestasi'           => $user->achievements,
+            'pengalaman'         => $user->experiences,
+            'organisasi'         => $user->organizations,
+            'kursus'             => $user->enrollments,
+            'lamaran_beasiswa'   => $user->scholarshipApplications,
+            'sesi_mentoring'     => [
+                'sebagai_murid'  => $user->mentoringSessionsAsStudent,
+                'sebagai_mentor' => $user->mentoringSessionsAsMentor,
+            ],
+            'langganan' => $user->subscriptions,
+        ], 'Portofolio berhasil diambil');
     }
 
     /**
-     * Get recommendations based on user profile
+     * RIWAYAT AKTIVITAS
+     * 
+     * Endpoint: GET /api/auth/activity-history
      */
-    public function recommendations(Request $request)
+    public function activityHistory(Request $request): JsonResponse
     {
-        try {
-            $user = $request->user();
-            $major = $user->major;
+        $user = $request->user();
 
-            // Basic recommendation logic
-            $recommendedCourses = \App\Models\Course::query();
+        $ringkasan = [
+            'kursus_selesai'        => $user->enrollments()->where('completed', true)->count(),
+            'kursus_sedang_diambil' => $user->enrollments()->where('completed', false)->count(),
+            'mentoring_selesai'     => $user->mentoringSessionsAsStudent()->where('status', 'completed')->count(),
+            'lamaran_beasiswa'      => $user->scholarshipApplications()->count(),
+            'jumlah_prestasi'       => $user->achievements()->count(),
+            'jumlah_pengalaman'     => $user->experiences()->count(),
+            'jumlah_organisasi'     => $user->organizations()->count(),
+        ];
 
-            if ($major) {
-                $recommendedCourses->where(function($query) use ($major) {
-                    $query->where('title', 'like', '%' . $major . '%')
-                          ->orWhere('description', 'like', '%' . $major . '%');
-                });
-                $recommendations = $recommendedCourses->limit(5)->get();
-            } else {
-                $recommendations = collect();
-            }
+        $terbaru = [
+            'kursus_terbaru'    => $user->enrollments()->with('course')->latest()->limit(5)->get(),
+            'lamaran_terbaru'   => $user->scholarshipApplications()->with('scholarship')->latest()->limit(5)->get(),
+            'mentoring_terbaru' => $user->mentoringSessionsAsStudent()->with('mentor')->latest()->limit(5)->get(),
+        ];
 
-            // If no specific matches, return popular/random courses
-            if ($recommendations->isEmpty()) {
-                $recommendations = \App\Models\Course::inRandomOrder()->limit(5)->get();
-            }
-
-            return response()->json([
-                'message' => 'Recommendations retrieved successfully',
-                'data' => $recommendations
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to retrieve recommendations',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Get user's complete portfolio
-     */
-    public function portfolio(Request $request)
-    {
-        try {
-            $user = $request->user()->load([
-                'achievements',
-                'experiences',
-                'organizations',
-                'enrollments.course',
-                'scholarshipApplications.scholarship',
-                'mentoringSessionsAsStudent',
-                'mentoringSessionsAsMentor',
-                'subscriptions'
-            ]);
-
-            return response()->json([
-                'message' => 'Portfolio retrieved successfully',
-                'data' => [
-                    'profile' => [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'role' => $user->role,
-                        'phone' => $user->phone,
-                        'address' => $user->address,
-                        'institution' => $user->institution,
-                        'major' => $user->major,
-                        'education_level' => $user->education_level,
-                        'bio' => $user->bio,
-                        'profile_photo' => $user->profile_photo,
-                        'cv_path' => $user->cv_path,
-                        'gender' => $user->gender,
-                        'birth_date' => $user->birth_date,
-                    ],
-                    'achievements' => $user->achievements,
-                    'experiences' => $user->experiences,
-                    'organizations' => $user->organizations,
-                    'courses' => $user->enrollments,
-                    'scholarship_applications' => $user->scholarshipApplications,
-                    'mentoring_sessions' => [
-                        'as_student' => $user->mentoringSessionsAsStudent,
-                        'as_mentor' => $user->mentoringSessionsAsMentor,
-                    ],
-                    'subscriptions' => $user->subscriptions,
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to retrieve portfolio',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Get user's activity history
-     */
-    public function activityHistory(Request $request)
-    {
-        try {
-            $user = $request->user();
-
-            $activities = [
-                'courses_completed' => $user->enrollments()->where('completed', true)->count(),
-                'courses_in_progress' => $user->enrollments()->where('completed', false)->count(),
-                'mentoring_sessions_completed' => $user->mentoringSessionsAsStudent()
-                    ->where('status', 'completed')->count(),
-                'scholarship_applications' => $user->scholarshipApplications()->count(),
-                'achievements' => $user->achievements()->count(),
-                'experiences' => $user->experiences()->count(),
-                'organizations' => $user->organizations()->count(),
-            ];
-
-            $recentActivities = [
-                'recent_enrollments' => $user->enrollments()
-                    ->with('course')
-                    ->latest()
-                    ->limit(5)
-                    ->get(),
-                'recent_applications' => $user->scholarshipApplications()
-                    ->with('scholarship')
-                    ->latest()
-                    ->limit(5)
-                    ->get(),
-                'recent_sessions' => $user->mentoringSessionsAsStudent()
-                    ->with('mentor')
-                    ->latest()
-                    ->limit(5)
-                    ->get(),
-            ];
-
-            return response()->json([
-                'message' => 'Activity history retrieved successfully',
-                'data' => [
-                    'summary' => $activities,
-                    'recent' => $recentActivities,
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to retrieve activity history',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return $this->successResponse([
+            'ringkasan' => $ringkasan,
+            'terbaru'   => $terbaru,
+        ], 'Riwayat aktivitas berhasil diambil');
     }
 }

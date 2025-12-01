@@ -4,11 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\CoachingFile;
 use App\Models\MentoringSession;
-use App\Http\Requests\StoreCoachingFileRequest;
+use App\Http\Requests\Coaching\StoreCoachingFileRequest;
 use App\Http\Resources\CoachingFileResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * ==========================================================================
+ * COACHING FILE CONTROLLER (Controller untuk File Coaching)
+ * ==========================================================================
+ * 
+ * FUNGSI: Menangani operasi untuk file coaching
+ * - Lihat daftar file
+ * - Upload file baru
+ * - Download file
+ * - Hapus file
+ */
 class CoachingFileController extends Controller
 {
     /**

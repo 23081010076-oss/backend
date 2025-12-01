@@ -5,218 +5,195 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Scholarship;
 use App\Models\ScholarshipApplication;
+use App\Services\ScholarshipService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+// Import Request Classes
+use App\Http\Requests\Scholarship\StoreScholarshipRequest;
+use App\Http\Requests\Scholarship\UpdateScholarshipRequest;
+use App\Http\Requests\Scholarship\ApplyScholarshipRequest;
+
+/**
+ * ==========================================================================
+ * SCHOLARSHIP CONTROLLER (Controller untuk Beasiswa)
+ * ==========================================================================
+ * 
+ * FUNGSI: Mengelola beasiswa dan lamaran beasiswa.
+ * 
+ * STRUKTUR CLEAN CODE:
+ * - Controller  : Hanya handle request/response (file ini)
+ * - Service     : Business logic → app/Services/ScholarshipService.php
+ * - Policy      : Authorization  → app/Policies/ScholarshipPolicy.php
+ * - Request     : Validation     → app/Http/Requests/Scholarship/
+ */
 class ScholarshipController extends Controller
 {
+    use ApiResponse;
+
     /**
-     * Display a listing of scholarships
+     * Service untuk business logic
      */
-    public function index(Request $request)
+    protected ScholarshipService $scholarshipService;
+
+    /**
+     * Constructor - Inject service
+     */
+    public function __construct(ScholarshipService $scholarshipService)
     {
-        $query = Scholarship::with(['organization']);
+        $this->scholarshipService = $scholarshipService;
+    }
 
-        // Filter by status
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | List & Retrieve Methods
+    |--------------------------------------------------------------------------
+    */
 
-        // Filter by location
-        if ($request->has('location')) {
-            $query->where('location', 'like', '%' . $request->location . '%');
-        }
+    /**
+     * Tampilkan daftar beasiswa dengan filter
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $scholarships = $this->scholarshipService->getScholarships($request->all());
 
-        // Filter by study_field
-        if ($request->has('study_field')) {
-            $query->where('study_field', 'like', '%' . $request->study_field . '%');
-        }
-
-        // Search
-        if ($request->has('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $scholarships = $query->paginate(15);
-
-        return response()->json($scholarships);
+        return $this->paginatedResponse($scholarships, 'Daftar beasiswa berhasil diambil');
     }
 
     /**
-     * Store a newly created scholarship
+     * Tampilkan detail beasiswa
      */
-    public function store(Request $request)
-    {
-        // Only organizations can create scholarships
-        $user = auth()->user();
-        if (!$user->hasRole(['corporate', 'admin'])) {
-            return response()->json([
-                'message' => 'Only corporate partners or admins can create scholarships'
-            ], 403);
-        }
-
-        $validated = $request->validate([
-            'organization_id' => 'nullable|exists:organizations,id',
-            'provider_id' => 'nullable|string|max:255',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'benefit' => 'nullable|string',
-            'location' => 'nullable|string',
-            'status' => 'required|in:open,coming_soon,closed',
-            'deadline' => 'nullable|date',
-            'study_field' => 'nullable|string|max:255',
-            'funding_amount' => 'nullable|numeric|min:0',
-            'requirements' => 'nullable|string',
-        ]);
-
-        $scholarship = Scholarship::create($validated);
-
-        return response()->json([
-            'message' => 'Scholarship created successfully',
-            'data' => $scholarship->load('organization')
-        ], 201);
-    }
-
-    /**
-     * Display the specified scholarship
-     */
-    public function show($id)
+    public function show(int $id): JsonResponse
     {
         $scholarship = Scholarship::with(['organization', 'applications'])->findOrFail($id);
-        
-        return response()->json([
-            'data' => $scholarship
-        ]);
+
+        return $this->successResponse($scholarship, 'Detail beasiswa berhasil diambil');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create & Update Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Tambah beasiswa baru
+     * 
+     * Validasi di: app/Http/Requests/Scholarship/StoreScholarshipRequest.php
+     */
+    public function store(StoreScholarshipRequest $request): JsonResponse
+    {
+        // Cek akses dengan Policy
+        $this->authorize('create', Scholarship::class);
+
+        $scholarship = $this->scholarshipService->createScholarship($request->validated());
+
+        return $this->createdResponse(
+            $scholarship->load('organization'),
+            'Beasiswa berhasil ditambahkan'
+        );
     }
 
     /**
-     * Apply to a scholarship
+     * Update beasiswa
+     * 
+     * Validasi di: app/Http/Requests/Scholarship/UpdateScholarshipRequest.php
      */
-    public function apply(Request $request, $id)
+    public function update(UpdateScholarshipRequest $request, int $id): JsonResponse
     {
         $scholarship = Scholarship::findOrFail($id);
 
-        if ($scholarship->status !== 'open') {
-            return response()->json([
-                'message' => 'This scholarship is not currently accepting applications'
-            ], 422);
-        }
+        // Cek akses dengan Policy
+        $this->authorize('update', $scholarship);
 
-        // Check if already applied
-        $existing = ScholarshipApplication::where('user_id', auth()->id())
-            ->where('scholarship_id', $id)
-            ->first();
+        $scholarship = $this->scholarshipService->updateScholarship(
+            $scholarship,
+            $request->validated()
+        );
 
-        if ($existing) {
-            return response()->json([
-                'message' => 'You have already applied to this scholarship'
-            ], 422);
-        }
-
-        $validated = $request->validate([
-            'motivation_letter' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'cv_path' => 'nullable|file|mimes:pdf|max:2048',
-            'transcript_path' => 'nullable|file|mimes:pdf|max:2048',
-            'recommendation_path' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-        ]);
-
-        $data = [
-            'user_id' => auth()->id(),
-            'scholarship_id' => $id,
-            'status' => 'submitted',
-            'submitted_at' => now(),
-        ];
-
-        // Handle file uploads
-        if ($request->hasFile('motivation_letter')) {
-            $data['motivation_letter'] = $request->file('motivation_letter')->store('scholarship-docs', 'public');
-        }
-        if ($request->hasFile('cv_path')) {
-            $data['cv_path'] = $request->file('cv_path')->store('scholarship-docs', 'public');
-        }
-        if ($request->hasFile('transcript_path')) {
-            $data['transcript_path'] = $request->file('transcript_path')->store('scholarship-docs', 'public');
-        }
-        if ($request->hasFile('recommendation_path')) {
-            $data['recommendation_path'] = $request->file('recommendation_path')->store('scholarship-docs', 'public');
-        }
-
-        $application = ScholarshipApplication::create($data);
-
-        return response()->json([
-            'message' => 'Application submitted successfully',
-            'data' => $application
-        ], 201);
+        return $this->successResponse($scholarship, 'Beasiswa berhasil diupdate');
     }
 
     /**
-     * Get user's scholarship applications
+     * Hapus beasiswa
      */
-    public function myApplications()
+    public function destroy(int $id): JsonResponse
     {
-        $applications = ScholarshipApplication::with('scholarship')
-            ->where('user_id', auth()->id())
-            ->paginate(15);
+        $scholarship = Scholarship::findOrFail($id);
 
-        return response()->json($applications);
+        // Cek akses dengan Policy
+        $this->authorize('delete', $scholarship);
+
+        $this->scholarshipService->deleteScholarship($scholarship);
+
+        return $this->successResponse(null, 'Beasiswa berhasil dihapus');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Melamar beasiswa
+     * 
+     * Validasi di: app/Http/Requests/Scholarship/ApplyScholarshipRequest.php
+     */
+    public function apply(ApplyScholarshipRequest $request, int $id): JsonResponse
+    {
+        $scholarship = Scholarship::findOrFail($id);
+
+        // Cek akses dengan Policy
+        $this->authorize('apply', $scholarship);
+
+        $result = $this->scholarshipService->applyScholarship(
+            auth()->user(),
+            $scholarship,
+            $request->validated(),
+            $request->allFiles()
+        );
+
+        if (!$result['success']) {
+            return $this->errorResponse($result['message'], 422);
+        }
+
+        return $this->createdResponse($result['data'], 'Lamaran beasiswa berhasil dikirim');
     }
 
     /**
-     * Update application status
+     * Lihat lamaran beasiswa user
      */
-    public function updateStatus(Request $request, $id)
+    public function myApplications(): JsonResponse
     {
+        $applications = $this->scholarshipService->getUserApplications(auth()->id());
+
+        return $this->paginatedResponse($applications, 'Daftar lamaran berhasil diambil');
+    }
+
+    /**
+     * Update status lamaran (admin only)
+     */
+    public function updateStatus(Request $request, int $id): JsonResponse
+    {
+        $application = ScholarshipApplication::findOrFail($id);
+
+        // Cek akses dengan Policy
+        $this->authorize('updateApplicationStatus', $application->scholarship);
+
         $validated = $request->validate([
             'status' => 'required|in:submitted,review,accepted,rejected',
+        ], [
+            'status.required' => 'Status harus diisi',
+            'status.in'       => 'Status harus salah satu dari: submitted, review, accepted, rejected',
         ]);
 
-        $application = ScholarshipApplication::findOrFail($id);
-        $application->update($validated);
+        $application = $this->scholarshipService->updateApplicationStatus(
+            $application,
+            $validated['status']
+        );
 
-        return response()->json([
-            'message' => 'Application status updated successfully',
-            'data' => $application
-        ]);
-    }
-
-    /**
-     * Update the specified scholarship
-     */
-    public function update(Request $request, $id)
-    {
-        $scholarship = Scholarship::findOrFail($id);
-
-        $validated = $request->validate([
-            'organization_id' => 'sometimes|nullable|exists:organizations,id',
-            'provider_id' => 'nullable|string',
-            'name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'benefit' => 'nullable|string',
-            'location' => 'nullable|string',
-            'status' => 'sometimes|in:open,coming_soon,closed',
-            'deadline' => 'nullable|date',
-        ]);
-
-        $scholarship->update($validated);
-
-        return response()->json([
-            'message' => 'Scholarship updated successfully',
-            'data' => $scholarship
-        ]);
-    }
-
-    /**
-     * Remove the specified scholarship
-     */
-    public function destroy($id)
-    {
-        $scholarship = Scholarship::findOrFail($id);
-        $scholarship->delete();
-
-        return response()->json([
-            'message' => 'Scholarship deleted successfully'
-        ]);
+        return $this->successResponse($application, 'Status lamaran berhasil diupdate');
     }
 }

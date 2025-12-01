@@ -4,138 +4,216 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\UserService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
+// Import Request Classes
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
+
+/**
+ * ==========================================================================
+ * USER CONTROLLER (Controller untuk Manajemen User)
+ * ==========================================================================
+ * 
+ * FUNGSI: Mengelola user oleh admin.
+ * 
+ * STRUKTUR CLEAN CODE:
+ * - Controller  : Hanya handle request/response (file ini)
+ * - Service     : Business logic → app/Services/UserService.php
+ * - Policy      : Authorization  → app/Policies/UserPolicy.php
+ * - Request     : Validation     → app/Http/Requests/User/
+ */
 class UserController extends Controller
 {
+    use ApiResponse;
+
     /**
-     * Display a listing of users (Admin only)
+     * Service untuk business logic
      */
-    public function index(Request $request)
+    protected UserService $userService;
+
+    /**
+     * Constructor - Inject service
+     */
+    public function __construct(UserService $userService)
     {
-        $query = User::query();
+        $this->userService = $userService;
+    }
 
-        // Filter by role
-        if ($request->has('role')) {
-            $query->where('role', $request->role);
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | List & Retrieve Methods
+    |--------------------------------------------------------------------------
+    */
 
-        // Search by name or email
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
+    /**
+     * Tampilkan daftar user dengan filter
+     */
+    public function index(Request $request): JsonResponse
+    {
+        // Cek akses dengan Policy
+        $this->authorize('viewAny', User::class);
 
-        $users = $query->paginate(20);
-        return response()->json($users);
+        $users = $this->userService->getUsers($request->all());
+
+        return $this->paginatedResponse($users, 'Daftar user berhasil diambil');
     }
 
     /**
-     * Create a new user (Admin only)
+     * Tampilkan detail user
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8',
-            'role' => 'required|in:student,mentor,admin,corporate',
-            'gender' => 'nullable|in:male,female',
-            'birth_date' => 'nullable|date',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
-            'institution' => 'nullable|string|max:255',
-            'major' => 'nullable|string|max:255',
-            'education_level' => 'nullable|in:sma,d3,s1,s2,s3',
-            'bio' => 'nullable|string',
-        ]);
-
-        $validated['password'] = Hash::make($validated['password']);
-        $user = User::create($validated);
-
-        return response()->json([
-            'message' => 'User created successfully',
-            'data' => $user
-        ], 201);
-    }
-
-    /**
-     * Display the specified user
-     */
-    public function show($id)
-    {
-        $user = User::with([
-            'achievements',
-            'experiences',
-            'organizations',
-            'subscriptions',
-            'enrollments.course'
-        ])->findOrFail($id);
-
-        return response()->json(['data' => $user]);
-    }
-
-    /**
-     * Update the specified user (Admin only or Self)
-     */
-    public function update(Request $request, $id)
+    public function show(int $id): JsonResponse
     {
         $user = User::findOrFail($id);
 
-        // Allow user to update their own profile or admin to update any
-        if ($request->user()->id !== $user->id && !$request->user()->hasRole('admin')) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        // Cek akses dengan Policy
+        $this->authorize('view', $user);
 
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $id,
-            'password' => 'sometimes|string|min:8',
-            'role' => 'sometimes|in:student,mentor,admin,corporate',
-            'gender' => 'nullable|in:male,female',
-            'birth_date' => 'nullable|date',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
-            'institution' => 'nullable|string|max:255',
-            'major' => 'nullable|string|max:255',
-            'education_level' => 'nullable|in:sma,d3,s1,s2,s3',
-            'bio' => 'nullable|string',
-            'profile_photo' => 'nullable|image|max:2048', // Max 2MB
-        ]);
+        $userWithDetails = $this->userService->getUserWithDetails($id);
 
-        if (isset($validated['password'])) {
-            $validated['password'] = Hash::make($validated['password']);
-        }
+        return $this->successResponse($userWithDetails, 'Detail user berhasil diambil');
+    }
 
-        // Handle profile photo upload
-        if ($request->hasFile('profile_photo')) {
-            // Delete old photo if exists
-            if ($user->profile_photo) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
-            }
-            $validated['profile_photo'] = $request->file('profile_photo')->store('profile-photos', 'public');
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | Create & Update Methods
+    |--------------------------------------------------------------------------
+    */
 
-        $user->update($validated);
+    /**
+     * Tambah user baru (admin only)
+     * 
+     * Validasi di: app/Http/Requests/User/StoreUserRequest.php
+     */
+    public function store(StoreUserRequest $request): JsonResponse
+    {
+        // Cek akses dengan Policy
+        $this->authorize('create', User::class);
 
-        return response()->json([
-            'message' => 'User updated successfully',
-            'data' => $user
-        ]);
+        $user = $this->userService->createUser($request->validated());
+
+        return $this->createdResponse($user, 'User berhasil ditambahkan');
     }
 
     /**
-     * Remove the specified user (Admin only)
+     * Update user (admin only)
+     * 
+     * Validasi di: app/Http/Requests/User/UpdateUserRequest.php
      */
-    public function destroy($id)
+    public function update(UpdateUserRequest $request, int $id): JsonResponse
     {
         $user = User::findOrFail($id);
-        $user->delete();
 
-        return response()->json(['message' => 'User deleted successfully']);
+        // Cek akses dengan Policy
+        $this->authorize('update', $user);
+
+        $user = $this->userService->updateUser($user, $request->validated());
+
+        return $this->successResponse($user, 'User berhasil diupdate');
+    }
+
+    /**
+     * Hapus user (admin only)
+     */
+    public function destroy(int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+
+        // Cek akses dengan Policy
+        $this->authorize('delete', $user);
+
+        $this->userService->deleteUser($user);
+
+        return $this->successResponse(null, 'User berhasil dihapus');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Status Management Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Update status user (admin only)
+     */
+    public function updateStatus(Request $request, int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+
+        // Cek akses dengan Policy
+        $this->authorize('update', $user);
+
+        $validated = $request->validate([
+            'status' => 'required|in:active,inactive,suspended',
+        ], [
+            'status.required' => 'Status harus diisi',
+            'status.in'       => 'Status harus salah satu dari: active, inactive, suspended',
+        ]);
+
+        $user = $this->userService->updateStatus($user, $validated['status']);
+
+        return $this->successResponse($user, 'Status user berhasil diupdate');
+    }
+
+    /**
+     * Suspend akun user
+     */
+    public function suspend(int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+
+        // Cek akses dengan Policy
+        $this->authorize('suspend', $user);
+
+        $user = $this->userService->suspendUser($user);
+
+        return $this->successResponse($user, 'User berhasil ditangguhkan');
+    }
+
+    /**
+     * Aktifkan akun user yang ditangguhkan
+     */
+    public function activate(int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+
+        // Cek akses dengan Policy
+        $this->authorize('activate', $user);
+
+        $user = $this->userService->activateUser($user);
+
+        return $this->successResponse($user, 'User berhasil diaktifkan');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Statistics & Reports
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Statistik user
+     */
+    public function statistics(): JsonResponse
+    {
+        // Cek akses dengan Policy
+        $this->authorize('viewStatistics', User::class);
+
+        $stats = $this->userService->getStatistics();
+
+        return $this->successResponse($stats, 'Statistik user berhasil diambil');
+    }
+
+    /**
+     * Daftar mentor
+     */
+    public function mentors(Request $request): JsonResponse
+    {
+        $mentors = $this->userService->getMentors($request->all());
+
+        return $this->paginatedResponse($mentors, 'Daftar mentor berhasil diambil');
     }
 }

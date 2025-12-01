@@ -4,138 +4,113 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Services\CourseService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
+// Import Request Classes
+use App\Http\Requests\Course\StoreCourseRequest;
+use App\Http\Requests\Course\UpdateCourseRequest;
+
+/**
+ * ==========================================================================
+ * COURSE CONTROLLER (Controller untuk Kursus)
+ * ==========================================================================
+ * 
+ * FUNGSI: Mengelola kursus dan bootcamp.
+ * 
+ * STRUKTUR CLEAN CODE:
+ * - Controller  : Hanya handle request/response (file ini)
+ * - Service     : Business logic → app/Services/CourseService.php
+ * - Policy      : Authorization  → app/Policies/CoursePolicy.php
+ * - Request     : Validation     → app/Http/Requests/Course/
+ */
 class CourseController extends Controller
 {
+    use ApiResponse;
+
     /**
-     * Display a listing of courses
+     * Service untuk business logic
      */
-    public function index(Request $request)
+    protected CourseService $courseService;
+
+    /**
+     * Constructor - Inject service
+     */
+    public function __construct(CourseService $courseService)
     {
-        $query = Course::query();
-
-        // Filter by type
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
-        }
-
-        // Filter by level
-        if ($request->has('level')) {
-            $query->where('level', $request->level);
-        }
-
-        // Filter by access_type
-        if ($request->has('access_type')) {
-            $query->where('access_type', $request->access_type);
-        }
-
-        // Search
-        if ($request->has('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $courses = $query->paginate(15);
-
-        return response()->json($courses);
+        $this->courseService = $courseService;
     }
 
     /**
-     * Store a newly created course
+     * Tampilkan daftar kursus dengan filter
      */
-    public function store(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'required|in:bootcamp,course',
-            'level' => 'required|in:beginner,intermediate,advanced',
-            'duration' => 'nullable|string',
-            'price' => 'nullable|numeric|min:0',
-            'access_type' => 'required|in:free,regular,premium',
-            'certificate_url' => 'nullable|string',
-            'instructor' => 'nullable|string',
-            'video_url' => 'nullable|string',
-            'video_duration' => 'nullable|string',
-            'total_videos' => 'nullable|integer|min:0',
-        ]);
+        $courses = $this->courseService->getCourses($request->all());
 
-        $course = Course::create($validated);
-
-        return response()->json([
-            'message' => 'Course created successfully',
-            'data' => $course
-        ], 201);
+        return $this->paginatedResponse($courses, 'Daftar kursus berhasil diambil');
     }
 
     /**
-     * Display the specified course
+     * Tambah kursus baru
+     * 
+     * Validasi di: app/Http/Requests/Course/StoreCourseRequest.php
      */
-    public function show($id)
+    public function store(StoreCourseRequest $request): JsonResponse
     {
-        $course = Course::with('enrollments')->findOrFail($id);
-        
-        return response()->json([
-            'data' => $course
-        ]);
+        // Cek akses dengan Policy
+        $this->authorize('create', Course::class);
+
+        $course = $this->courseService->createCourse($request->validated());
+
+        return $this->createdResponse($course, 'Kursus berhasil ditambahkan');
     }
 
     /**
-     * Update the specified course
+     * Tampilkan detail kursus
      */
-    public function update(Request $request, $id)
+    public function show(int $id): JsonResponse
+    {
+        $course = $this->courseService->getCourseWithDetails($id);
+
+        return $this->successResponse($course, 'Detail kursus berhasil diambil');
+    }
+
+    /**
+     * Update kursus
+     * 
+     * Validasi di: app/Http/Requests/Course/UpdateCourseRequest.php
+     */
+    public function update(UpdateCourseRequest $request, int $id): JsonResponse
     {
         $course = Course::findOrFail($id);
 
-        $validated = $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'sometimes|in:bootcamp,course',
-            'level' => 'sometimes|in:beginner,intermediate,advanced',
-            'duration' => 'nullable|string',
-            'price' => 'nullable|numeric|min:0',
-            'access_type' => 'sometimes|in:free,regular,premium',
-            'certificate_url' => 'nullable|string',
-            'video_file' => 'nullable|file|mimes:mp4,avi,mov,mkv,flv|max:524288', // 500MB max
-            'video_url' => 'nullable|string|url', // For embed URLs like YouTube
-            'video_duration' => 'nullable|string', // HH:MM:SS format
-        ]);
+        // Cek akses dengan Policy
+        $this->authorize('update', $course);
 
-        // Handle video file upload
-        if ($request->hasFile('video_file')) {
-            $file = $request->file('video_file');
-            $path = $file->store('course-videos', 'public');
-            $validated['video_url'] = $path;
-        }
+        $course = $this->courseService->updateCourse(
+            $course,
+            $request->validated(),
+            $request->file('video_file')
+        );
 
-        $course->update($validated);
-
-        return response()->json([
-            'message' => 'Course updated successfully',
-            'data' => $course
-        ]);
+        return $this->successResponse($course, 'Kursus berhasil diupdate');
     }
 
     /**
-     * Remove the specified course
+     * Hapus kursus
      */
-    public function destroy($id)
+    public function destroy(int $id): JsonResponse
     {
         $course = Course::findOrFail($id);
-        
-        // Delete video file if exists
-        if ($course->video_url && Storage::disk('public')->exists($course->video_url)) {
-            Storage::disk('public')->delete($course->video_url);
-        }
-        
-        $course->delete();
 
-        return response()->json([
-            'message' => 'Course deleted successfully'
-        ]);
+        // Cek akses dengan Policy
+        $this->authorize('delete', $course);
+
+        $this->courseService->deleteCourse($course);
+
+        return $this->successResponse(null, 'Kursus berhasil dihapus');
     }
 }

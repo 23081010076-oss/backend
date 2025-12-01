@@ -4,47 +4,63 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Course;
-use Illuminate\Auth\Access\Response;
 
+/**
+ * ==========================================================================
+ * COURSE POLICY (Aturan Akses untuk Kursus)
+ * ==========================================================================
+ * 
+ * FUNGSI: Mengatur siapa yang boleh melakukan apa terhadap kursus.
+ * 
+ * ATURAN:
+ * - Semua orang bisa lihat kursus
+ * - Hanya admin yang bisa kelola kursus (CRUD)
+ * - User yang terdaftar bisa akses konten kursus berbayar
+ */
 class CoursePolicy
 {
     /**
-     * Determine if the user can view any courses.
+     * Apakah user boleh melihat daftar kursus?
+     * → Semua orang boleh
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
         return true;
     }
 
     /**
-     * Determine if the user can view the course.
+     * Apakah user boleh melihat detail kursus?
+     * → Semua orang boleh
      */
-    public function view(User $user, Course $course): bool
+    public function view(?User $user, Course $course): bool
     {
         return true;
     }
 
     /**
-     * Determine if the user can create courses.
+     * Apakah user boleh membuat kursus baru?
+     * → Hanya admin boleh
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('admin');
+        return $user->role === 'admin';
     }
 
     /**
-     * Determine if the user can update the course.
+     * Apakah user boleh mengupdate kursus?
+     * → Hanya admin boleh
      */
     public function update(User $user, Course $course): bool
     {
-        return $user->hasRole('admin');
+        return $user->role === 'admin';
     }
 
     /**
-     * Determine if the user can delete the course.
+     * Apakah user boleh menghapus kursus?
+     * → Hanya admin boleh
      */
     public function delete(User $user, Course $course): bool
     {
-        return $user->hasRole('admin');
+        return $user->role === 'admin';
     }
 }

@@ -8,60 +8,53 @@ use Illuminate\Pagination\LengthAwarePaginator;
 /**
  * Trait ApiResponse
  * 
- * Provides standardized JSON response methods for API controllers.
- * Ensures consistent response format across the entire application.
- * Frontend-friendly: 'data' key is always present for easy access.
+ * FUNGSI: Menyediakan format response JSON yang seragam untuk semua API.
  * 
- * @package App\Traits
+ * CARA PAKAI: Tambahkan "use ApiResponse;" di dalam controller.
+ * 
+ * CONTOH RESPONSE SUKSES:
+ * {
+ *   "sukses": true,
+ *   "pesan": "Data berhasil diambil",
+ *   "data": {...}
+ * }
+ * 
+ * CONTOH RESPONSE GAGAL:
+ * {
+ *   "sukses": false,
+ *   "pesan": "Data tidak ditemukan",
+ *   "data": null
+ * }
  */
 trait ApiResponse
 {
     /**
-     * Return a success JSON response
+     * Response SUKSES
      * 
-     * Response structure:
-     * {
-     *   "success": true,
-     *   "message": "Success message",
-     *   "data": {...} // Always present, null if no data
-     * }
-     *
-     * @param mixed $data Response data
-     * @param string $message Success message
-     * @param int $statusCode HTTP status code
-     * @return JsonResponse
+     * Gunakan ini ketika operasi berhasil.
+     * Contoh: return $this->responseSukses($user, 'Login berhasil');
      */
-    protected function successResponse($data = null, string $message = 'Success', int $statusCode = 200): JsonResponse
+    protected function successResponse($data = null, string $message = 'Berhasil', int $statusCode = 200): JsonResponse
     {
         return response()->json([
-            'success' => true,
-            'message' => $message,
-            'data' => $data, // Always include data key for consistency
+            'sukses' => true,
+            'pesan'  => $message,
+            'data'   => $data,
         ], $statusCode);
     }
 
     /**
-     * Return an error JSON response
+     * Response GAGAL
      * 
-     * Response structure:
-     * {
-     *   "success": false,
-     *   "message": "Error message",
-     *   "data": null,
-     *   "errors": {...} // Optional, only if provided
-     * }
-     *
-     * @param string $message Error message
-     * @param int $statusCode HTTP status code
-     * @param mixed $errors Additional error details
-     * @return JsonResponse
+     * Gunakan ini ketika ada error.
+     * Contoh: return $this->responseGagal('Email sudah terdaftar');
      */
-    protected function errorResponse(string $message = 'Error', int $statusCode = 400, $errors = null): JsonResponse
+    protected function errorResponse(string $message = 'Gagal', int $statusCode = 400, $errors = null): JsonResponse
     {
         $response = [
-            'success' => false,
-            'message' => $message,
-            'data' => null, // Always include data key for consistency
+            'sukses' => false,
+            'pesan'  => $message,
+            'data'   => null,
         ];
 
         if ($errors !== null) {
@@ -72,61 +65,49 @@ trait ApiResponse
     }
 
     /**
-     * Return a paginated JSON response
+     * Response dengan PAGINATION (halaman)
      * 
-     * Response structure:
-     * {
-     *   "success": true,
-     *   "message": "Success message",
-     *   "data": [...], // Array of items
-     *   "meta": {
-     *     "total": 100,
-     *     "per_page": 15,
-     *     "current_page": 1,
-     *     "last_page": 7,
-     *     "from": 1,
-     *     "to": 15
-     *   }
-     * }
-     *
-     * @param LengthAwarePaginator $paginator Paginator instance
-     * @param string $message Success message
-     * @return JsonResponse
+     * Gunakan ini untuk data yang banyak dan perlu dibagi per halaman.
+     * Contoh: return $this->responsePagination($courses, 'Daftar kursus');
+     * 
+     * META berisi info halaman:
+     * - total: jumlah semua data
+     * - per_halaman: jumlah data per halaman
+     * - halaman_sekarang: halaman yang sedang ditampilkan
+     * - halaman_terakhir: nomor halaman terakhir
      */
-    protected function paginatedResponse(LengthAwarePaginator $paginator, string $message = 'Success'): JsonResponse
+    protected function paginatedResponse(LengthAwarePaginator $paginator, string $message = 'Berhasil'): JsonResponse
     {
         return response()->json([
-            'success' => true,
-            'message' => $message,
-            'data' => $paginator->items(),
-            'meta' => [
-                'total' => $paginator->total(),
-                'per_page' => $paginator->perPage(),
-                'current_page' => $paginator->currentPage(),
-                'last_page' => $paginator->lastPage(),
-                'from' => $paginator->firstItem(),
-                'to' => $paginator->lastItem(),
+            'sukses' => true,
+            'pesan'  => $message,
+            'data'   => $paginator->items(),
+            'meta'   => [
+                'total'            => $paginator->total(),
+                'per_halaman'      => $paginator->perPage(),
+                'halaman_sekarang' => $paginator->currentPage(),
+                'halaman_terakhir' => $paginator->lastPage(),
+                'dari'             => $paginator->firstItem(),
+                'sampai'           => $paginator->lastItem(),
             ],
         ]);
     }
 
     /**
-     * Return a created resource response (201)
-     *
-     * @param mixed $data Created resource data
-     * @param string $message Success message
-     * @return JsonResponse
+     * Response DATA BARU DIBUAT (kode 201)
+     * 
+     * Gunakan setelah berhasil membuat data baru (insert).
+     * Contoh: return $this->responseDibuat($course, 'Kursus berhasil dibuat');
      */
-    protected function createdResponse($data, string $message = 'Resource created successfully'): JsonResponse
+    protected function createdResponse($data, string $message = 'Data berhasil dibuat'): JsonResponse
     {
         return $this->successResponse($data, $message, 201);
     }
 
     /**
-     * Return a no content response (204)
-     * Note: 204 responses should not have a body
-     *
-     * @return JsonResponse
+     * Response KOSONG (kode 204)
+     * 
+     * Gunakan ketika tidak perlu mengembalikan data apapun.
      */
     protected function noContentResponse(): JsonResponse
     {
@@ -134,58 +115,54 @@ trait ApiResponse
     }
 
     /**
-     * Return a not found response (404)
-     *
-     * @param string $message Error message
-     * @return JsonResponse
+     * Response TIDAK DITEMUKAN (kode 404)
+     * 
+     * Gunakan ketika data yang dicari tidak ada.
+     * Contoh: return $this->responseTidakDitemukan('Kursus tidak ditemukan');
      */
-    protected function notFoundResponse(string $message = 'Resource not found'): JsonResponse
+    protected function notFoundResponse(string $message = 'Data tidak ditemukan'): JsonResponse
     {
         return $this->errorResponse($message, 404);
     }
 
     /**
-     * Return an unauthorized response (401)
-     *
-     * @param string $message Error message
-     * @return JsonResponse
+     * Response BELUM LOGIN (kode 401)
+     * 
+     * Gunakan ketika user belum login tapi mencoba akses fitur yang perlu login.
      */
-    protected function unauthorizedResponse(string $message = 'Unauthorized'): JsonResponse
+    protected function unauthorizedResponse(string $message = 'Silakan login terlebih dahulu'): JsonResponse
     {
         return $this->errorResponse($message, 401);
     }
 
     /**
-     * Return a forbidden response (403)
-     *
-     * @param string $message Error message
-     * @return JsonResponse
+     * Response TIDAK DIIZINKAN (kode 403)
+     * 
+     * Gunakan ketika user sudah login tapi tidak punya hak akses.
+     * Contoh: Student mencoba hapus kursus (hanya admin yang bisa).
      */
-    protected function forbiddenResponse(string $message = 'Forbidden'): JsonResponse
+    protected function forbiddenResponse(string $message = 'Anda tidak memiliki izin untuk aksi ini'): JsonResponse
     {
         return $this->errorResponse($message, 403);
     }
 
     /**
-     * Return a validation error response (422)
-     *
-     * @param array $errors Validation errors
-     * @param string $message Error message
-     * @return JsonResponse
+     * Response VALIDASI GAGAL (kode 422)
+     * 
+     * Gunakan ketika input dari user tidak valid.
+     * Contoh: Email format salah, password terlalu pendek, dll.
      */
-    protected function validationErrorResponse(array $errors, string $message = 'Validation failed'): JsonResponse
+    protected function validationErrorResponse(array $errors, string $message = 'Data tidak valid'): JsonResponse
     {
         return $this->errorResponse($message, 422, $errors);
     }
 
     /**
-     * Return a server error response (500)
-     *
-     * @param string $message Error message
-     * @param mixed $errors Additional error details
-     * @return JsonResponse
+     * Response SERVER ERROR (kode 500)
+     * 
+     * Gunakan ketika ada error di server (bug, database error, dll).
      */
-    protected function serverErrorResponse(string $message = 'Internal server error', $errors = null): JsonResponse
+    protected function serverErrorResponse(string $message = 'Terjadi kesalahan pada server', $errors = null): JsonResponse
     {
         return $this->errorResponse($message, 500, $errors);
     }

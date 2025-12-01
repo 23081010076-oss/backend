@@ -11,13 +11,22 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+// Import Request Classes
+use App\Http\Requests\Enrollment\UpdateEnrollmentRequest;
+use App\Http\Requests\Enrollment\UpdateProgressRequest;
+
 /**
- * Class EnrollmentController
+ * ==========================================================================
+ * ENROLLMENT CONTROLLER (Controller untuk Enrollment/Pendaftaran Kursus)
+ * ==========================================================================
  * 
- * Handles HTTP requests related to course enrollments.
- * Uses EnrollmentService for business logic and EnrollmentPolicy for authorization.
+ * FUNGSI: Mengelola pendaftaran kursus.
  * 
- * @package App\Http\Controllers\Api
+ * VALIDASI:
+ * - UpdateEnrollmentRequest = untuk update enrollment
+ * - UpdateProgressRequest   = untuk update progress
+ * 
+ * Lihat file validasi di: app/Http/Requests/Enrollment/
  */
 class EnrollmentController extends Controller
 {
@@ -29,9 +38,7 @@ class EnrollmentController extends Controller
     protected EnrollmentService $enrollmentService;
 
     /**
-     * Create a new controller instance
-     *
-     * @param EnrollmentService $enrollmentService
+     * Constructor
      */
     public function __construct(EnrollmentService $enrollmentService)
     {
@@ -39,10 +46,7 @@ class EnrollmentController extends Controller
     }
 
     /**
-     * Display a listing of enrollments
-     *
-     * @param Request $request
-     * @return JsonResponse
+     * Tampilkan daftar enrollment
      */
     public function index(Request $request): JsonResponse
     {
@@ -52,14 +56,11 @@ class EnrollmentController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        return $this->paginatedResponse($enrollments, 'Enrollments retrieved successfully');
+        return $this->paginatedResponse($enrollments, 'Daftar enrollment berhasil diambil');
     }
 
     /**
-     * Enroll to a course
-     *
-     * @param int $courseId
-     * @return JsonResponse
+     * Daftar ke kursus
      */
     public function enroll(int $courseId): JsonResponse
     {
@@ -73,7 +74,7 @@ class EnrollmentController extends Controller
 
             return $this->createdResponse(
                 $enrollment->load('course'),
-                'Successfully enrolled in course'
+                'Berhasil mendaftar ke kursus'
             );
         } catch (\InvalidArgumentException $e) {
             $statusCode = str_contains($e->getMessage(), 'already enrolled') ? 422 : 403;
@@ -84,14 +85,12 @@ class EnrollmentController extends Controller
                 'course_id' => $courseId,
                 'error' => $e->getMessage(),
             ]);
-            return $this->serverErrorResponse('Failed to enroll in course');
+            return $this->serverErrorResponse('Gagal mendaftar ke kursus');
         }
     }
 
     /**
-     * Get user's enrolled courses
-     *
-     * @return JsonResponse
+     * Lihat kursus yang diikuti user
      */
     public function myCourses(): JsonResponse
     {
@@ -101,22 +100,17 @@ class EnrollmentController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        return $this->paginatedResponse($enrollments, 'Your courses retrieved successfully');
+        return $this->paginatedResponse($enrollments, 'Kursus Anda berhasil diambil');
     }
 
     /**
-     * Update enrollment progress
-     *
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
+     * Update progress enrollment
+     * 
+     * Validasi di: app/Http/Requests/Enrollment/UpdateProgressRequest.php
      */
-    public function updateProgress(Request $request, int $id): JsonResponse
+    public function updateProgress(UpdateProgressRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'progress' => 'required|integer|min:0|max:100',
-        ]);
-
+        $validated = $request->validated();
         $enrollment = Enrollment::findOrFail($id);
         $this->authorize('updateProgress', $enrollment);
 
@@ -126,66 +120,54 @@ class EnrollmentController extends Controller
                 $validated['progress']
             );
 
-            return $this->successResponse($enrollment, 'Progress updated successfully');
+            return $this->successResponse($enrollment, 'Progress berhasil diupdate');
         } catch (\Exception $e) {
             Log::error('Progress update failed in controller', [
                 'enrollment_id' => $id,
                 'error' => $e->getMessage(),
             ]);
-            return $this->serverErrorResponse('Failed to update progress');
+            return $this->serverErrorResponse('Gagal mengupdate progress');
         }
     }
 
     /**
-     * Display the specified enrollment
-     *
-     * @param int $id
-     * @return JsonResponse
+     * Tampilkan detail enrollment
      */
     public function show(int $id): JsonResponse
     {
         $enrollment = Enrollment::with(['user', 'course'])->findOrFail($id);
         $this->authorize('view', $enrollment);
 
-        return $this->successResponse($enrollment, 'Enrollment retrieved successfully');
+        return $this->successResponse($enrollment, 'Detail enrollment berhasil diambil');
     }
 
     /**
-     * Update the specified enrollment
-     *
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
+     * Update enrollment
+     * 
+     * Validasi di: app/Http/Requests/Enrollment/UpdateEnrollmentRequest.php
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateEnrollmentRequest $request, int $id): JsonResponse
     {
         $enrollment = Enrollment::findOrFail($id);
         $this->authorize('update', $enrollment);
 
-        $validated = $request->validate([
-            'progress' => 'sometimes|integer|min:0|max:100',
-            'completed' => 'sometimes|boolean',
-            'certificate_url' => 'nullable|url',
-        ]);
+        $validated = $request->validated();
 
         try {
             $enrollment->update($validated);
 
-            return $this->successResponse($enrollment->fresh(), 'Enrollment updated successfully');
+            return $this->successResponse($enrollment->fresh(), 'Enrollment berhasil diupdate');
         } catch (\Exception $e) {
             Log::error('Enrollment update failed in controller', [
                 'enrollment_id' => $id,
                 'error' => $e->getMessage(),
             ]);
-            return $this->serverErrorResponse('Failed to update enrollment');
+            return $this->serverErrorResponse('Gagal mengupdate enrollment');
         }
     }
 
     /**
-     * Remove the specified enrollment
-     *
-     * @param int $id
-     * @return JsonResponse
+     * Hapus enrollment
      */
     public function destroy(int $id): JsonResponse
     {
@@ -194,13 +176,13 @@ class EnrollmentController extends Controller
 
         try {
             $enrollment->delete();
-            return $this->successResponse(null, 'Enrollment deleted successfully');
+            return $this->successResponse(null, 'Enrollment berhasil dihapus');
         } catch (\Exception $e) {
             Log::error('Enrollment deletion failed in controller', [
                 'enrollment_id' => $id,
                 'error' => $e->getMessage(),
             ]);
-            return $this->serverErrorResponse('Failed to delete enrollment');
+            return $this->serverErrorResponse('Gagal menghapus enrollment');
         }
     }
 }

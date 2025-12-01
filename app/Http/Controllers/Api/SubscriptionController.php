@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreSubscriptionRequest;
-use App\Http\Requests\UpdateSubscriptionRequest;
+use App\Http\Requests\Subscription\StoreSubscriptionRequest;
+use App\Http\Requests\Subscription\UpdateSubscriptionRequest;
 use App\Models\Subscription;
 use App\Services\SubscriptionService;
 use App\Traits\ApiResponse;
@@ -13,10 +13,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Class SubscriptionController
+ * ==========================================================================
+ * SUBSCRIPTION CONTROLLER (Controller untuk Langganan)
+ * ==========================================================================
  * 
- * Handles HTTP requests related to subscriptions.
- * Uses SubscriptionService for business logic and SubscriptionPolicy for authorization.
+ * FUNGSI: Menangani operasi CRUD untuk langganan
+ * - Lihat daftar langganan user
+ * - Tambah langganan baru
+ * - Update langganan
+ * - Upgrade paket langganan
+ * - Hapus langganan
  * 
  * @package App\Http\Controllers\Api
  */

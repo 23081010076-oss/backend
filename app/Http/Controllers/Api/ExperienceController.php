@@ -4,103 +4,183 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Experience;
+use App\Services\ExperienceService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
+// Import Request Classes
+use App\Http\Requests\Experience\StoreExperienceRequest;
+use App\Http\Requests\Experience\UpdateExperienceRequest;
+
+/**
+ * ==========================================================================
+ * EXPERIENCE CONTROLLER (Controller untuk Pengalaman)
+ * ==========================================================================
+ * 
+ * FUNGSI: Mengelola pengalaman kerja/pendidikan user.
+ * 
+ * STRUKTUR CLEAN CODE:
+ * - Controller  : Hanya handle request/response (file ini)
+ * - Service     : Business logic → app/Services/ExperienceService.php
+ * - Policy      : Authorization  → app/Policies/ExperiencePolicy.php
+ * - Request     : Validation     → app/Http/Requests/Experience/
+ */
 class ExperienceController extends Controller
 {
+    use ApiResponse;
+
     /**
-     * Display a listing of user's experiences
+     * Service untuk business logic
      */
-    public function index()
+    protected ExperienceService $experienceService;
+
+    /**
+     * Constructor - Inject service
+     */
+    public function __construct(ExperienceService $experienceService)
     {
-        $experiences = Experience::where('user_id', request()->user()->id)->paginate(15);
-        return response()->json($experiences);
+        $this->experienceService = $experienceService;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | List & Retrieve Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Tampilkan daftar pengalaman user yang login
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $experiences = $this->experienceService->getUserExperiences(
+            Auth::id(),
+            $request->all()
+        );
+
+        return $this->paginatedResponse($experiences, 'Daftar pengalaman berhasil diambil');
     }
 
     /**
-     * Store a newly created experience
+     * Tampilkan detail pengalaman
      */
-    public function store(Request $request)
+    public function show(int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'required|in:work,internship,volunteer',
-            'level' => 'nullable|string',
-            'company' => 'nullable|string',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'certificate_url' => 'nullable|string|url',
-            'certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
+        $experience = Experience::findOrFail($id);
 
-        $data = $validated;
-        $data['user_id'] = $request->user()->id;
+        // Cek akses dengan Policy
+        $this->authorize('view', $experience);
 
-        if ($request->hasFile('certificate')) {
-            $data['certificate_url'] = $request->file('certificate')->store('certificates', 'public');
-        }
-        // If certificate_url is provided in request, it stays in $data. 
-        // If file is provided, it overwrites certificate_url in $data.
+        return $this->successResponse($experience, 'Detail pengalaman berhasil diambil');
+    }
 
-        $experience = Experience::create($data);
+    /*
+    |--------------------------------------------------------------------------
+    | Create & Update Methods
+    |--------------------------------------------------------------------------
+    */
 
-        return response()->json([
-            'message' => 'Experience created successfully',
-            'data' => $experience
-        ], 201);
+    /**
+     * Tambah pengalaman baru
+     * 
+     * Validasi di: app/Http/Requests/Experience/StoreExperienceRequest.php
+     */
+    public function store(StoreExperienceRequest $request): JsonResponse
+    {
+        // Cek akses dengan Policy
+        $this->authorize('create', Experience::class);
+
+        $experience = $this->experienceService->createExperience(
+            Auth::user(),
+            $request->validated()
+        );
+
+        return $this->createdResponse($experience, 'Pengalaman berhasil ditambahkan');
     }
 
     /**
-     * Display the specified experience
+     * Update pengalaman
+     * 
+     * Validasi di: app/Http/Requests/Experience/UpdateExperienceRequest.php
      */
-    public function show($id)
+    public function update(UpdateExperienceRequest $request, int $id): JsonResponse
     {
-        $experience = Experience::where('user_id', request()->user()->id)->findOrFail($id);
-        return response()->json(['data' => $experience]);
+        $experience = Experience::findOrFail($id);
+
+        // Cek akses dengan Policy
+        $this->authorize('update', $experience);
+
+        $experience = $this->experienceService->updateExperience(
+            $experience,
+            $request->validated()
+        );
+
+        return $this->successResponse($experience, 'Pengalaman berhasil diupdate');
     }
 
     /**
-     * Update the specified experience
+     * Hapus pengalaman
      */
-    public function update(Request $request, $id)
+    public function destroy(int $id): JsonResponse
     {
-        $experience = Experience::where('user_id', $request->user()->id)->findOrFail($id);
+        $experience = Experience::findOrFail($id);
 
-        $validated = $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'sometimes|in:work,internship,volunteer',
-            'level' => 'nullable|string',
-            'company' => 'nullable|string',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'certificate_url' => 'nullable|string|url',
-            'certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
+        // Cek akses dengan Policy
+        $this->authorize('delete', $experience);
 
-        $data = $validated;
+        $this->experienceService->deleteExperience($experience);
 
-        if ($request->hasFile('certificate')) {
-            $data['certificate_url'] = $request->file('certificate')->store('certificates', 'public');
-        }
+        return $this->successResponse(null, 'Pengalaman berhasil dihapus');
+    }
 
-        $experience->update($data);
+    /*
+    |--------------------------------------------------------------------------
+    | Additional Methods
+    |--------------------------------------------------------------------------
+    */
 
-        return response()->json([
-            'message' => 'Experience updated successfully',
-            'data' => $experience
-        ]);
+    /**
+     * Lihat pengalaman user tertentu (profil publik)
+     */
+    public function userExperiences(int $userId, Request $request): JsonResponse
+    {
+        $experiences = $this->experienceService->getUserExperiences(
+            $userId,
+            $request->all()
+        );
+
+        return $this->paginatedResponse($experiences, 'Daftar pengalaman user berhasil diambil');
     }
 
     /**
-     * Remove the specified experience
+     * Pengalaman kerja user yang login
      */
-    public function destroy($id)
+    public function workExperiences(): JsonResponse
     {
-        $experience = Experience::where('user_id', request()->user()->id)->findOrFail($id);
-        $experience->delete();
+        $experiences = $this->experienceService->getWorkExperiences(Auth::id());
 
-        return response()->json(['message' => 'Experience deleted successfully']);
+        return $this->successResponse($experiences, 'Pengalaman kerja berhasil diambil');
+    }
+
+    /**
+     * Pengalaman pendidikan user yang login
+     */
+    public function educationExperiences(): JsonResponse
+    {
+        $experiences = $this->experienceService->getEducationExperiences(Auth::id());
+
+        return $this->successResponse($experiences, 'Pengalaman pendidikan berhasil diambil');
+    }
+
+    /**
+     * Statistik pengalaman user yang login
+     */
+    public function statistics(): JsonResponse
+    {
+        $stats = $this->experienceService->getStatistics(Auth::id());
+
+        return $this->successResponse($stats, 'Statistik pengalaman berhasil diambil');
     }
 }

@@ -4,47 +4,82 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Scholarship;
-use Illuminate\Auth\Access\Response;
 
+/**
+ * ==========================================================================
+ * SCHOLARSHIP POLICY (Aturan Akses untuk Beasiswa)
+ * ==========================================================================
+ * 
+ * FUNGSI: Mengatur siapa yang boleh melakukan apa terhadap beasiswa.
+ * 
+ * ATURAN:
+ * - Semua orang bisa lihat beasiswa
+ * - Corporate dan admin bisa membuat/update/hapus beasiswa
+ * - User bisa melamar beasiswa yang terbuka
+ * - Admin bisa update status lamaran
+ */
 class ScholarshipPolicy
 {
     /**
-     * Determine if the user can view any scholarships.
+     * Apakah user boleh melihat daftar beasiswa?
+     * → Semua orang boleh
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
         return true;
     }
 
     /**
-     * Determine if the user can view the scholarship.
+     * Apakah user boleh melihat detail beasiswa?
+     * → Semua orang boleh
      */
-    public function view(User $user, Scholarship $scholarship): bool
+    public function view(?User $user, Scholarship $scholarship): bool
     {
         return true;
     }
 
     /**
-     * Determine if the user can create scholarships.
+     * Apakah user boleh membuat beasiswa baru?
+     * → Corporate atau admin boleh
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('corporate');
+        return in_array($user->role, ['corporate', 'admin']);
     }
 
     /**
-     * Determine if the user can update the scholarship.
+     * Apakah user boleh mengupdate beasiswa?
+     * → Corporate atau admin boleh
      */
     public function update(User $user, Scholarship $scholarship): bool
     {
-        return $user->hasRole('corporate') || $user->hasRole('admin');
+        return in_array($user->role, ['corporate', 'admin']);
     }
 
     /**
-     * Determine if the user can delete the scholarship.
+     * Apakah user boleh menghapus beasiswa?
+     * → Corporate atau admin boleh
      */
     public function delete(User $user, Scholarship $scholarship): bool
     {
-        return $user->hasRole('corporate') || $user->hasRole('admin');
+        return in_array($user->role, ['corporate', 'admin']);
+    }
+
+    /**
+     * Apakah user boleh melamar beasiswa?
+     * → Semua user yang login boleh (jika beasiswa terbuka)
+     */
+    public function apply(User $user, Scholarship $scholarship): bool
+    {
+        return $scholarship->status === 'open';
+    }
+
+    /**
+     * Apakah user boleh mengupdate status lamaran?
+     * → Hanya admin boleh
+     */
+    public function updateApplicationStatus(User $user, Scholarship $scholarship): bool
+    {
+        return $user->role === 'admin';
     }
 }
