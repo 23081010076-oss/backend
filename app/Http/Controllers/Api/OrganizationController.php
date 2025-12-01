@@ -3,94 +3,145 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreOrganizationRequest;
+use App\Http\Requests\UpdateOrganizationRequest;
 use App\Models\Organization;
-use Illuminate\Http\Request;
+use App\Services\OrganizationService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * Class OrganizationController
+ * 
+ * Handles HTTP requests related to organizations.
+ * Uses OrganizationService for business logic and OrganizationPolicy for authorization.
+ * 
+ * @package App\Http\Controllers\Api
+ */
 class OrganizationController extends Controller
 {
+    use ApiResponse;
+
+    /**
+     * @var OrganizationService
+     */
+    protected OrganizationService $organizationService;
+
+    /**
+     * Create a new controller instance
+     *
+     * @param OrganizationService $organizationService
+     */
+    public function __construct(OrganizationService $organizationService)
+    {
+        $this->organizationService = $organizationService;
+    }
+
     /**
      * Display user's organizations
+     *
+     * @return JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $organizations = Organization::where('user_id', request()->user()->id)
+        $this->authorize('viewAny', Organization::class);
+
+        $organizations = Organization::where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->paginate(15);
         
-        return response()->json($organizations);
+        return $this->paginatedResponse($organizations, 'Organizations retrieved successfully');
     }
 
     /**
      * Store a new organization
+     *
+     * @param StoreOrganizationRequest $request
+     * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(StoreOrganizationRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'location' => 'nullable|string|max:255',
-            'website' => 'nullable|url',
-            'contact_email' => 'nullable|email',
-            'phone' => 'nullable|string',
-            'founded_year' => 'nullable|integer',
-        ]);
+        $this->authorize('create', Organization::class);
 
-        $validated['user_id'] = $request->user()->id;
-        $organization = Organization::create($validated);
+        try {
+            $organization = $this->organizationService->createOrganization(
+                $request->validated(),
+                $request->user()
+            );
 
-        return response()->json([
-            'message' => 'Organization added successfully',
-            'data' => $organization
-        ], 201);
+            return $this->createdResponse($organization, 'Organization added successfully');
+        } catch (\Exception $e) {
+            Log::error('Organization creation failed in controller', [
+                'user_id' => $request->user()->id,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Failed to create organization');
+        }
     }
 
     /**
      * Display the specified organization
+     *
+     * @param int $id
+     * @return JsonResponse
      */
-    public function show($id)
+    public function show(int $id): JsonResponse
     {
-        $organization = Organization::where('user_id', request()->user()->id)
-            ->findOrFail($id);
+        $organization = Organization::findOrFail($id);
+        $this->authorize('view', $organization);
         
-        return response()->json(['data' => $organization]);
+        return $this->successResponse($organization, 'Organization retrieved successfully');
     }
 
     /**
      * Update the specified organization
+     *
+     * @param UpdateOrganizationRequest $request
+     * @param int $id
+     * @return JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(UpdateOrganizationRequest $request, int $id): JsonResponse
     {
-        $organization = Organization::where('user_id', $request->user()->id)
-            ->findOrFail($id);
+        $organization = Organization::findOrFail($id);
+        $this->authorize('update', $organization);
 
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'role' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'location' => 'nullable|string|max:255',
-            'start_date' => 'sometimes|date',
-            'end_date' => 'nullable|date|after:start_date',
-        ]);
+        try {
+            $organization = $this->organizationService->updateOrganization(
+                $organization,
+                $request->validated()
+            );
 
-        $organization->update($validated);
-
-        return response()->json([
-            'message' => 'Organization updated successfully',
-            'data' => $organization
-        ]);
+            return $this->successResponse($organization, 'Organization updated successfully');
+        } catch (\Exception $e) {
+            Log::error('Organization update failed in controller', [
+                'organization_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Failed to update organization');
+        }
     }
 
     /**
      * Remove the specified organization
+     *
+     * @param int $id
+     * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy(int $id): JsonResponse
     {
-        $organization = Organization::where('user_id', request()->user()->id)
-            ->findOrFail($id);
+        $organization = Organization::findOrFail($id);
+        $this->authorize('delete', $organization);
         
-        $organization->delete();
-
-        return response()->json(['message' => 'Organization deleted successfully']);
+        try {
+            $this->organizationService->deleteOrganization($organization);
+            return $this->successResponse(null, 'Organization deleted successfully');
+        } catch (\Exception $e) {
+            Log::error('Organization deletion failed in controller', [
+                'organization_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Failed to delete organization');
+        }
     }
 }

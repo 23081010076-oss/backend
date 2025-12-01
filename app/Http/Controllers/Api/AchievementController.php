@@ -10,7 +10,7 @@ class AchievementController extends Controller
 {
     public function index()
     {
-        $achievements = Achievement::where('user_id', auth()->id())->paginate(15);
+        $achievements = Achievement::where('user_id', request()->user()->id)->paginate(15);
         return response()->json($achievements);
     }
 
@@ -23,7 +23,7 @@ class AchievementController extends Controller
             'year' => 'nullable|integer|min:1900|max:' . (date('Y') + 10),
         ]);
 
-        $validated['user_id'] = auth()->id();
+        $validated['user_id'] = $request->user()->id;
         $achievement = Achievement::create($validated);
 
         return response()->json([
@@ -34,13 +34,13 @@ class AchievementController extends Controller
 
     public function show($id)
     {
-        $achievement = Achievement::where('user_id', auth()->id())->findOrFail($id);
+        $achievement = Achievement::where('user_id', request()->user()->id)->findOrFail($id);
         return response()->json(['data' => $achievement]);
     }
 
     public function update(Request $request, $id)
     {
-        $achievement = Achievement::where('user_id', auth()->id())->findOrFail($id);
+        $achievement = Achievement::where('user_id', $request->user()->id)->findOrFail($id);
 
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
@@ -59,7 +59,7 @@ class AchievementController extends Controller
 
     public function destroy($id)
     {
-        $achievement = Achievement::where('user_id', auth()->id())->findOrFail($id);
+        $achievement = Achievement::where('user_id', request()->user()->id)->findOrFail($id);
         $achievement->delete();
 
         return response()->json(['message' => 'Achievement deleted successfully']);

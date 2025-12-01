@@ -26,43 +26,43 @@ class EnrollmentSeeder extends Seeder
             // Student 1 enrollments
             [
                 'user_id' => $students->first()->id,
-                'course_id' => $courses->where('title', 'Introduction to Programming')->first()->id ?? $courses->first()->id,
+                'course_id' => $courses->where('title', 'Introduction to Programming')->first()?->id,
                 'progress' => 100,
                 'completed' => true,
                 'certificate_url' => 'https://example.com/certificates/student1-intro-programming.pdf',
             ],
             [
                 'user_id' => $students->first()->id,
-                'course_id' => $courses->where('title', 'JavaScript Fundamentals')->first()->id ?? $courses->skip(1)->first()->id,
+                'course_id' => $courses->where('title', 'JavaScript Fundamentals')->first()?->id,
                 'progress' => 75,
                 'completed' => false,
                 'certificate_url' => null,
             ],
             [
                 'user_id' => $students->first()->id,
-                'course_id' => $courses->where('title', 'Full Stack Web Development Bootcamp')->first()->id ?? $courses->skip(2)->first()->id,
+                'course_id' => $courses->where('title', 'Full Stack Web Development Bootcamp')->first()?->id,
                 'progress' => 45,
                 'completed' => false,
                 'certificate_url' => null,
             ],
             // Student 2 enrollments
             [
-                'user_id' => $students->skip(1)->first()->id ?? $students->first()->id,
-                'course_id' => $courses->where('title', 'UI/UX Design Fundamentals')->first()->id ?? $courses->skip(3)->first()->id,
+                'user_id' => $students->skip(1)->first()?->id,
+                'course_id' => $courses->where('title', 'UI/UX Design Fundamentals')->first()?->id,
                 'progress' => 100,
                 'completed' => true,
                 'certificate_url' => 'https://example.com/certificates/student2-uiux-design.pdf',
             ],
             [
-                'user_id' => $students->skip(1)->first()->id ?? $students->first()->id,
-                'course_id' => $courses->where('title', 'React Advanced Patterns')->first()->id ?? $courses->skip(4)->first()->id,
+                'user_id' => $students->skip(1)->first()?->id,
+                'course_id' => $courses->where('title', 'React Advanced Patterns')->first()?->id,
                 'progress' => 60,
                 'completed' => false,
                 'certificate_url' => null,
             ],
             [
-                'user_id' => $students->skip(1)->first()->id ?? $students->first()->id,
-                'course_id' => $courses->where('title', 'Git and Version Control')->first()->id ?? $courses->last()->id,
+                'user_id' => $students->skip(1)->first()?->id,
+                'course_id' => $courses->where('title', 'Git and Version Control')->first()?->id,
                 'progress' => 100,
                 'completed' => true,
                 'certificate_url' => 'https://example.com/certificates/student2-git.pdf',
@@ -70,21 +70,21 @@ class EnrollmentSeeder extends Seeder
             // Student 3 enrollments
             [
                 'user_id' => $students->last()->id,
-                'course_id' => $courses->where('title', 'Machine Learning with Python')->first()->id ?? $courses->skip(5)->first()->id,
+                'course_id' => $courses->where('title', 'Machine Learning with Python')->first()?->id,
                 'progress' => 30,
                 'completed' => false,
                 'certificate_url' => null,
             ],
             [
                 'user_id' => $students->last()->id,
-                'course_id' => $courses->where('title', 'Database Design and SQL')->first()->id ?? $courses->skip(6)->first()->id,
+                'course_id' => $courses->where('title', 'Database Design and SQL')->first()?->id,
                 'progress' => 85,
                 'completed' => false,
                 'certificate_url' => null,
             ],
             [
                 'user_id' => $students->last()->id,
-                'course_id' => $courses->where('title', 'Introduction to Programming')->first()->id ?? $courses->first()->id,
+                'course_id' => $courses->where('title', 'Introduction to Programming')->first()?->id,
                 'progress' => 100,
                 'completed' => true,
                 'certificate_url' => 'https://example.com/certificates/student3-intro-programming.pdf',
@@ -92,6 +92,17 @@ class EnrollmentSeeder extends Seeder
         ];
 
         foreach ($enrollments as $enrollmentData) {
+            // Validate that all required data exists
+            if (!$enrollmentData['user_id']) {
+                $this->command->error('Student not found for enrollment. Please ensure UserSeeder has created enough students.');
+                return;
+            }
+            
+            if (!$enrollmentData['course_id']) {
+                $this->command->error('Course not found for enrollment. Please ensure CourseSeeder has created all required courses.');
+                return;
+            }
+            
             Enrollment::create($enrollmentData);
         }
 

@@ -2,12 +2,24 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Transaction as MidtransTransaction;
 
+/**
+ * Class MidtransService
+ * 
+ * Handles all interactions with Midtrans payment gateway.
+ * Provides methods for creating transactions, checking status, and verifying webhooks.
+ * 
+ * @package App\Services
+ */
 class MidtransService
 {
+    /**
+     * Initialize Midtrans configuration
+     */
     public function __construct()
     {
         // Set Midtrans configuration
@@ -21,12 +33,18 @@ class MidtransService
      * Create Snap transaction token
      *
      * @param array $params Transaction parameters
-     * @return object Snap token response
+     * @return array Response with snap_token or error
      */
-    public function createTransaction(array $params)
+    public function createTransaction(array $params): array
     {
         try {
             $snapToken = Snap::getSnapToken($params);
+
+            Log::info('Midtrans transaction created successfully', [
+                'order_id' => $params['transaction_details']['order_id'] ?? 'unknown',
+                'amount' => $params['transaction_details']['gross_amount'] ?? 0,
+            ]);
+
             return [
                 'success' => true,
                 'snap_token' => $snapToken,
@@ -35,6 +53,12 @@ class MidtransService
                     : "https://app.sandbox.midtrans.com/snap/v2/vtweb/{$snapToken}"
             ];
         } catch (\Exception $e) {
+            Log::error('Midtrans transaction creation failed', [
+                'order_id' => $params['transaction_details']['order_id'] ?? 'unknown',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return [
                 'success' => false,
                 'message' => $e->getMessage()
@@ -43,20 +67,31 @@ class MidtransService
     }
 
     /**
-     * Get transaction status
+     * Get transaction status from Midtrans
      *
      * @param string $orderId Transaction order ID
-     * @return object Transaction status
+     * @return array Response with transaction status or error
      */
-    public function getTransactionStatus(string $orderId)
+    public function getTransactionStatus(string $orderId): array
     {
         try {
             $status = MidtransTransaction::status($orderId);
+
+            Log::info('Midtrans transaction status retrieved', [
+                'order_id' => $orderId,
+                'transaction_status' => $status->transaction_status ?? 'unknown',
+            ]);
+
             return [
                 'success' => true,
                 'data' => $status
             ];
         } catch (\Exception $e) {
+            Log::error('Failed to get Midtrans transaction status', [
+                'order_id' => $orderId,
+                'error' => $e->getMessage(),
+            ]);
+
             return [
                 'success' => false,
                 'message' => $e->getMessage()
@@ -67,8 +102,8 @@ class MidtransService
     /**
      * Verify notification signature from Midtrans webhook
      *
-     * @param array $notification Notification data
-     * @return bool Is signature valid
+     * @param array $notification Notification data from webhook
+     * @return bool True if signature is valid
      */
     public function verifySignature(array $notification): bool
     {
@@ -80,17 +115,31 @@ class MidtransService
 
         $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
 
-        return $signatureKey === $expectedSignature;
+        $isValid = $signatureKey === $expectedSignature;
+
+        if (!$isValid) {
+            Log::warning('Midtrans webhook signature verification failed', [
+                'order_id' => $orderId,
+                'provided_signature' => $signatureKey,
+                'expected_signature' => $expectedSignature,
+            ]);
+        } else {
+            Log::info('Midtrans webhook signature verified', [
+                'order_id' => $orderId,
+            ]);
+        }
+
+        return $isValid;
     }
 
     /**
      * Map Midtrans transaction status to our system status
      *
      * @param string $transactionStatus Midtrans transaction status
-     * @param string $fraudStatus Midtrans fraud status
+     * @param string|null $fraudStatus Midtrans fraud status
      * @return string Our system status
      */
-    public function mapTransactionStatus(string $transactionStatus, string $fraudStatus = null): string
+    public function mapTransactionStatus(string $transactionStatus, ?string $fraudStatus = null): string
     {
         if ($transactionStatus == 'capture') {
             if ($fraudStatus == 'accept') {

@@ -3,123 +3,183 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSubscriptionRequest;
+use App\Http\Requests\UpdateSubscriptionRequest;
 use App\Models\Subscription;
+use App\Services\SubscriptionService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * Class SubscriptionController
+ * 
+ * Handles HTTP requests related to subscriptions.
+ * Uses SubscriptionService for business logic and SubscriptionPolicy for authorization.
+ * 
+ * @package App\Http\Controllers\Api
+ */
 class SubscriptionController extends Controller
 {
+    use ApiResponse;
+
+    /**
+     * @var SubscriptionService
+     */
+    protected SubscriptionService $subscriptionService;
+
+    /**
+     * Create a new controller instance
+     *
+     * @param SubscriptionService $subscriptionService
+     */
+    public function __construct(SubscriptionService $subscriptionService)
+    {
+        $this->subscriptionService = $subscriptionService;
+    }
+
     /**
      * Display a listing of user's subscriptions
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        $subscriptions = Subscription::where('user_id', request()->user()->id)->paginate(15);
-        return response()->json($subscriptions);
+        $this->authorize('viewAny', Subscription::class);
+
+        $subscriptions = Subscription::where('user_id', $request->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return $this->paginatedResponse($subscriptions, 'Subscriptions retrieved successfully');
     }
 
     /**
      * Store a newly created subscription
+     *
+     * @param StoreSubscriptionRequest $request
+     * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(StoreSubscriptionRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'plan' => 'required|in:free,regular,premium',
-            'package_type' => 'required|in:single_course,all_in_one',
-            'courses_ids' => 'nullable|array',
-            'courses_ids.*' => 'exists:courses,id',
-            'duration' => 'required|integer|min:1',
-            'duration_unit' => 'required|in:months,years',
-            'price' => 'required|numeric|min:0',
-            'auto_renew' => 'boolean',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after:start_date',
-            'status' => 'required|in:active,expired,cancelled',
-        ]);
+        $this->authorize('create', Subscription::class);
 
-        $validated['user_id'] = $request->user()->id;
+        try {
+            $subscription = $this->subscriptionService->createSubscription(
+                $request->validated(),
+                $request->user()
+            );
 
-        // If package_type is single_course, ensure courses_ids is present
-        if ($validated['package_type'] === 'single_course' && empty($validated['courses_ids'])) {
-             return response()->json(['message' => 'Course selection is required for single course package'], 422);
+            return $this->createdResponse($subscription, 'Subscription created successfully');
+        } catch (\InvalidArgumentException $e) {
+            return $this->validationErrorResponse(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            Log::error('Subscription creation failed in controller', [
+                'user_id' => $request->user()->id,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Failed to create subscription');
         }
-
-        $subscription = Subscription::create($validated);
-
-        return response()->json([
-            'message' => 'Subscription created successfully',
-            'data' => $subscription
-        ], 201);
     }
 
     /**
      * Display the specified subscription
+     *
+     * @param int $id
+     * @return JsonResponse
      */
-    public function show($id)
+    public function show(int $id): JsonResponse
     {
-        $subscription = Subscription::where('user_id', request()->user()->id)->findOrFail($id);
-        return response()->json(['data' => $subscription]);
+        $subscription = Subscription::findOrFail($id);
+        $this->authorize('view', $subscription);
+
+        return $this->successResponse($subscription, 'Subscription retrieved successfully');
     }
 
     /**
      * Update the specified subscription
+     *
+     * @param UpdateSubscriptionRequest $request
+     * @param int $id
+     * @return JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(UpdateSubscriptionRequest $request, int $id): JsonResponse
     {
-        $subscription = Subscription::where('user_id', $request->user()->id)->findOrFail($id);
+        $subscription = Subscription::findOrFail($id);
+        $this->authorize('update', $subscription);
 
-        $validated = $request->validate([
-            'plan' => 'sometimes|in:free,regular,premium',
-            'start_date' => 'sometimes|date',
-            'end_date' => 'nullable|date|after:start_date',
-            'status' => 'sometimes|in:active,expired,cancelled',
-        ]);
+        try {
+            $subscription = $this->subscriptionService->updateSubscription(
+                $subscription,
+                $request->validated()
+            );
 
-        $subscription->update($validated);
-
-        return response()->json([
-            'message' => 'Subscription updated successfully',
-            'data' => $subscription
-        ]);
+            return $this->successResponse($subscription, 'Subscription updated successfully');
+        } catch (\Exception $e) {
+            Log::error('Subscription update failed in controller', [
+                'subscription_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Failed to update subscription');
+        }
     }
 
     /**
-     * Upgrade subscription
+     * Upgrade subscription to a higher plan
+     *
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
      */
-    public function upgrade(Request $request, $id)
+    public function upgrade(Request $request, int $id): JsonResponse
     {
-        $subscription = Subscription::where('user_id', $request->user()->id)->findOrFail($id);
+        $subscription = Subscription::findOrFail($id);
+        $this->authorize('upgrade', $subscription);
 
         $validated = $request->validate([
             'plan' => 'required|in:regular,premium',
         ]);
 
-        // Validate upgrade path
-        if ($subscription->plan === 'premium' && $validated['plan'] !== 'premium') {
-            return response()->json([
-                'message' => 'Cannot downgrade from premium'
-            ], 422);
+        try {
+            $subscription = $this->subscriptionService->upgradeSubscription(
+                $subscription,
+                $validated['plan']
+            );
+
+            return $this->successResponse($subscription, 'Subscription upgraded successfully');
+        } catch (\InvalidArgumentException $e) {
+            return $this->validationErrorResponse(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            Log::error('Subscription upgrade failed in controller', [
+                'subscription_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Failed to upgrade subscription');
         }
-
-        $subscription->update([
-            'plan' => $validated['plan'],
-            'status' => 'active',
-            'end_date' => now()->addYear(),
-        ]);
-
-        return response()->json([
-            'message' => 'Subscription upgraded successfully',
-            'data' => $subscription
-        ]);
     }
 
     /**
      * Remove the specified subscription
+     *
+     * @param int $id
+     * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy(int $id): JsonResponse
     {
-        $subscription = Subscription::where('user_id', request()->user()->id)->findOrFail($id);
-        $subscription->delete();
+        $subscription = Subscription::findOrFail($id);
+        $this->authorize('delete', $subscription);
 
-        return response()->json(['message' => 'Subscription deleted successfully']);
+        try {
+            $subscription->delete();
+            return $this->successResponse(null, 'Subscription deleted successfully');
+        } catch (\Exception $e) {
+            Log::error('Subscription deletion failed in controller', [
+                'subscription_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Failed to delete subscription');
+        }
     }
 }

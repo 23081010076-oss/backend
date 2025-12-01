@@ -1,7 +1,6 @@
-<?php
-
 namespace Database\Seeders;
 
+use App\Models\Course;
 use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -14,6 +13,7 @@ class SubscriptionSeeder extends Seeder
     public function run(): void
     {
         $students = User::where('role', 'student')->get();
+        $courses = Course::limit(3)->pluck('id')->toArray();
 
         if ($students->isEmpty()) {
             $this->command->warn('No students found. Please run UserSeeder first.');
@@ -49,12 +49,12 @@ class SubscriptionSeeder extends Seeder
                 'end_date' => now()->addMonths(5),
                 'status' => 'active',
             ],
-            // Expired subscription
+            // Expired subscription with dynamic course IDs
             [
                 'user_id' => $students->last()->id,
                 'plan' => 'regular',
                 'package_type' => 'single_course',
-                'courses_ids' => json_encode([1, 2, 3]),
+                'courses_ids' => !empty($courses) ? json_encode($courses) : null,
                 'duration' => 3,
                 'duration_unit' => 'months',
                 'price' => 499000.00,
