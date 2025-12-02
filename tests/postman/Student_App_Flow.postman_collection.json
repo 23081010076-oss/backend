@@ -349,7 +349,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"Ahmad Rizki Updated\",\n    \"phone\": \"081234567890\",\n    \"address\": \"Jakarta Selatan\",\n    \"institution\": \"Universitas Indonesia\",\n    \"major\": \"Computer Science\",\n    \"education_level\": \"S1\",\n    \"bio\": \"Passionate about technology and education\"\n}"
+									"raw": "{\n    \"name\": \"Ahmad Rizki Updated\",\n    \"phone\": \"081234567890\",\n    \"address\": \"Jakarta Selatan\",\n    \"institution\": \"Universitas Indonesia\",\n    \"major\": \"Computer Science\",\n    \"education_level\": \"bachelor\",\n    \"bio\": \"Passionate about technology and education\"\n}"
 								},
 								"url": "{{baseUrl}}/auth/profile"
 							}
