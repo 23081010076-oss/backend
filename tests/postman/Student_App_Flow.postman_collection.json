@@ -689,6 +689,44 @@
 							}
 						},
 						{
+							"name": "Update Need Assessment",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" },
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"form_data\": {\n        \"current_situation\": \"Updated situation\",\n        \"goals\": \"Updated goals\",\n        \"challenges\": [\"Updated challenge 1\"],\n        \"expectations\": \"Updated expectations\"\n    }\n}"
+								},
+								"url": "{{baseUrl}}/mentoring-sessions/1/need-assessments"
+							}
+						},
+						{
+							"name": "Mark Need Assessment Completed",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{mentorToken}}" }
+								],
+								"url": "{{baseUrl}}/mentoring-sessions/1/need-assessments/mark-completed"
+							}
+						},
+						{
+							"name": "Delete Need Assessment",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
+								],
+								"url": "{{baseUrl}}/mentoring-sessions/1/need-assessments"
+							}
+						},
+						{
 							"name": "Get Coaching Files",
 							"request": {
 								"method": "GET",
@@ -940,6 +978,22 @@
 									"raw": "{\n    \"plan\": \"premium\",\n    \"package_type\": \"all_in_one\",\n    \"duration\": 12,\n    \"duration_unit\": \"months\",\n    \"payment_method\": \"bank_transfer\"\n}"
 								},
 								"url": "{{baseUrl}}/transactions/subscriptions"
+							}
+						},
+						{
+							"name": "Create Transaction for Mentoring Session",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" },
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"payment_method\": \"qris\"\n}"
+								},
+								"url": "{{baseUrl}}/transactions/mentoring-sessions/1"
 							}
 						},
 						{
