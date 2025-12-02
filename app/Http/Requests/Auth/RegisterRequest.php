@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * ==========================================================================
  * REGISTER REQUEST (Validasi untuk Pendaftaran)
  * ==========================================================================
- * 
+ *
  * FUNGSI: Memvalidasi data pendaftaran user baru.
  */
 class RegisterRequest extends FormRequest
@@ -31,9 +31,9 @@ class RegisterRequest extends FormRequest
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role'     => 'required|in:student,mentor,admin,corporate',
-            
+
             // FIELD OPSIONAL
+            'role'     => 'nullable|in:student,mentor,admin,corporate',
             'phone'      => 'nullable|string|max:20',
             'gender'     => 'nullable|in:male,female,other',
             'birth_date' => 'nullable|date|before:today',
@@ -54,7 +54,6 @@ class RegisterRequest extends FormRequest
             'password.required'  => 'Password wajib diisi',
             'password.min'       => 'Password minimal 8 karakter',
             'password.confirmed' => 'Konfirmasi password tidak cocok',
-            'role.required'      => 'Role wajib dipilih',
             'role.in'            => 'Role tidak valid (pilih: student/mentor/admin/corporate)',
             'gender.in'          => 'Gender tidak valid (pilih: male/female/other)',
             'birth_date.date'    => 'Format tanggal lahir tidak valid',

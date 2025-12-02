@@ -198,6 +198,8 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('mentoring-sessions', MentoringSessionController::class);
     Route::get('/mentoring-sessions/{mentorId}/schedule', [MentoringSessionController::class, 'schedule'])
         ->name('mentoring-sessions.schedule');
+    Route::get('/mentors/{id}/schedule', [MentoringSessionController::class, 'schedule'])
+        ->name('mentors.schedule');
     Route::put('/mentoring-sessions/{id}/status', [MentoringSessionController::class, 'updateStatus'])
         ->name('mentoring-sessions.update-status');
     Route::post('/mentoring-sessions/{id}/feedback', [MentoringSessionController::class, 'feedback'])
@@ -281,5 +283,4 @@ Route::middleware('auth:api')->group(function () {
             Route::post('/{id}/confirm', [TransactionController::class, 'confirmPayment'])->name('confirm-payment');
         });
     });
-
 });

@@ -28,16 +28,16 @@ use App\Jobs\SendWelcomeEmail;
  * ==========================================================================
  * AUTH CONTROLLER (Controller untuk Autentikasi)
  * ==========================================================================
- * 
+ *
  * FUNGSI: Menangani semua hal tentang akun pengguna:
  * - Daftar akun baru (register)
  * - Masuk/Login
- * - Keluar/Logout  
+ * - Keluar/Logout
  * - Ganti password
  * - Kelola profil pengguna
  * - Upload foto dan CV
  * - Melihat portofolio
- * 
+ *
  * CATATAN PENTING:
  * - Validasi input sudah dipindahkan ke folder app/Http/Requests
  * - Format output sudah dipindahkan ke folder app/Http/Resources
@@ -55,18 +55,18 @@ class AuthController extends Controller
 
     /**
      * DAFTAR AKUN BARU
-     * 
+     *
      * Endpoint: POST /api/auth/register
-     * 
+     *
      * PERHATIKAN:
      * - Sebelum: public function register(Request $request)
      * - Sesudah: public function register(RegisterRequest $request)
-     * 
+     *
      * Dengan pakai RegisterRequest:
      * - Validasi otomatis dijalankan SEBELUM masuk ke function ini
      * - Jika validasi gagal, langsung return error 422
      * - Kita tidak perlu tulis $request->validate([...]) lagi
-     * 
+     *
      * Lihat validasinya di: app/Http/Requests/RegisterRequest.php
      */
     public function register(RegisterRequest $request): JsonResponse
@@ -75,13 +75,13 @@ class AuthController extends Controller
             // $request->validated() = ambil data yang sudah lolos validasi
             // Data yang tidak ada di rules() akan dibuang
             $validated = $request->validated();
-            
+
             // Buat user baru di database
             $user = User::create([
                 'name'       => $validated['name'],
                 'email'      => $validated['email'],
                 'password'   => Hash::make($validated['password']),  // Enkripsi password
-                'role'       => $validated['role'],
+                'role'       => $validated['role'] ?? 'student',  // Default role = student
                 'phone'      => $validated['phone'] ?? null,
                 'gender'     => $validated['gender'] ?? null,
                 'birth_date' => $validated['birth_date'] ?? null,
@@ -104,9 +104,9 @@ class AuthController extends Controller
 
     /**
      * LOGIN / MASUK
-     * 
+     *
      * Endpoint: POST /api/auth/login
-     * 
+     *
      * PERHATIKAN:
      * - Pakai LoginRequest untuk validasi
      * - Validasinya ada di: app/Http/Requests/LoginRequest.php
@@ -142,9 +142,9 @@ class AuthController extends Controller
 
     /**
      * LOGOUT / KELUAR
-     * 
+     *
      * Endpoint: POST /api/auth/logout
-     * 
+     *
      * Header: Authorization: Bearer {token}
      */
     public function logout(): JsonResponse
@@ -159,9 +159,9 @@ class AuthController extends Controller
 
     /**
      * PERBARUI TOKEN
-     * 
+     *
      * Endpoint: POST /api/auth/refresh
-     * 
+     *
      * Gunakan ketika token hampir expired
      */
     public function refresh(): JsonResponse
@@ -189,9 +189,9 @@ class AuthController extends Controller
 
     /**
      * LIHAT DATA SAYA (User yang sedang login)
-     * 
+     *
      * Endpoint: GET /api/auth/me
-     * 
+     *
      * PERHATIKAN: Pakai UserResource untuk format output
      */
     public function me(Request $request): JsonResponse
@@ -205,7 +205,7 @@ class AuthController extends Controller
 
     /**
      * LIHAT PROFIL LENGKAP (dengan achievement, pengalaman, dll)
-     * 
+     *
      * Endpoint: GET /api/auth/profile
      */
     public function profile(Request $request): JsonResponse
@@ -223,9 +223,9 @@ class AuthController extends Controller
 
     /**
      * UPDATE PROFIL
-     * 
+     *
      * Endpoint: PUT /api/auth/profile
-     * 
+     *
      * Validasi di: app/Http/Requests/UpdateProfileRequest.php
      */
     public function updateProfile(UpdateProfileRequest $request): JsonResponse
@@ -242,9 +242,9 @@ class AuthController extends Controller
 
     /**
      * GANTI PASSWORD
-     * 
+     *
      * Endpoint: PUT /api/auth/change-password
-     * 
+     *
      * PERHATIKAN:
      * - Pakai ChangePasswordRequest untuk validasi
      * - Validasinya ada di: app/Http/Requests/ChangePasswordRequest.php
@@ -274,9 +274,9 @@ class AuthController extends Controller
 
     /**
      * UPLOAD FOTO PROFIL
-     * 
+     *
      * Endpoint: POST /api/auth/profile/photo
-     * 
+     *
      * Data: photo (jpeg, png, jpg, gif) max 2MB
      */
     public function uploadProfilePhoto(Request $request): JsonResponse
@@ -307,9 +307,9 @@ class AuthController extends Controller
 
     /**
      * UPLOAD CV (Curriculum Vitae)
-     * 
+     *
      * Endpoint: POST /api/auth/profile/cv
-     * 
+     *
      * Data: cv (pdf, doc, docx) max 2MB
      */
     public function uploadCv(Request $request): JsonResponse
@@ -346,7 +346,7 @@ class AuthController extends Controller
 
     /**
      * REKOMENDASI KURSUS
-     * 
+     *
      * Endpoint: GET /api/auth/recommendations
      */
     public function recommendations(Request $request): JsonResponse
@@ -375,7 +375,7 @@ class AuthController extends Controller
 
     /**
      * LIHAT PORTOFOLIO LENGKAP
-     * 
+     *
      * Endpoint: GET /api/auth/portfolio
      */
     public function portfolio(Request $request): JsonResponse
@@ -408,7 +408,7 @@ class AuthController extends Controller
 
     /**
      * RIWAYAT AKTIVITAS
-     * 
+     *
      * Endpoint: GET /api/auth/activity-history
      */
     public function activityHistory(Request $request): JsonResponse

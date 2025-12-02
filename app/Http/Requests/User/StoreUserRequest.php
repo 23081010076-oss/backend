@@ -8,9 +8,9 @@ use Illuminate\Foundation\Http\FormRequest;
  * ==========================================================================
  * STORE USER REQUEST (Validasi untuk Tambah User - Admin Only)
  * ==========================================================================
- * 
+ *
  * FUNGSI: Memvalidasi data ketika admin menambah user baru.
- * 
+ *
  * FIELD YANG DIVALIDASI:
  * - name         = Nama lengkap (wajib)
  * - email        = Email (wajib, harus unik)
@@ -42,8 +42,8 @@ class StoreUserRequest extends FormRequest
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
-            'role'     => 'required|in:admin,student,mentor,corporate',
-            
+            'role'     => 'nullable|in:admin,student,mentor,corporate',
+
             // FIELD OPSIONAL
             'phone'        => 'nullable|string|max:20',
             'bio'          => 'nullable|string',
@@ -66,7 +66,6 @@ class StoreUserRequest extends FormRequest
             'email.unique'      => 'Email sudah terdaftar',
             'password.required' => 'Password wajib diisi',
             'password.min'      => 'Password minimal 8 karakter',
-            'role.required'     => 'Role wajib dipilih',
             'role.in'           => 'Role harus admin, student, mentor, atau corporate',
             'phone.max'         => 'Nomor telepon maksimal 20 karakter',
             'status.in'         => 'Status harus active, inactive, atau suspended',
