@@ -9,23 +9,49 @@ use Laravel\Socialite\Facades\Socialite;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class GoogleAuthController extends Controller
 {
     /**
+     * Allowed roles for registration
+     */
+    private $allowedRoles = ['student', 'mentor', 'corporate'];
+
+    /**
      * Redirect the user to the Google authentication page.
      *
+     * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Illuminate\Http\JsonResponse
      */
-    public function redirectToGoogle()
+    public function redirectToGoogle(Request $request)
     {
         try {
             // Validate Google OAuth configuration
             $this->validateGoogleConfig();
             
+            // Get and validate role from request
+            $role = $request->query('role', 'student');
+            
+            if (!in_array($role, $this->allowedRoles)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid role specified',
+                    'error' => 'Role must be one of: ' . implode(', ', $this->allowedRoles),
+                    'hint' => 'Add ?role=student or ?role=mentor or ?role=corporate to the URL'
+                ], 400);
+            }
+            
             /** @var \Laravel\Socialite\Two\GoogleProvider $driver */
             $driver = Socialite::driver('google');
-            return $driver->stateless()->redirect();
+            
+            // Store role in state parameter (will be returned by Google)
+            $state = bin2hex(random_bytes(16));
+            Cache::put('google_oauth_role_' . $state, $role, now()->addMinutes(10));
+            
+            return $driver->stateless()
+                ->with(['state' => $state])
+                ->redirect();
         } catch (Exception $e) {
             Log::error('Google OAuth Redirect Error: ' . $e->getMessage());
             
@@ -41,13 +67,25 @@ class GoogleAuthController extends Controller
     /**
      * Obtain the user information from Google.
      *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function handleGoogleCallback()
+    public function handleGoogleCallback(Request $request)
     {
         try {
             // Validate Google OAuth configuration
             $this->validateGoogleConfig();
+            
+            // Get role from state parameter
+            $state = $request->query('state');
+            $role = 'student'; // Default role
+            
+            if ($state) {
+                $cachedRole = Cache::pull('google_oauth_role_' . $state);
+                if ($cachedRole && in_array($cachedRole, $this->allowedRoles)) {
+                    $role = $cachedRole;
+                }
+            }
             
             // Get user from Google
             /** @var \Laravel\Socialite\Two\GoogleProvider $driver */
@@ -67,13 +105,13 @@ class GoogleAuthController extends Controller
                 ], 403);
             }
             
-            // Find or create user
-            $user = $this->findOrCreateUser($googleUser);
+            // Find or create user with selected role
+            $user = $this->findOrCreateUser($googleUser, $role);
             
             // Generate JWT token
             $token = JWTAuth::fromUser($user);
             
-            Log::info('Google login successful for user: ' . $user->email);
+            Log::info('Google login successful for user: ' . $user->email . ' with role: ' . $user->role);
             
             // Return response based on configuration
             return $this->handleResponse($token, $user);
@@ -140,9 +178,10 @@ class GoogleAuthController extends Controller
      * Find or create user from Google data
      *
      * @param \Laravel\Socialite\Two\User $googleUser
+     * @param string $role
      * @return User
      */
-    private function findOrCreateUser($googleUser)
+    private function findOrCreateUser($googleUser, $role = 'student')
     {
         // Try to find user by google_id
         $user = User::where('google_id', $googleUser->getId())->first();
@@ -152,7 +191,7 @@ class GoogleAuthController extends Controller
             $user = User::where('email', $googleUser->getEmail())->first();
 
             if ($user) {
-                // Update existing user with google_id
+                // Update existing user with google_id (keep existing role)
                 $user->update([
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
@@ -160,17 +199,17 @@ class GoogleAuthController extends Controller
                 
                 Log::info('Linked Google account to existing user: ' . $user->email);
             } else {
-                // Create new user
+                // Create new user with selected role
                 $user = User::create([
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
                     'password' => bcrypt(bin2hex(random_bytes(16))), // Random secure password
-                    'role' => 'student', // Default role
+                    'role' => $role, // Use selected role
                 ]);
                 
-                Log::info('Created new user from Google: ' . $user->email);
+                Log::info('Created new user from Google: ' . $user->email . ' with role: ' . $role);
             }
         } else {
             // Update avatar if changed

@@ -391,6 +391,40 @@
 								],
 								"url": "{{baseUrl}}/auth/logout"
 							}
+						},
+						{
+							"name": "Upload Profile Photo",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{ "key": "profile_photo", "type": "file", "src": "" }
+									]
+								},
+								"url": "{{baseUrl}}/auth/profile/photo"
+							}
+						},
+						{
+							"name": "Upload CV",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{ "key": "cv", "type": "file", "src": "" }
+									]
+								},
+								"url": "{{baseUrl}}/auth/profile/cv"
+							}
 						}
 					]
 				},
@@ -526,6 +560,22 @@
 									{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
 								],
 								"url": "{{baseUrl}}/subscriptions/4"
+							}
+						},
+						{
+							"name": "Upgrade Subscription",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" },
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"new_plan\": \"premium\",\n    \"payment_method\": \"qris\"\n}"
+								},
+								"url": "{{baseUrl}}/subscriptions/2/upgrade"
 							}
 						}
 					]
@@ -930,6 +980,28 @@
 									{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
 								],
 								"url": "{{baseUrl}}/experiences/2"
+							}
+						},
+						{
+							"name": "Get All Organizations",
+							"request": {
+								"method": "GET",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
+								],
+								"url": "{{baseUrl}}/organizations"
+							}
+						},
+						{
+							"name": "Get Single Organization",
+							"request": {
+								"method": "GET",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{studentToken}}" }
+								],
+								"url": "{{baseUrl}}/organizations/1"
 							}
 						}
 					]
@@ -1484,6 +1556,17 @@
 								},
 								"url": "{{baseUrl}}/transactions/1/confirm"
 							}
+						},
+						{
+							"name": "Get Transaction Statistics",
+							"request": {
+								"method": "GET",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+								],
+								"url": "{{baseUrl}}/transactions/statistics"
+							}
 						}
 					]
 				},
@@ -1521,6 +1604,22 @@
 									{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
 								],
 								"url": "{{baseUrl}}/corporate-contacts/1"
+							}
+						},
+						{
+							"name": "Update Contact Status",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" },
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{adminToken}}" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"status\": \"contacted\"\n}"
+								},
+								"url": "{{baseUrl}}/corporate-contacts/1/status"
 							}
 						}
 					]
