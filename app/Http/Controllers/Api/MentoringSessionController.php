@@ -19,9 +19,9 @@ use App\Http\Requests\Mentoring\FeedbackRequest;
  * ==========================================================================
  * MENTORING SESSION CONTROLLER (Controller untuk Sesi Mentoring)
  * ==========================================================================
- * 
+ *
  * FUNGSI: Mengelola sesi mentoring (booking, jadwal, feedback).
- * 
+ *
  * STRUKTUR CLEAN CODE:
  * - Controller  : Hanya handle request/response (file ini)
  * - Service     : Business logic → app/Services/MentoringService.php
@@ -85,7 +85,7 @@ class MentoringSessionController extends Controller
 
     /**
      * Buat sesi mentoring baru
-     * 
+     *
      * Validasi di: app/Http/Requests/Mentoring/StoreMentoringSessionRequest.php
      */
     public function store(StoreMentoringSessionRequest $request): JsonResponse
@@ -103,7 +103,7 @@ class MentoringSessionController extends Controller
 
     /**
      * Update sesi mentoring
-     * 
+     *
      * Validasi di: app/Http/Requests/Mentoring/UpdateMentoringSessionRequest.php
      */
     public function update(UpdateMentoringSessionRequest $request, int $id): JsonResponse
@@ -166,7 +166,7 @@ class MentoringSessionController extends Controller
 
     /**
      * Berikan feedback untuk sesi yang sudah selesai
-     * 
+     *
      * Validasi di: app/Http/Requests/Mentoring/FeedbackRequest.php
      */
     public function feedback(FeedbackRequest $request, int $id): JsonResponse
@@ -183,6 +183,17 @@ class MentoringSessionController extends Controller
         $session = $this->mentoringService->giveFeedback($session, $request->validated());
 
         return $this->successResponse($session, 'Feedback berhasil dikirim');
+    }
+
+
+    public function mySessions(Request $request): JsonResponse
+    {
+        $sessions = $this->mentoringService->getSessions(
+            Auth::user(),
+            $request->all() // Tetap bawa filter lain (misal: status=pending)
+        );
+
+        return $this->paginatedResponse($sessions, 'Daftar sesi mentoring saya berhasil diambil');
     }
 
     /*
