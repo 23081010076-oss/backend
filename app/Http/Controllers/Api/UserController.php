@@ -8,6 +8,7 @@ use App\Services\UserService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 // Import Request Classes
 use App\Http\Requests\User\StoreUserRequest;
@@ -125,9 +126,12 @@ class UserController extends Controller
         // Cek akses dengan Policy
         $this->authorize('delete', $user);
 
-        $this->userService->deleteUser($user);
-
-        return $this->successResponse(null, 'User berhasil dihapus');
+        try {
+            $this->userService->deleteUser($user, Auth::id());
+            return $this->successResponse(null, 'User berhasil dihapus');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        }
     }
 
     /*
@@ -168,9 +172,12 @@ class UserController extends Controller
         // Cek akses dengan Policy
         $this->authorize('suspend', $user);
 
-        $user = $this->userService->suspendUser($user);
-
-        return $this->successResponse($user, 'User berhasil ditangguhkan');
+        try {
+            $user = $this->userService->suspendUser($user, Auth::id());
+            return $this->successResponse($user, 'User berhasil ditangguhkan');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        }
     }
 
     /**

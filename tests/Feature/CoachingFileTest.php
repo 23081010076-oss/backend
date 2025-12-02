@@ -35,14 +35,26 @@ class CoachingFileTest extends TestCase
         $response = $this->postJson("/api/mentoring-sessions/{$session->id}/coaching-files", [
             'file' => $file,
             'file_name' => 'My Plan',
-            'file_type' => 'pdf',
-            'uploaded_by' => $mentor->id,
         ], [
             'Authorization' => 'Bearer ' . $token,
         ]);
 
-        $response->assertStatus(201);
-        Storage::disk('public')->assertExists('coaching-files/My Plan');
+        $response->assertStatus(201)
+            ->assertJsonStructure([
+                'sukses',
+                'pesan',
+                'data' => [
+                    'id',
+                    'file_name',
+                    'file_path',
+                    'file_type',
+                ]
+            ]);
+        
+        // Assert file exists in subdirectory
+        $this->assertTrue(
+            count(Storage::disk('public')->files("coaching-files/{$session->id}")) > 0
+        );
     }
 
     public function test_can_list_coaching_files()
@@ -63,6 +75,14 @@ class CoachingFileTest extends TestCase
             'Authorization' => 'Bearer ' . $token,
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'sukses',
+                'pesan',
+                'data' => [
+                    'files',
+                    'total'
+                ]
+            ]);
     }
 }

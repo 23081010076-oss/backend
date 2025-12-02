@@ -11,14 +11,13 @@ use Illuminate\Foundation\Http\FormRequest;
  * 
  * FUNGSI: Memvalidasi data ketika user menambah prestasi baru.
  * 
+ * Database columns: id, user_id, title, description, organization, year, timestamps
+ * 
  * FIELD YANG DIVALIDASI:
- * - title       = Judul prestasi (wajib)
- * - description = Deskripsi prestasi (opsional)
- * - type        = Jenis: certificate/award/publication/project/other (wajib)
- * - issuer      = Penerbit/penyelenggara (opsional)
- * - date        = Tanggal pencapaian (wajib)
- * - url         = Link bukti (opsional)
- * - image_url   = Link gambar (opsional)
+ * - title        = Judul prestasi (wajib)
+ * - description  = Deskripsi prestasi (opsional)
+ * - organization = Organisasi/penyelenggara (opsional)
+ * - year         = Tahun pencapaian (opsional)
  */
 class StoreAchievementRequest extends FormRequest
 {
@@ -38,14 +37,11 @@ class StoreAchievementRequest extends FormRequest
         return [
             // FIELD WAJIB
             'title' => 'required|string|max:255',
-            'type'  => 'required|in:certificate,award,publication,project,other',
-            'date'  => 'required|date',
             
             // FIELD OPSIONAL
-            'description' => 'nullable|string',
-            'issuer'      => 'nullable|string|max:255',
-            'url'         => 'nullable|url',
-            'image_url'   => 'nullable|url',
+            'description'  => 'nullable|string',
+            'organization' => 'nullable|string|max:255',
+            'year'         => 'nullable|integer|min:1900|max:' . (date('Y') + 1),
         ];
     }
 
@@ -55,15 +51,12 @@ class StoreAchievementRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'Judul prestasi wajib diisi',
-            'title.max'      => 'Judul maksimal 255 karakter',
-            'type.required'  => 'Jenis prestasi wajib dipilih',
-            'type.in'        => 'Jenis prestasi tidak valid (pilih: certificate/award/publication/project/other)',
-            'date.required'  => 'Tanggal prestasi wajib diisi',
-            'date.date'      => 'Format tanggal tidak valid',
-            'issuer.max'     => 'Nama penerbit maksimal 255 karakter',
-            'url.url'        => 'Format URL tidak valid',
-            'image_url.url'  => 'Format URL gambar tidak valid',
+            'title.required'   => 'Judul prestasi wajib diisi',
+            'title.max'        => 'Judul maksimal 255 karakter',
+            'organization.max' => 'Nama organisasi maksimal 255 karakter',
+            'year.integer'     => 'Tahun harus berupa angka',
+            'year.min'         => 'Tahun minimal 1900',
+            'year.max'         => 'Tahun tidak valid',
         ];
     }
 }

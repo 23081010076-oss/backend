@@ -9,6 +9,7 @@ use App\Services\ScholarshipService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 // Import Request Classes
 use App\Http\Requests\Scholarship\StoreScholarshipRequest;
@@ -148,18 +149,17 @@ class ScholarshipController extends Controller
         // Cek akses dengan Policy
         $this->authorize('apply', $scholarship);
 
-        $result = $this->scholarshipService->applyScholarship(
-            auth()->user(),
-            $scholarship,
-            $request->validated(),
-            $request->allFiles()
-        );
+        try {
+            $application = $this->scholarshipService->applyScholarship(
+                $scholarship,
+                Auth::user(),
+                $request->allFiles()
+            );
 
-        if (!$result['success']) {
-            return $this->errorResponse($result['message'], 422);
+            return $this->createdResponse($application, 'Lamaran beasiswa berhasil dikirim');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
         }
-
-        return $this->createdResponse($result['data'], 'Lamaran beasiswa berhasil dikirim');
     }
 
     /**
@@ -167,7 +167,7 @@ class ScholarshipController extends Controller
      */
     public function myApplications(): JsonResponse
     {
-        $applications = $this->scholarshipService->getUserApplications(auth()->id());
+        $applications = $this->scholarshipService->getUserApplications(Auth::id());
 
         return $this->paginatedResponse($applications, 'Daftar lamaran berhasil diambil');
     }

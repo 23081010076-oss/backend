@@ -15,7 +15,7 @@ class GoogleAuthController extends Controller
     /**
      * Redirect the user to the Google authentication page.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Illuminate\Http\JsonResponse
      */
     public function redirectToGoogle()
     {
@@ -23,7 +23,9 @@ class GoogleAuthController extends Controller
             // Validate Google OAuth configuration
             $this->validateGoogleConfig();
             
-            return Socialite::driver('google')->stateless()->redirect();
+            /** @var \Laravel\Socialite\Two\GoogleProvider $driver */
+            $driver = Socialite::driver('google');
+            return $driver->stateless()->redirect();
         } catch (Exception $e) {
             Log::error('Google OAuth Redirect Error: ' . $e->getMessage());
             
@@ -48,11 +50,15 @@ class GoogleAuthController extends Controller
             $this->validateGoogleConfig();
             
             // Get user from Google
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            /** @var \Laravel\Socialite\Two\GoogleProvider $driver */
+            $driver = Socialite::driver('google');
+            
+            /** @var \Laravel\Socialite\Two\User $googleUser */
+            $googleUser = $driver->stateless()->user();
             
             // Validate email domain if configured
-            if (!$this->isEmailDomainAllowed($googleUser->email)) {
-                Log::warning('Google login attempt with unauthorized domain: ' . $googleUser->email);
+            if (!$this->isEmailDomainAllowed($googleUser->getEmail())) {
+                Log::warning('Google login attempt with unauthorized domain: ' . $googleUser->getEmail());
                 
                 return response()->json([
                     'status' => 'error',
@@ -133,33 +139,33 @@ class GoogleAuthController extends Controller
     /**
      * Find or create user from Google data
      *
-     * @param object $googleUser
+     * @param \Laravel\Socialite\Two\User $googleUser
      * @return User
      */
     private function findOrCreateUser($googleUser)
     {
         // Try to find user by google_id
-        $user = User::where('google_id', $googleUser->id)->first();
+        $user = User::where('google_id', $googleUser->getId())->first();
 
         if (!$user) {
             // Check if user exists with the same email
-            $user = User::where('email', $googleUser->email)->first();
+            $user = User::where('email', $googleUser->getEmail())->first();
 
             if ($user) {
                 // Update existing user with google_id
                 $user->update([
-                    'google_id' => $googleUser->id,
-                    'avatar' => $googleUser->avatar,
+                    'google_id' => $googleUser->getId(),
+                    'avatar' => $googleUser->getAvatar(),
                 ]);
                 
                 Log::info('Linked Google account to existing user: ' . $user->email);
             } else {
                 // Create new user
                 $user = User::create([
-                    'name' => $googleUser->name,
-                    'email' => $googleUser->email,
-                    'google_id' => $googleUser->id,
-                    'avatar' => $googleUser->avatar,
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'google_id' => $googleUser->getId(),
+                    'avatar' => $googleUser->getAvatar(),
                     'password' => bcrypt(bin2hex(random_bytes(16))), // Random secure password
                     'role' => 'student', // Default role
                 ]);
@@ -168,9 +174,9 @@ class GoogleAuthController extends Controller
             }
         } else {
             // Update avatar if changed
-            if ($user->avatar !== $googleUser->avatar) {
+            if ($user->avatar !== $googleUser->getAvatar()) {
                 $user->update([
-                    'avatar' => $googleUser->avatar,
+                    'avatar' => $googleUser->getAvatar(),
                 ]);
             }
         }

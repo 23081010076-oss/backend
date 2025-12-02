@@ -7,13 +7,13 @@ use App\Models\CorporateContact;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Class CorporateContactController
  * 
  * Handles corporate contact/inquiry submissions.
- * Allows companies to submit partnership or training requests.
+ * 
+ * Database columns: id, org_id, name, email, message, timestamps
  * 
  * @package App\Http\Controllers\Api
  */
@@ -37,24 +37,18 @@ class CorporateContactController extends Controller
     {
         $query = CorporateContact::query();
 
-        // Filter by status
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by type
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
-        }
-
-        // Search by company name or contact name
+        // Search by name or email
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('company_name', 'like', "%{$search}%")
-                  ->orWhere('contact_name', 'like', "%{$search}%")
+                $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
+        }
+
+        // Filter by organization
+        if ($request->has('org_id')) {
+            $query->where('org_id', $request->org_id);
         }
 
         $contacts = $query->latest()->paginate($request->get('per_page', 15));
@@ -90,25 +84,11 @@ class CorporateContactController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'company_name'     => 'required|string|max:255',
-            'contact_name'     => 'required|string|max:255',
-            'email'            => 'required|email|max:255',
-            'phone'            => 'nullable|string|max:20',
-            'type'             => 'required|in:partnership,training,recruitment,other',
-            'message'          => 'required|string',
-            'company_size'     => 'nullable|string|max:50',
-            'industry'         => 'nullable|string|max:100',
-            'website'          => 'nullable|url',
-            'preferred_date'   => 'nullable|date',
-            'budget_range'     => 'nullable|string|max:100',
+            'org_id'  => 'nullable|exists:organizations,id',
+            'name'    => 'required|string|max:255',
+            'email'   => 'required|email|max:255',
+            'message' => 'required|string',
         ]);
-
-        $validated['status'] = 'pending';
-
-        // Associate with authenticated user if logged in
-        if (Auth::check()) {
-            $validated['user_id'] = Auth::id();
-        }
 
         $contact = CorporateContact::create($validated);
 
@@ -127,19 +107,10 @@ class CorporateContactController extends Controller
         $contact = CorporateContact::findOrFail($id);
 
         $validated = $request->validate([
-            'company_name'   => 'sometimes|string|max:255',
-            'contact_name'   => 'sometimes|string|max:255',
-            'email'          => 'sometimes|email|max:255',
-            'phone'          => 'nullable|string|max:20',
-            'type'           => 'sometimes|in:partnership,training,recruitment,other',
-            'message'        => 'sometimes|string',
-            'status'         => 'sometimes|in:pending,contacted,in_progress,completed,rejected',
-            'admin_notes'    => 'nullable|string',
-            'company_size'   => 'nullable|string|max:50',
-            'industry'       => 'nullable|string|max:100',
-            'website'        => 'nullable|url',
-            'preferred_date' => 'nullable|date',
-            'budget_range'   => 'nullable|string|max:100',
+            'org_id'  => 'nullable|exists:organizations,id',
+            'name'    => 'sometimes|string|max:255',
+            'email'   => 'sometimes|email|max:255',
+            'message' => 'sometimes|string',
         ]);
 
         $contact->update($validated);
@@ -164,53 +135,6 @@ class CorporateContactController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Status Management Methods
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Update contact status (admin only)
-     *
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
-     */
-    public function updateStatus(Request $request, int $id): JsonResponse
-    {
-        $contact = CorporateContact::findOrFail($id);
-
-        $validated = $request->validate([
-            'status'      => 'required|in:pending,contacted,in_progress,completed,rejected',
-            'admin_notes' => 'nullable|string',
-        ]);
-
-        $contact->update($validated);
-
-        return $this->successResponse($contact, 'Contact status updated successfully');
-    }
-
-    /**
-     * Mark contact as contacted
-     *
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
-     */
-    public function markContacted(Request $request, int $id): JsonResponse
-    {
-        $contact = CorporateContact::findOrFail($id);
-
-        $contact->update([
-            'status'       => 'contacted',
-            'contacted_at' => now(),
-            'admin_notes'  => $request->get('admin_notes', $contact->admin_notes),
-        ]);
-
-        return $this->successResponse($contact, 'Contact marked as contacted');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
     | Statistics Methods
     |--------------------------------------------------------------------------
     */
@@ -223,18 +147,7 @@ class CorporateContactController extends Controller
     public function statistics(): JsonResponse
     {
         $stats = [
-            'total'       => CorporateContact::count(),
-            'pending'     => CorporateContact::where('status', 'pending')->count(),
-            'contacted'   => CorporateContact::where('status', 'contacted')->count(),
-            'in_progress' => CorporateContact::where('status', 'in_progress')->count(),
-            'completed'   => CorporateContact::where('status', 'completed')->count(),
-            'rejected'    => CorporateContact::where('status', 'rejected')->count(),
-            'by_type'     => [
-                'partnership' => CorporateContact::where('type', 'partnership')->count(),
-                'training'    => CorporateContact::where('type', 'training')->count(),
-                'recruitment' => CorporateContact::where('type', 'recruitment')->count(),
-                'other'       => CorporateContact::where('type', 'other')->count(),
-            ],
+            'total' => CorporateContact::count(),
         ];
 
         return $this->successResponse($stats, 'Corporate contact statistics retrieved successfully');

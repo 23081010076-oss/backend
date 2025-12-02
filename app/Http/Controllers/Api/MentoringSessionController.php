@@ -69,7 +69,7 @@ class MentoringSessionController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $session = MentoringSession::with(['user', 'mentor'])->findOrFail($id);
+        $session = MentoringSession::with(['member', 'mentor'])->findOrFail($id);
 
         // Cek akses dengan Policy
         $this->authorize('view', $session);
@@ -94,8 +94,8 @@ class MentoringSessionController extends Controller
         $this->authorize('create', MentoringSession::class);
 
         $session = $this->mentoringService->createSession(
-            Auth::user(),
-            $request->validated()
+            $request->validated(),
+            Auth::user()
         );
 
         return $this->createdResponse($session, 'Sesi mentoring berhasil dibuat');
@@ -153,10 +153,10 @@ class MentoringSessionController extends Controller
         $this->authorize('updateStatus', $session);
 
         $validated = $request->validate([
-            'status' => 'required|in:pending,confirmed,completed,cancelled',
+            'status' => 'required|in:pending,scheduled,completed,cancelled,refunded',
         ], [
             'status.required' => 'Status harus diisi',
-            'status.in'       => 'Status harus salah satu dari: pending, confirmed, completed, cancelled',
+            'status.in'       => 'Status harus salah satu dari: pending, scheduled, completed, cancelled, refunded',
         ]);
 
         $session = $this->mentoringService->updateStatus($session, $validated['status']);
@@ -196,7 +196,11 @@ class MentoringSessionController extends Controller
      */
     public function schedule(Request $request, int $mentorId): JsonResponse
     {
-        $schedule = $this->mentoringService->getMentorSchedule($mentorId, $request->all());
+        $schedule = $this->mentoringService->getMentorSchedule(
+            $mentorId,
+            $request->input('from_date'),
+            $request->input('to_date')
+        );
 
         return $this->successResponse($schedule, 'Jadwal mentor berhasil diambil');
     }

@@ -41,10 +41,7 @@ class MentoringSessionTest extends TestCase
 
         $response = $this->postJson('/api/mentoring-sessions', [
             'mentor_id' => $mentor->id,
-            'member_id' => $student->id,
             'type' => 'academic',
-            'schedule' => '2025-12-01 10:00:00',
-            'status' => 'pending',
         ], [
             'Authorization' => 'Bearer ' . $token,
         ]);

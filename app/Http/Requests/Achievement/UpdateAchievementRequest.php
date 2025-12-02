@@ -11,6 +11,8 @@ use Illuminate\Foundation\Http\FormRequest;
  * 
  * FUNGSI: Memvalidasi data ketika user mengupdate prestasi.
  * 
+ * Database columns: id, user_id, title, description, organization, year, timestamps
+ * 
  * CATATAN: Semua field opsional (pakai 'sometimes')
  * User hanya perlu kirim field yang ingin diubah.
  */
@@ -30,13 +32,10 @@ class UpdateAchievementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'       => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'type'        => 'sometimes|in:certificate,award,publication,project,other',
-            'issuer'      => 'nullable|string|max:255',
-            'date'        => 'sometimes|date',
-            'url'         => 'nullable|url',
-            'image_url'   => 'nullable|url',
+            'title'        => 'sometimes|string|max:255',
+            'description'  => 'nullable|string',
+            'organization' => 'nullable|string|max:255',
+            'year'         => 'nullable|integer|min:1900|max:' . (date('Y') + 1),
         ];
     }
 
@@ -46,12 +45,11 @@ class UpdateAchievementRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.max'     => 'Judul maksimal 255 karakter',
-            'type.in'       => 'Jenis prestasi tidak valid (pilih: certificate/award/publication/project/other)',
-            'date.date'     => 'Format tanggal tidak valid',
-            'issuer.max'    => 'Nama penerbit maksimal 255 karakter',
-            'url.url'       => 'Format URL tidak valid',
-            'image_url.url' => 'Format URL gambar tidak valid',
+            'title.max'        => 'Judul maksimal 255 karakter',
+            'organization.max' => 'Nama organisasi maksimal 255 karakter',
+            'year.integer'     => 'Tahun harus berupa angka',
+            'year.min'         => 'Tahun minimal 1900',
+            'year.max'         => 'Tahun tidak valid',
         ];
     }
 }

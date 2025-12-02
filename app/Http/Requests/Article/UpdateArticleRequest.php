@@ -11,6 +11,8 @@ use Illuminate\Foundation\Http\FormRequest;
  * 
  * FUNGSI: Memvalidasi data ketika user mengupdate artikel.
  * 
+ * Database columns: id, author_id, title, content, category, author (string), timestamps
+ * 
  * CATATAN: Semua field opsional (pakai 'sometimes')
  */
 class UpdateArticleRequest extends FormRequest
@@ -29,14 +31,10 @@ class UpdateArticleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'     => 'sometimes|string|max:255',
-            'content'   => 'sometimes|string',
-            'excerpt'   => 'nullable|string|max:500',
-            'category'  => 'nullable|string|max:100',
-            'tags'      => 'nullable|string',
-            'status'    => 'nullable|in:draft,published',
-            'image'     => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_url' => 'nullable|url',
+            'title'    => 'sometimes|string|max:255',
+            'content'  => 'sometimes|string',
+            'category' => 'nullable|string|max:100',
+            'author'   => 'nullable|string|max:255',
         ];
     }
 
@@ -46,14 +44,9 @@ class UpdateArticleRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.max'     => 'Judul maksimal 255 karakter',
-            'excerpt.max'   => 'Ringkasan maksimal 500 karakter',
-            'category.max'  => 'Kategori maksimal 100 karakter',
-            'status.in'     => 'Status harus draft atau published',
-            'image.image'   => 'File harus berupa gambar',
-            'image.mimes'   => 'Format gambar harus jpeg, png, jpg, atau gif',
-            'image.max'     => 'Ukuran gambar maksimal 2MB',
-            'image_url.url' => 'Format URL gambar tidak valid',
+            'title.max'    => 'Judul maksimal 255 karakter',
+            'category.max' => 'Kategori maksimal 100 karakter',
+            'author.max'   => 'Nama penulis maksimal 255 karakter',
         ];
     }
 }

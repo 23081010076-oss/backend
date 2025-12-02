@@ -9,6 +9,7 @@ use App\Services\EnrollmentService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 // Import Request Classes
@@ -67,7 +68,7 @@ class EnrollmentController extends Controller
         $this->authorize('create', Enrollment::class);
 
         $course = Course::findOrFail($courseId);
-        $user = auth()->user();
+        $user = Auth::user();
 
         try {
             $enrollment = $this->enrollmentService->enrollUserToCourse($user, $course);
@@ -94,7 +95,7 @@ class EnrollmentController extends Controller
      */
     public function myCourses(): JsonResponse
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $enrollments = Enrollment::with('course')
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')

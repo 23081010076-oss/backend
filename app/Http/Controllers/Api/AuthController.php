@@ -22,6 +22,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
+use App\Jobs\SendWelcomeEmail;
 
 /**
  * ==========================================================================
@@ -85,6 +86,9 @@ class AuthController extends Controller
                 'gender'     => $validated['gender'] ?? null,
                 'birth_date' => $validated['birth_date'] ?? null,
             ]);
+
+            // Kirim welcome email via queue (background)
+            SendWelcomeEmail::dispatch($user);
 
             // Return response dengan UserResource
             // UserResource akan format data user secara konsisten

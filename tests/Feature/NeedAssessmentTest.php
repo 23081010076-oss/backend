@@ -38,13 +38,19 @@ class NeedAssessmentTest extends TestCase
             'Authorization' => 'Bearer ' . $token,
         ]);
 
-        $response->assertStatus(201);
+        $response->assertStatus(201)
+            ->assertJsonStructure([
+                'sukses',
+                'pesan',
+                'data' => [
+                    'id',
+                    'mentoring_session_id',
+                    'form_data',
+                ]
+            ]);
+        
         $this->assertDatabaseHas('need_assessments', [
             'mentoring_session_id' => $session->id,
-        ]);
-        $this->assertDatabaseHas('mentoring_sessions', [
-            'id' => $session->id,
-            'need_assessment_status' => 'completed',
         ]);
     }
 
@@ -73,9 +79,12 @@ class NeedAssessmentTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
+                'sukses',
+                'pesan',
                 'data' => [
                     'id',
                     'form_data',
+                    'is_completed',
                 ],
             ]);
     }

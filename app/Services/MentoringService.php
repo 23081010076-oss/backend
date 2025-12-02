@@ -26,13 +26,13 @@ class MentoringService
      */
     public function getSessions(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = MentoringSession::with(['user', 'mentor']);
+        $query = MentoringSession::with(['member', 'mentor']);
 
         // Filter berdasarkan role user
         if ($user->role === 'mentor') {
             $query->where('mentor_id', $user->id);
         } else {
-            $query->where('user_id', $user->id);
+            $query->where('member_id', $user->id);
         }
 
         // Filter berdasarkan status
@@ -40,7 +40,7 @@ class MentoringService
             $query->where('status', $filters['status']);
         }
 
-        return $query->orderBy('session_date', 'desc')->paginate($perPage);
+        return $query->orderBy('schedule', 'desc')->paginate($perPage);
     }
 
     /**
@@ -48,12 +48,12 @@ class MentoringService
      */
     public function createSession(array $data, User $user): MentoringSession
     {
-        $data['user_id'] = $user->id;
+        $data['member_id'] = $user->id;
         $data['status'] = 'pending';
 
         $session = MentoringSession::create($data);
         
-        return $session->load(['user', 'mentor']);
+        return $session->load(['member', 'mentor']);
     }
 
     /**
@@ -63,7 +63,7 @@ class MentoringService
     {
         $session->update($data);
         
-        return $session->fresh()->load(['user', 'mentor']);
+        return $session->fresh()->load(['member', 'mentor']);
     }
 
     /**
@@ -81,7 +81,7 @@ class MentoringService
     {
         $session->update(['status' => $status]);
         
-        return $session->fresh()->load(['user', 'mentor']);
+        return $session->fresh()->load(['member', 'mentor']);
     }
 
     /**
@@ -97,7 +97,7 @@ class MentoringService
 
         $session->update($feedbackData);
         
-        return $session->fresh()->load(['user', 'mentor']);
+        return $session->fresh()->load(['member', 'mentor']);
     }
 
     /**
@@ -109,15 +109,15 @@ class MentoringService
             ->where('status', '!=', 'cancelled');
 
         if ($fromDate) {
-            $query->whereDate('session_date', '>=', $fromDate);
+            $query->whereDate('schedule', '>=', $fromDate);
         }
 
         if ($toDate) {
-            $query->whereDate('session_date', '<=', $toDate);
+            $query->whereDate('schedule', '<=', $toDate);
         }
 
-        return $query->orderBy('session_date', 'asc')
-            ->get(['id', 'session_date', 'duration', 'status']);
+        return $query->orderBy('schedule', 'asc')
+            ->get(['id', 'schedule', 'type', 'status']);
     }
 
     /**
@@ -126,8 +126,8 @@ class MentoringService
     public function checkAvailability(int $mentorId, string $date, string $time): bool
     {
         $exists = MentoringSession::where('mentor_id', $mentorId)
-            ->whereDate('session_date', $date)
-            ->whereTime('session_date', $time)
+            ->whereDate('schedule', $date)
+            ->whereTime('schedule', $time)
             ->where('status', '!=', 'cancelled')
             ->exists();
 
@@ -139,14 +139,14 @@ class MentoringService
      */
     public function getUpcomingSessions(int $userId, int $limit = 5): Collection
     {
-        return MentoringSession::with(['user', 'mentor'])
+        return MentoringSession::with(['member', 'mentor'])
             ->where(function ($query) use ($userId) {
-                $query->where('user_id', $userId)
+                $query->where('member_id', $userId)
                       ->orWhere('mentor_id', $userId);
             })
-            ->where('session_date', '>=', now())
-            ->where('status', 'confirmed')
-            ->orderBy('session_date', 'asc')
+            ->where('schedule', '>=', now())
+            ->whereIn('status', ['scheduled', 'pending'])
+            ->orderBy('schedule', 'asc')
             ->limit($limit)
             ->get();
     }
@@ -160,7 +160,7 @@ class MentoringService
 
         if ($userId) {
             $query->where(function ($q) use ($userId) {
-                $q->where('user_id', $userId)
+                $q->where('member_id', $userId)
                   ->orWhere('mentor_id', $userId);
             });
         }
@@ -168,7 +168,7 @@ class MentoringService
         return [
             'total'     => (clone $query)->count(),
             'pending'   => (clone $query)->where('status', 'pending')->count(),
-            'confirmed' => (clone $query)->where('status', 'confirmed')->count(),
+            'scheduled' => (clone $query)->where('status', 'scheduled')->count(),
             'completed' => (clone $query)->where('status', 'completed')->count(),
             'cancelled' => (clone $query)->where('status', 'cancelled')->count(),
         ];

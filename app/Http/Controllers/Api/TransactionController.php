@@ -58,7 +58,7 @@ class TransactionController extends Controller
     public function index(Request $request): JsonResponse
     {
         $transactions = $this->transactionService->getUserTransactions(
-            $request->user(),
+            $request->user()->id,
             $request->all()
         );
 
@@ -94,18 +94,20 @@ class TransactionController extends Controller
         // Cek akses dengan Policy
         $this->authorize('create', Transaction::class);
 
-        $course = Course::findOrFail($courseId);
-        $result = $this->transactionService->createCourseTransaction(
-            $request->user(),
-            $course,
-            $request->validated()
-        );
+        try {
+            $course = Course::findOrFail($courseId);
+            $validated = $request->validated();
+            
+            $result = $this->transactionService->createCourseTransaction(
+                $course,
+                $request->user(),
+                $validated['payment_method']
+            );
 
-        if (!$result['success']) {
-            return $this->errorResponse($result['message'], $result['code'] ?? 422);
+            return $this->createdResponse($result, 'Transaksi berhasil dibuat');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
         }
-
-        return $this->createdResponse($result['data'], 'Transaksi berhasil dibuat');
     }
 
     /*
@@ -124,16 +126,19 @@ class TransactionController extends Controller
         // Cek akses dengan Policy
         $this->authorize('create', Transaction::class);
 
-        $result = $this->transactionService->createSubscriptionTransaction(
-            $request->user(),
-            $request->validated()
-        );
+        try {
+            $validated = $request->validated();
+            
+            $result = $this->transactionService->createSubscriptionTransaction(
+                $request->user(),
+                $validated['plan'],
+                $validated['payment_method']
+            );
 
-        if (!$result['success']) {
-            return $this->errorResponse($result['message'], $result['code'] ?? 422);
+            return $this->createdResponse($result, 'Transaksi langganan berhasil dibuat');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
         }
-
-        return $this->createdResponse($result['data'], 'Transaksi langganan berhasil dibuat');
     }
 
     /*
@@ -157,18 +162,19 @@ class TransactionController extends Controller
         // Cek akses dengan Policy
         $this->authorize('create', Transaction::class);
 
-        $session = MentoringSession::findOrFail($sessionId);
-        $result = $this->transactionService->createMentoringTransaction(
-            $request->user(),
-            $session,
-            $validated
-        );
+        try {
+            $session = MentoringSession::findOrFail($sessionId);
+            
+            $result = $this->transactionService->createMentoringTransaction(
+                $session,
+                $request->user(),
+                $validated['payment_method']
+            );
 
-        if (!$result['success']) {
-            return $this->errorResponse($result['message'], $result['code'] ?? 422);
+            return $this->createdResponse($result, 'Transaksi mentoring berhasil dibuat');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
         }
-
-        return $this->createdResponse($result['data'], 'Transaksi mentoring berhasil dibuat');
     }
 
     /*

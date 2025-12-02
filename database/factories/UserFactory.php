@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * 
+ * Database role enum: student, mentor, admin, corporate
  */
 class UserFactory extends Factory
 {
@@ -29,6 +31,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => 'student', // Default role
         ];
     }
 

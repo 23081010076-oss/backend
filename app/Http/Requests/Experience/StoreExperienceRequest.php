@@ -11,16 +11,15 @@ use Illuminate\Foundation\Http\FormRequest;
  * 
  * FUNGSI: Memvalidasi data ketika user menambah pengalaman baru.
  * 
- * FIELD YANG DIVALIDASI:
- * - type         = Jenis: work/education/volunteer/internship (wajib)
- * - title        = Jabatan/posisi (wajib)
- * - organization = Nama organisasi/perusahaan (wajib)
- * - location     = Lokasi (opsional)
- * - start_date   = Tanggal mulai (wajib)
- * - end_date     = Tanggal selesai (opsional, harus >= start_date)
- * - is_current   = Masih aktif? (opsional)
- * - description  = Deskripsi (opsional)
- * - skills       = Skill yang digunakan (opsional)
+ * FIELD YANG DIVALIDASI (sesuai database):
+ * - type            = Jenis: work/internship/volunteer (wajib)
+ * - title           = Jabatan/posisi (wajib)
+ * - company         = Nama perusahaan (opsional)
+ * - level           = Level (opsional)
+ * - start_date      = Tanggal mulai (opsional)
+ * - end_date        = Tanggal selesai (opsional, harus >= start_date)
+ * - description     = Deskripsi (opsional)
+ * - certificate_url = URL sertifikat (opsional)
  */
 class StoreExperienceRequest extends FormRequest
 {
@@ -39,17 +38,16 @@ class StoreExperienceRequest extends FormRequest
     {
         return [
             // FIELD WAJIB
-            'type'         => 'required|in:work,education,volunteer,internship',
-            'title'        => 'required|string|max:255',
-            'organization' => 'required|string|max:255',
-            'start_date'   => 'required|date',
+            'type'            => 'required|in:work,internship,volunteer',
+            'title'           => 'required|string|max:255',
             
             // FIELD OPSIONAL
-            'location'    => 'nullable|string|max:255',
-            'end_date'    => 'nullable|date|after_or_equal:start_date',
-            'is_current'  => 'nullable|boolean',
-            'description' => 'nullable|string',
-            'skills'      => 'nullable|string',
+            'company'         => 'nullable|string|max:255',
+            'level'           => 'nullable|string|max:255',
+            'start_date'      => 'nullable|date',
+            'end_date'        => 'nullable|date|after_or_equal:start_date',
+            'description'     => 'nullable|string',
+            'certificate_url' => 'nullable|url|max:255',
         ];
     }
 
@@ -59,18 +57,17 @@ class StoreExperienceRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'type.required'         => 'Jenis pengalaman wajib dipilih',
-            'type.in'               => 'Jenis harus work, education, volunteer, atau internship',
-            'title.required'        => 'Jabatan/posisi wajib diisi',
-            'title.max'             => 'Jabatan maksimal 255 karakter',
-            'organization.required' => 'Nama organisasi wajib diisi',
-            'organization.max'      => 'Nama organisasi maksimal 255 karakter',
-            'start_date.required'   => 'Tanggal mulai wajib diisi',
-            'start_date.date'       => 'Format tanggal mulai tidak valid',
-            'location.max'          => 'Lokasi maksimal 255 karakter',
-            'end_date.date'         => 'Format tanggal selesai tidak valid',
+            'type.required'           => 'Jenis pengalaman wajib dipilih',
+            'type.in'                 => 'Jenis harus work, internship, atau volunteer',
+            'title.required'          => 'Jabatan/posisi wajib diisi',
+            'title.max'               => 'Jabatan maksimal 255 karakter',
+            'company.max'             => 'Nama perusahaan maksimal 255 karakter',
+            'level.max'               => 'Level maksimal 255 karakter',
+            'start_date.date'         => 'Format tanggal mulai tidak valid',
+            'end_date.date'           => 'Format tanggal selesai tidak valid',
             'end_date.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai',
-            'is_current.boolean'    => 'Status aktif harus true atau false',
+            'certificate_url.url'     => 'Format URL sertifikat tidak valid',
+            'certificate_url.max'     => 'URL sertifikat maksimal 255 karakter',
         ];
     }
 }

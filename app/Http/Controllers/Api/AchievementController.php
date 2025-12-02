@@ -93,8 +93,8 @@ class AchievementController extends Controller
         $this->authorize('create', Achievement::class);
 
         $achievement = $this->achievementService->createAchievement(
-            Auth::user(),
-            $request->validated()
+            $request->validated(),
+            Auth::user()
         );
 
         return $this->createdResponse($achievement, 'Prestasi berhasil ditambahkan');

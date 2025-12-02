@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 /**
@@ -16,28 +17,20 @@ use Illuminate\Support\Str;
  * 
  * FUNGSI: Menangani logika bisnis untuk manajemen artikel.
  * 
- * KENAPA PAKAI SERVICE?
- * - Controller jadi bersih (hanya terima request & return response)
- * - Logika upload gambar, generate slug ada di sini
- * - Mudah dipakai ulang di tempat lain
+ * Database columns: id, author_id, title, content, category, author (string), timestamps
  */
 class ArticleService
 {
     /**
      * Ambil daftar artikel dengan filter
      */
-    public function getArticles(array $filters = [], bool $isAdmin = false, int $perPage = 15): LengthAwarePaginator
+    public function getArticles(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Article::with('author');
+        $query = Article::with('authorUser');
 
         // Filter berdasarkan kategori
         if (!empty($filters['category'])) {
             $query->where('category', $filters['category']);
-        }
-
-        // Filter berdasarkan tag
-        if (!empty($filters['tag'])) {
-            $query->where('tags', 'like', '%' . $filters['tag'] . '%');
         }
 
         // Pencarian berdasarkan judul atau konten
@@ -49,11 +42,6 @@ class ArticleService
             });
         }
 
-        // Hanya artikel published untuk non-admin
-        if (!$isAdmin) {
-            $query->where('status', 'published');
-        }
-
         return $query->latest()->paginate($perPage);
     }
 
@@ -62,23 +50,18 @@ class ArticleService
      */
     public function createArticle(array $data, User $author, $imageFile = null): Article
     {
-        // Handle upload gambar
-        if ($imageFile) {
-            $path = $imageFile->store('articles', 'public');
-            $data['image_url'] = Storage::url($path);
-        }
-
-        // Generate slug unik
-        $data['slug'] = $this->generateUniqueSlug($data['title']);
         $data['author_id'] = $author->id;
-
-        // Set default status jika tidak ada
-        if (!isset($data['status'])) {
-            $data['status'] = 'draft';
+        
+        // Set author name if not provided
+        if (!isset($data['author'])) {
+            $data['author'] = $author->name;
         }
 
         $article = Article::create($data);
-        $article->load('author');
+        $article->load('authorUser');
+        
+        // Clear cache setelah create
+        $this->clearCache();
 
         return $article;
     }
@@ -88,23 +71,11 @@ class ArticleService
      */
     public function updateArticle(Article $article, array $data, $imageFile = null): Article
     {
-        // Handle upload gambar baru
-        if ($imageFile) {
-            // Hapus gambar lama
-            $this->deleteImage($article->image_url);
-            
-            // Upload gambar baru
-            $path = $imageFile->store('articles', 'public');
-            $data['image_url'] = Storage::url($path);
-        }
-
-        // Update slug jika judul berubah
-        if (isset($data['title']) && $data['title'] !== $article->title) {
-            $data['slug'] = $this->generateUniqueSlug($data['title']);
-        }
-
         $article->update($data);
-        $article->load('author');
+        $article->load('authorUser');
+        
+        // Clear cache setelah update
+        $this->clearCache();
 
         return $article;
     }
@@ -114,30 +85,25 @@ class ArticleService
      */
     public function deleteArticle(Article $article): bool
     {
-        // Hapus gambar jika ada
-        $this->deleteImage($article->image_url);
+        $result = $article->delete();
+        
+        // Clear cache setelah delete
+        $this->clearCache();
 
-        return $article->delete();
+        return $result;
     }
 
     /**
-     * Tambah view count
-     */
-    public function incrementViews(Article $article): void
-    {
-        $article->increment('views');
-    }
-
-    /**
-     * Ambil artikel populer
+     * Ambil artikel populer (cached 15 menit)
      */
     public function getPopularArticles(int $limit = 5): Collection
     {
-        return Article::with('author')
-            ->where('status', 'published')
-            ->orderBy('views', 'desc')
-            ->limit($limit)
-            ->get();
+        return Cache::remember("articles:popular:{$limit}", 900, function () use ($limit) {
+            return Article::with('authorUser')
+                ->latest()
+                ->limit($limit)
+                ->get();
+        });
     }
 
     /**
@@ -145,31 +111,18 @@ class ArticleService
      */
     public function getByCategory(string $category, int $perPage = 15): LengthAwarePaginator
     {
-        return Article::with('author')
+        return Article::with('authorUser')
             ->where('category', $category)
-            ->where('status', 'published')
             ->latest()
             ->paginate($perPage);
     }
 
     /**
-     * Generate slug unik
+     * Clear semua cache articles
      */
-    private function generateUniqueSlug(string $title): string
+    public function clearCache(): void
     {
-        return Str::slug($title) . '-' . Str::random(5);
-    }
-
-    /**
-     * Hapus file gambar
-     */
-    private function deleteImage(?string $imageUrl): void
-    {
-        if ($imageUrl) {
-            $path = str_replace('/storage/', '', $imageUrl);
-            if (Storage::disk('public')->exists($path)) {
-                Storage::disk('public')->delete($path);
-            }
-        }
+        Cache::forget('articles:popular:5');
+        Cache::forget('articles:popular:10');
     }
 }

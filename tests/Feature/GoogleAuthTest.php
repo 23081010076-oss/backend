@@ -47,6 +47,14 @@ class GoogleAuthTest extends TestCase
         $googleUser = Mockery::mock('Laravel\Socialite\Two\User');
         $googleUser->shouldReceive('getId')
             ->andReturn('123456789');
+        $googleUser->shouldReceive('getEmail')
+            ->andReturn('testuser@gmail.com');
+        $googleUser->shouldReceive('getName')
+            ->andReturn('Test User');
+        $googleUser->shouldReceive('getAvatar')
+            ->andReturn('https://example.com/avatar.jpg');
+        
+        // Mock properties for backward compatibility
         $googleUser->id = '123456789';
         $googleUser->name = 'Test User';
         $googleUser->email = 'testuser@gmail.com';
@@ -103,6 +111,13 @@ class GoogleAuthTest extends TestCase
         $googleUser = Mockery::mock('Laravel\Socialite\Two\User');
         $googleUser->shouldReceive('getId')
             ->andReturn('987654321');
+        $googleUser->shouldReceive('getEmail')
+            ->andReturn('existing@gmail.com');
+        $googleUser->shouldReceive('getName')
+            ->andReturn('Existing User');
+        $googleUser->shouldReceive('getAvatar')
+            ->andReturn('https://example.com/avatar.jpg');
+        
         $googleUser->id = '987654321';
         $googleUser->name = 'Existing User';
         $googleUser->email = 'existing@gmail.com';
@@ -138,6 +153,13 @@ class GoogleAuthTest extends TestCase
         $googleUser = Mockery::mock('Laravel\Socialite\Two\User');
         $googleUser->shouldReceive('getId')
             ->andReturn('token-test-123');
+        $googleUser->shouldReceive('getEmail')
+            ->andReturn('tokentest@gmail.com');
+        $googleUser->shouldReceive('getName')
+            ->andReturn('Token Test User');
+        $googleUser->shouldReceive('getAvatar')
+            ->andReturn('https://example.com/avatar.jpg');
+        
         $googleUser->id = 'token-test-123';
         $googleUser->name = 'Token Test User';
         $googleUser->email = 'tokentest@gmail.com';
@@ -200,6 +222,13 @@ class GoogleAuthTest extends TestCase
         $googleUser = Mockery::mock('Laravel\Socialite\Two\User');
         $googleUser->shouldReceive('getId')
             ->andReturn('blocked-user-123');
+        $googleUser->shouldReceive('getEmail')
+            ->andReturn('user@unauthorized.com');
+        $googleUser->shouldReceive('getName')
+            ->andReturn('Blocked User');
+        $googleUser->shouldReceive('getAvatar')
+            ->andReturn('https://example.com/avatar.jpg');
+        
         $googleUser->id = 'blocked-user-123';
         $googleUser->name = 'Blocked User';
         $googleUser->email = 'user@unauthorized.com';
@@ -239,6 +268,13 @@ class GoogleAuthTest extends TestCase
         $googleUser = Mockery::mock('Laravel\Socialite\Two\User');
         $googleUser->shouldReceive('getId')
             ->andReturn('allowed-user-123');
+        $googleUser->shouldReceive('getEmail')
+            ->andReturn('student@university.edu');
+        $googleUser->shouldReceive('getName')
+            ->andReturn('Allowed User');
+        $googleUser->shouldReceive('getAvatar')
+            ->andReturn('https://example.com/avatar.jpg');
+        
         $googleUser->id = 'allowed-user-123';
         $googleUser->name = 'Allowed User';
         $googleUser->email = 'student@university.edu';

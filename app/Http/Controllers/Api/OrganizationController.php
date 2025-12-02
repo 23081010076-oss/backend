@@ -9,6 +9,7 @@ use App\Models\Organization;
 use App\Services\OrganizationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -52,7 +53,7 @@ class OrganizationController extends Controller
     {
         $this->authorize('viewAny', Organization::class);
 
-        $organizations = Organization::where('user_id', auth()->id())
+        $organizations = Organization::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->paginate(15);
         

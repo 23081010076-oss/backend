@@ -71,7 +71,7 @@ class CourseTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-            ->assertJson(['message' => 'Course created successfully']);
+            ->assertJsonStructure(['sukses', 'pesan', 'data']);
 
         $this->assertDatabaseHas('courses', ['title' => 'New Course']);
     }

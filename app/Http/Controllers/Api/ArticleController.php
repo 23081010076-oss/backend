@@ -65,13 +65,10 @@ class ArticleController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $article = Article::with('author')->findOrFail($id);
+        $article = Article::with('authorUser')->findOrFail($id);
 
         // Cek akses dengan Policy (bisa dilihat guest jika published)
         $this->authorize('view', $article);
-
-        // Increment views via service
-        $this->articleService->incrementViews($article);
 
         return $this->successResponse($article, 'Detail artikel berhasil diambil');
     }
@@ -93,8 +90,8 @@ class ArticleController extends Controller
         $this->authorize('create', Article::class);
 
         $article = $this->articleService->createArticle(
-            Auth::user(),
             $request->validated(),
+            Auth::user(),
             $request->file('image')
         );
 
@@ -145,17 +142,18 @@ class ArticleController extends Controller
 
     /**
      * Lihat artikel berdasarkan slug
+     * 
+     * @deprecated Kolom slug tidak ada di database
      */
     public function showBySlug(string $slug): JsonResponse
     {
-        $article = Article::with('author')
-            ->where('slug', $slug)
+        // Kolom slug tidak ada di database, cari berdasarkan title
+        $article = Article::with('authorUser')
+            ->where('title', 'like', "%{$slug}%")
             ->firstOrFail();
 
         // Cek akses dengan Policy
         $this->authorize('view', $article);
-
-        $this->articleService->incrementViews($article);
 
         return $this->successResponse($article, 'Detail artikel berhasil diambil');
     }
@@ -176,7 +174,8 @@ class ArticleController extends Controller
      */
     public function byCategory(string $category, Request $request): JsonResponse
     {
-        $articles = $this->articleService->getByCategory($category, $request->all());
+        $perPage = $request->get('per_page', 15);
+        $articles = $this->articleService->getByCategory($category, $perPage);
 
         return $this->paginatedResponse($articles, "Artikel kategori '{$category}' berhasil diambil");
     }

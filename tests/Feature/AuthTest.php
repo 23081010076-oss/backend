@@ -24,7 +24,8 @@ class AuthTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'message',
+                'sukses',
+                'pesan',
                 'data' => [
                     'id',
                     'name',
@@ -51,7 +52,8 @@ class AuthTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'message',
+                'sukses',
+                'pesan',
                 'data' => [
                     'user',
                     'token',
@@ -69,7 +71,10 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-            ->assertJson(['message' => 'Logout successful']);
+            ->assertJson([
+                'sukses' => true,
+                'pesan' => 'Logout berhasil',
+            ]);
     }
 
     public function test_user_can_view_profile()
@@ -83,7 +88,8 @@ class AuthTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'message',
+                'sukses',
+                'pesan',
                 'data' => [
                     'user' => [
                         'id',

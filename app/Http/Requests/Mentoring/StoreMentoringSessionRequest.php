@@ -11,15 +11,12 @@ use Illuminate\Foundation\Http\FormRequest;
  * 
  * FUNGSI: Memvalidasi data ketika user membuat sesi mentoring baru.
  * 
- * FIELD YANG DIVALIDASI:
+ * FIELD YANG DIVALIDASI (sesuai database):
  * - mentor_id     = ID mentor (wajib, harus valid)
- * - session_date  = Tanggal & waktu sesi (wajib, harus di masa depan)
- * - duration      = Durasi dalam menit (wajib, 30-180 menit)
- * - topic         = Topik pembahasan (wajib)
- * - notes         = Catatan tambahan (opsional)
- * - meeting_url   = Link meeting (opsional)
- * - session_type  = Jenis: online/offline (opsional)
- * - location      = Lokasi jika offline (opsional)
+ * - type          = Jenis: academic/life_plan (wajib)
+ * - schedule      = Tanggal & waktu sesi (opsional)
+ * - meeting_link  = Link meeting (opsional)
+ * - payment_method = Metode pembayaran (opsional)
  */
 class StoreMentoringSessionRequest extends FormRequest
 {
@@ -38,16 +35,13 @@ class StoreMentoringSessionRequest extends FormRequest
     {
         return [
             // FIELD WAJIB
-            'mentor_id'    => 'required|exists:users,id',
-            'session_date' => 'required|date|after:now',
-            'duration'     => 'required|integer|min:30|max:180',
-            'topic'        => 'required|string|max:255',
+            'mentor_id'      => 'required|exists:users,id',
+            'type'           => 'required|in:academic,life_plan',
             
             // FIELD OPSIONAL
-            'notes'        => 'nullable|string',
-            'meeting_url'  => 'nullable|url',
-            'session_type' => 'nullable|in:online,offline',
-            'location'     => 'nullable|string|max:255',
+            'schedule'       => 'nullable|date|after:now',
+            'meeting_link'   => 'nullable|url',
+            'payment_method' => 'nullable|in:qris,bank,va,manual',
         ];
     }
 
@@ -57,20 +51,14 @@ class StoreMentoringSessionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'mentor_id.required'    => 'Mentor wajib dipilih',
-            'mentor_id.exists'      => 'Mentor tidak ditemukan',
-            'session_date.required' => 'Tanggal sesi wajib diisi',
-            'session_date.date'     => 'Format tanggal tidak valid',
-            'session_date.after'    => 'Tanggal sesi harus di masa depan',
-            'duration.required'     => 'Durasi wajib diisi',
-            'duration.integer'      => 'Durasi harus berupa angka',
-            'duration.min'          => 'Durasi minimal 30 menit',
-            'duration.max'          => 'Durasi maksimal 180 menit (3 jam)',
-            'topic.required'        => 'Topik pembahasan wajib diisi',
-            'topic.max'             => 'Topik maksimal 255 karakter',
-            'meeting_url.url'       => 'Format URL meeting tidak valid',
-            'session_type.in'       => 'Jenis sesi harus online atau offline',
-            'location.max'          => 'Lokasi maksimal 255 karakter',
+            'mentor_id.required'  => 'Mentor wajib dipilih',
+            'mentor_id.exists'    => 'Mentor tidak ditemukan',
+            'type.required'       => 'Jenis sesi wajib dipilih',
+            'type.in'             => 'Jenis sesi harus academic atau life_plan',
+            'schedule.date'       => 'Format tanggal tidak valid',
+            'schedule.after'      => 'Jadwal sesi harus di masa depan',
+            'meeting_link.url'    => 'Format URL meeting tidak valid',
+            'payment_method.in'   => 'Metode pembayaran tidak valid',
         ];
     }
 }

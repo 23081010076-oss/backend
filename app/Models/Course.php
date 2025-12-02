@@ -40,4 +40,14 @@ class Course extends Model
                     ->withPivot('progress', 'completed', 'certificate_url')
                     ->withTimestamps();
     }
+
+    public function reviews()
+    {
+        return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    public function transactions()
+    {
+        return $this->morphMany(Transaction::class, 'transactionable');
+    }
 }

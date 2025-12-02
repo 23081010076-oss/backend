@@ -12,9 +12,10 @@ use App\Models\Article;
  * 
  * FUNGSI: Mengatur siapa yang boleh melakukan apa terhadap artikel.
  * 
+ * Database columns: id, author_id, title, content, category, author (string), timestamps
+ * 
  * ATURAN:
- * - Semua orang bisa lihat artikel yang published
- * - Admin bisa lihat semua artikel (termasuk draft)
+ * - Semua orang bisa lihat artikel
  * - Admin dan mentor bisa membuat artikel
  * - Penulis atau admin yang bisa edit/hapus
  */
@@ -31,23 +32,11 @@ class ArticlePolicy
 
     /**
      * Apakah user boleh melihat artikel tertentu?
-     * → Artikel published: semua boleh
-     * → Artikel draft: hanya penulis atau admin
+     * → Semua artikel bisa dilihat semua orang (no status column in DB)
      */
     public function view(?User $user, Article $article): bool
     {
-        // Artikel published bisa dilihat semua orang
-        if ($article->status === 'published') {
-            return true;
-        }
-
-        // Artikel draft hanya bisa dilihat penulis atau admin
-        if ($user) {
-            return $user->id === $article->author_id 
-                || $user->role === 'admin';
-        }
-
-        return false;
+        return true;
     }
 
     /**
@@ -77,14 +66,5 @@ class ArticlePolicy
     {
         return $user->id === $article->author_id 
             || $user->role === 'admin';
-    }
-
-    /**
-     * Apakah user boleh mempublish artikel?
-     * → Admin saja yang boleh
-     */
-    public function publish(User $user, Article $article): bool
-    {
-        return $user->role === 'admin';
     }
 }

@@ -7,6 +7,7 @@ use App\Models\ScholarshipApplication;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * ==========================================================================
@@ -23,37 +24,42 @@ use Illuminate\Support\Facades\Storage;
 class ScholarshipService
 {
     /**
-     * Ambil daftar beasiswa dengan filter
+     * Ambil daftar beasiswa dengan filter (cached 10 menit)
      */
     public function getScholarships(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Scholarship::with(['organization']);
+        // Generate cache key berdasarkan filter
+        $cacheKey = 'scholarships:' . md5(json_encode($filters) . $perPage . request('page', 1));
+        
+        return Cache::remember($cacheKey, 600, function () use ($filters, $perPage) {
+            $query = Scholarship::with(['organization']);
 
-        // Filter berdasarkan status
-        if (!empty($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
+            // Filter berdasarkan status
+            if (!empty($filters['status'])) {
+                $query->where('status', $filters['status']);
+            }
 
-        // Filter berdasarkan lokasi
-        if (!empty($filters['location'])) {
-            $query->where('location', 'like', '%' . $filters['location'] . '%');
-        }
+            // Filter berdasarkan lokasi
+            if (!empty($filters['location'])) {
+                $query->where('location', 'like', '%' . $filters['location'] . '%');
+            }
 
-        // Filter berdasarkan bidang studi
-        if (!empty($filters['study_field'])) {
-            $query->where('study_field', 'like', '%' . $filters['study_field'] . '%');
-        }
+            // Filter berdasarkan bidang studi
+            if (!empty($filters['study_field'])) {
+                $query->where('study_field', 'like', '%' . $filters['study_field'] . '%');
+            }
 
-        // Pencarian
-        if (!empty($filters['search'])) {
-            $search = $filters['search'];
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
+            // Pencarian
+            if (!empty($filters['search'])) {
+                $search = $filters['search'];
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
 
-        return $query->paginate($perPage);
+            return $query->paginate($perPage);
+        });
     }
 
     /**
@@ -62,6 +68,9 @@ class ScholarshipService
     public function createScholarship(array $data): Scholarship
     {
         $scholarship = Scholarship::create($data);
+        
+        // Clear cache setelah create
+        $this->clearCache();
         
         return $scholarship->load('organization');
     }
@@ -73,6 +82,9 @@ class ScholarshipService
     {
         $scholarship->update($data);
         
+        // Clear cache setelah update
+        $this->clearCache();
+        
         return $scholarship->fresh()->load('organization');
     }
 
@@ -81,7 +93,12 @@ class ScholarshipService
      */
     public function deleteScholarship(Scholarship $scholarship): bool
     {
-        return $scholarship->delete();
+        $result = $scholarship->delete();
+        
+        // Clear cache setelah delete
+        $this->clearCache();
+        
+        return $result;
     }
 
     /**
@@ -151,22 +168,32 @@ class ScholarshipService
     }
 
     /**
-     * Ambil statistik beasiswa
+     * Ambil statistik beasiswa (cached 30 menit)
      */
     public function getStatistics(): array
     {
-        return [
-            'total'       => Scholarship::count(),
-            'open'        => Scholarship::where('status', 'open')->count(),
-            'coming_soon' => Scholarship::where('status', 'coming_soon')->count(),
-            'closed'      => Scholarship::where('status', 'closed')->count(),
-            'applications' => [
-                'total'    => ScholarshipApplication::count(),
-                'submitted'=> ScholarshipApplication::where('status', 'submitted')->count(),
-                'review'   => ScholarshipApplication::where('status', 'review')->count(),
-                'accepted' => ScholarshipApplication::where('status', 'accepted')->count(),
-                'rejected' => ScholarshipApplication::where('status', 'rejected')->count(),
-            ],
-        ];
+        return Cache::remember('scholarships:statistics', 1800, function () {
+            return [
+                'total'       => Scholarship::count(),
+                'open'        => Scholarship::where('status', 'open')->count(),
+                'coming_soon' => Scholarship::where('status', 'coming_soon')->count(),
+                'closed'      => Scholarship::where('status', 'closed')->count(),
+                'applications' => [
+                    'total'    => ScholarshipApplication::count(),
+                    'submitted'=> ScholarshipApplication::where('status', 'submitted')->count(),
+                    'review'   => ScholarshipApplication::where('status', 'review')->count(),
+                    'accepted' => ScholarshipApplication::where('status', 'accepted')->count(),
+                    'rejected' => ScholarshipApplication::where('status', 'rejected')->count(),
+                ],
+            ];
+        });
+    }
+
+    /**
+     * Clear semua cache scholarships
+     */
+    public function clearCache(): void
+    {
+        Cache::forget('scholarships:statistics');
     }
 }

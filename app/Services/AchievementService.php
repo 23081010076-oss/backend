@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Collection;
  * 
  * FUNGSI: Menangani logika bisnis untuk manajemen prestasi.
  * 
+ * Database columns: id, user_id, title, description, organization, year, timestamps
+ * 
  * KENAPA PAKAI SERVICE?
  * - Agar controller tetap bersih dan ringkas
  * - Logika bisnis terpusat di satu tempat
@@ -28,12 +30,17 @@ class AchievementService
     {
         $query = Achievement::where('user_id', $userId);
 
-        // Filter berdasarkan tipe
-        if (!empty($filters['type'])) {
-            $query->where('type', $filters['type']);
+        // Filter berdasarkan tahun
+        if (!empty($filters['year'])) {
+            $query->where('year', $filters['year']);
         }
 
-        return $query->orderBy('date', 'desc')->paginate($perPage);
+        // Search by title
+        if (!empty($filters['search'])) {
+            $query->where('title', 'like', '%' . $filters['search'] . '%');
+        }
+
+        return $query->orderBy('year', 'desc')->paginate($perPage);
     }
 
     /**
@@ -70,12 +77,7 @@ class AchievementService
     public function getStatistics(int $userId): array
     {
         return [
-            'total'        => Achievement::where('user_id', $userId)->count(),
-            'certificates' => Achievement::where('user_id', $userId)->where('type', 'certificate')->count(),
-            'awards'       => Achievement::where('user_id', $userId)->where('type', 'award')->count(),
-            'publications' => Achievement::where('user_id', $userId)->where('type', 'publication')->count(),
-            'projects'     => Achievement::where('user_id', $userId)->where('type', 'project')->count(),
-            'other'        => Achievement::where('user_id', $userId)->where('type', 'other')->count(),
+            'total' => Achievement::where('user_id', $userId)->count(),
         ];
     }
 
@@ -85,7 +87,7 @@ class AchievementService
     public function getRecentAchievements(int $userId, int $limit = 5): Collection
     {
         return Achievement::where('user_id', $userId)
-            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get();
     }

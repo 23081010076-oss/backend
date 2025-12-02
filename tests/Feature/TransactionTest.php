@@ -33,13 +33,9 @@ class TransactionTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'message',
-                'data' => [
-                    'id',
-                    'transaction_code',
-                    'amount',
-                    'status',
-                ],
+                'sukses',
+                'pesan',
+                'data',
             ]);
         
         $this->assertDatabaseHas('transactions', [

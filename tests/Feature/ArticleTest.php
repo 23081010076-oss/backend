@@ -59,7 +59,7 @@ class ArticleTest extends TestCase
             'author_id' => $user->id,
             'title' => 'Test Article',
             'content' => 'Content',
-            'status' => 'published',
+            'category' => 'Tech',
         ]);
 
         $response = $this->getJson("/api/articles/{$article->id}");

@@ -93,8 +93,8 @@ class ExperienceController extends Controller
         $this->authorize('create', Experience::class);
 
         $experience = $this->experienceService->createExperience(
-            Auth::user(),
-            $request->validated()
+            $request->validated(),
+            Auth::user()
         );
 
         return $this->createdResponse($experience, 'Pengalaman berhasil ditambahkan');
