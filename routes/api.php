@@ -107,14 +107,17 @@ Route::middleware('auth:api')->group(function () {
     // ======================================================================
     // USER MANAGEMENT (Admin Only)
     // ======================================================================
-    Route::middleware('role:admin')->group(function () {
-        Route::apiResource('admin/users', UserController::class)->names([
-            'index' => 'admin.users.index',
-            'store' => 'admin.users.store',
-            'show' => 'admin.users.show',
-            'update' => 'admin.users.update',
-            'destroy' => 'admin.users.destroy',
-        ]);
+    Route::middleware('role:admin')->prefix('admin/users')->name('admin.users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('/statistics', [UserController::class, 'statistics'])->name('statistics');
+        Route::get('/mentors', [UserController::class, 'mentors'])->name('mentors');
+        Route::get('/{id}', [UserController::class, 'show'])->name('show');
+        Route::put('/{id}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
+        Route::put('/{id}/status', [UserController::class, 'updateStatus'])->name('update-status');
+        Route::post('/{id}/suspend', [UserController::class, 'suspend'])->name('suspend');
+        Route::post('/{id}/activate', [UserController::class, 'activate'])->name('activate');
     });
 
     // ======================================================================
@@ -174,10 +177,12 @@ Route::middleware('auth:api')->group(function () {
     // MENTORING SESSIONS
     // ======================================================================
     Route::apiResource('mentoring-sessions', MentoringSessionController::class);
-    Route::post('/mentoring-sessions/{id}/schedule', [MentoringSessionController::class, 'schedule'])
+    Route::get('/mentoring-sessions/{mentorId}/schedule', [MentoringSessionController::class, 'schedule'])
         ->name('mentoring-sessions.schedule');
     Route::put('/mentoring-sessions/{id}/status', [MentoringSessionController::class, 'updateStatus'])
         ->name('mentoring-sessions.update-status');
+    Route::post('/mentoring-sessions/{id}/feedback', [MentoringSessionController::class, 'feedback'])
+        ->name('mentoring-sessions.feedback');
     Route::get('/my-mentoring-sessions', [MentoringSessionController::class, 'mySessions'])
         ->name('my-mentoring-sessions');
 
@@ -209,12 +214,18 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/articles/{id}', [ArticleController::class, 'destroy'])->name('articles.destroy');
     });
 
+    // Article additional routes (authenticated)
+    Route::get('/articles/popular', [ArticleController::class, 'popular'])->name('articles.popular');
+    Route::get('/articles/category/{category}', [ArticleController::class, 'byCategory'])->name('articles.by-category');
+
     // ======================================================================
     // CORPORATE CONTACT MANAGEMENT (Admin Only)
     // ======================================================================
     Route::middleware('role:admin')->prefix('corporate-contacts')->name('corporate-contacts.')->group(function () {
         Route::get('/', [CorporateContactController::class, 'index'])->name('index');
+        Route::get('/statistics', [CorporateContactController::class, 'statistics'])->name('statistics');
         Route::get('/{id}', [CorporateContactController::class, 'show'])->name('show');
+        Route::put('/{id}', [CorporateContactController::class, 'update'])->name('update');
         Route::put('/{id}/status', [CorporateContactController::class, 'updateStatus'])->name('update-status');
         Route::delete('/{id}', [CorporateContactController::class, 'destroy'])->name('destroy');
     });
@@ -224,6 +235,12 @@ Route::middleware('auth:api')->group(function () {
     // ======================================================================
     Route::prefix('transactions')->name('transactions.')->group(function () {
         Route::get('/', [TransactionController::class, 'index'])->name('index');
+
+        // Admin Only - harus di atas route dengan parameter {id}
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/statistics', [TransactionController::class, 'statistics'])->name('statistics');
+        });
+
         Route::get('/{id}', [TransactionController::class, 'show'])->name('show');
 
         // Create Transactions
@@ -243,7 +260,6 @@ Route::middleware('auth:api')->group(function () {
         // Admin Only
         Route::middleware('role:admin')->group(function () {
             Route::post('/{id}/confirm', [TransactionController::class, 'confirmPayment'])->name('confirm-payment');
-            Route::get('/statistics', [TransactionController::class, 'statistics'])->name('statistics');
         });
     });
 

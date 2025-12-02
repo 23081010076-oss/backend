@@ -204,4 +204,17 @@ class MentoringSessionController extends Controller
 
         return $this->successResponse($schedule, 'Jadwal mentor berhasil diambil');
     }
+
+    /**
+     * Tampilkan sesi mentoring milik user yang sedang login
+     */
+    public function mySessions(Request $request): JsonResponse
+    {
+        $sessions = $this->mentoringService->getSessions(
+            Auth::user(),
+            $request->all()
+        );
+
+        return $this->paginatedResponse($sessions, 'Daftar sesi mentoring Anda berhasil diambil');
+    }
 }

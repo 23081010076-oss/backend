@@ -133,6 +133,29 @@ class CorporateContactController extends Controller
         return $this->successResponse(null, 'Corporate contact deleted successfully');
     }
 
+    /**
+     * Update the status of a corporate contact (admin only)
+     *
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function updateStatus(Request $request, int $id): JsonResponse
+    {
+        $contact = CorporateContact::findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => 'required|in:new,contacted,responded,closed',
+        ], [
+            'status.required' => 'Status harus diisi',
+            'status.in'       => 'Status harus salah satu dari: new, contacted, responded, closed',
+        ]);
+
+        $contact->update(['status' => $validated['status']]);
+
+        return $this->successResponse($contact, 'Corporate contact status updated successfully');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Statistics Methods
