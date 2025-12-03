@@ -126,6 +126,13 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('achievements', AchievementController::class);
     Route::apiResource('experiences', ExperienceController::class);
     Route::apiResource('organizations', OrganizationController::class);
+    
+    // Organization Logo Upload
+    Route::match(['post', 'put'], '/organizations/{id}/logo', [OrganizationController::class, 'uploadLogo'])
+        ->middleware('throttle:uploads')
+        ->name('organizations.upload-logo');
+    Route::delete('/organizations/{id}/logo', [OrganizationController::class, 'deleteLogo'])
+        ->name('organizations.delete-logo');
 
     // ======================================================================
     // SUBSCRIPTIONS

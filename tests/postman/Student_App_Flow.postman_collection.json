@@ -2558,6 +2558,53 @@
                                 ],
                                 "url": "{{baseUrl}}/organizations/5"
                             }
+                        },
+                        {
+                            "name": "Upload Organization Logo",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{adminToken}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "logo",
+                                            "type": "file",
+                                            "src": "",
+                                            "description": "File logo (jpeg, png, jpg, gif, svg) max 2MB"
+                                        }
+                                    ]
+                                },
+                                "url": "{{baseUrl}}/organizations/1/logo"
+                            },
+                            "description": "Upload logo untuk organisasi. Format: jpeg, png, jpg, gif, svg. Max 2MB."
+                        },
+                        {
+                            "name": "Delete Organization Logo",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{adminToken}}"
+                                    }
+                                ],
+                                "url": "{{baseUrl}}/organizations/1/logo"
+                            },
+                            "description": "Hapus logo organisasi"
                         }
                     ]
                 },

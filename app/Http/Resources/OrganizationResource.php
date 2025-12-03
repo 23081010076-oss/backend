@@ -20,6 +20,7 @@ class OrganizationResource extends JsonResource
             'phone' => $this->phone,
             'founded_year' => $this->founded_year,
             'logo_url' => $this->logo_url,
+            'logo_full_url' => $this->logo_url ? asset('storage/' . $this->logo_url) : null,
             'scholarship_count' => $this->scholarships_count ?? 0,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
