@@ -3,33 +3,34 @@
 namespace App\Swagger;
 
 /**
- * @OA\Post(
+  * @OA\Post(
  *     path="/api/corporate-contact",
  *     summary="Submit corporate inquiry",
  *     description="Submit corporate partnership/inquiry form (public)",
  *     operationId="submitCorporateContact",
  *     tags={"Corporate Contact"},
+ *
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
- *             required={"company_name","contact_name","email","message"},
- *             @OA\Property(property="company_name", type="string", example="PT ABC Technology"),
- *             @OA\Property(property="contact_name", type="string", example="John Doe"),
- *             @OA\Property(property="email", type="string", format="email", example="john@abc-tech.com"),
- *             @OA\Property(property="phone", type="string", example="08123456789"),
- *             @OA\Property(property="message", type="string", example="We are interested in corporate training partnership"),
- *             @OA\Property(property="company_size", type="string", enum={"1-10", "11-50", "51-200", "201-500", "500+"}, example="51-200"),
- *             @OA\Property(property="industry", type="string", example="Technology")
+ *             required={"name","email","message"},
+ *             @OA\Property(property="org_id", type="integer", nullable=true, example=1),
+ *             @OA\Property(property="name", type="string", example="John Doe"),
+ *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+ *             @OA\Property(property="message", type="string", example="We are interested in a corporate partnership.")
  *         )
  *     ),
+ *
  *     @OA\Response(
  *         response=201,
- *         description="Inquiry submitted successfully",
+ *         description="Corporate contact submitted successfully",
  *         @OA\JsonContent(
  *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Thank you for your inquiry. We will contact you soon.")
+ *             @OA\Property(property="message", type="string", example="Corporate contact submitted successfully. We will get back to you soon."),
+ *             @OA\Property(property="data", type="object")
  *         )
  *     ),
+ *
  *     @OA\Response(
  *         response=422,
  *         description="Validation error"

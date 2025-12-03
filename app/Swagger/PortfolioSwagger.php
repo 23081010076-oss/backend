@@ -173,8 +173,11 @@ namespace App\Swagger;
  *     ),
  *     @OA\RequestBody(
  *         @OA\JsonContent(
- *             @OA\Property(property="title", type="string"),
- *             @OA\Property(property="description", type="string")
+ *             required={"title"},
+ *             @OA\Property(property="title", type="string", example="Best Student Award2"),
+ *             @OA\Property(property="description", type="string", example="Awarded for academic excellence"),
+ *             @OA\Property(property="organization", type="string", example="University of Indonesia"),
+ *             @OA\Property(property="year", type="integer", example=2023)
  *         )
  *     ),
  *     @OA\Response(
