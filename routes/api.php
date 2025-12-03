@@ -124,7 +124,19 @@ Route::middleware('auth:api')->group(function () {
     // PORTFOLIO: ACHIEVEMENTS, EXPERIENCES, ORGANIZATIONS
     // ======================================================================
     Route::apiResource('achievements', AchievementController::class);
+    Route::match(['post', 'put'], '/achievements/{id}/certificate', [AchievementController::class, 'uploadCertificate'])
+        ->middleware('throttle:uploads')
+        ->name('achievements.upload-certificate');
+    Route::delete('/achievements/{id}/certificate', [AchievementController::class, 'deleteCertificate'])
+        ->name('achievements.delete-certificate');
+
     Route::apiResource('experiences', ExperienceController::class);
+    Route::match(['post', 'put'], '/experiences/{id}/certificate', [ExperienceController::class, 'uploadCertificate'])
+        ->middleware('throttle:uploads')
+        ->name('experiences.upload-certificate');
+    Route::delete('/experiences/{id}/certificate', [ExperienceController::class, 'deleteCertificate'])
+        ->name('experiences.delete-certificate');
+
     Route::apiResource('organizations', OrganizationController::class);
     
     // Organization Logo Upload

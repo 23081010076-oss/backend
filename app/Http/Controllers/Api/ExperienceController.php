@@ -9,6 +9,8 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 // Import Request Classes
 use App\Http\Requests\Experience\StoreExperienceRequest;
@@ -182,5 +184,101 @@ class ExperienceController extends Controller
         $stats = $this->experienceService->getStatistics(Auth::id());
 
         return $this->successResponse($stats, 'Statistik pengalaman berhasil diambil');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Certificate Upload Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Upload sertifikat untuk pengalaman
+     *
+     * Endpoint: POST|PUT /api/experiences/{id}/certificate
+     */
+    public function uploadCertificate(Request $request, int $id): JsonResponse
+    {
+        $experience = Experience::findOrFail($id);
+        $this->authorize('update', $experience);
+
+        $request->validate([
+            'certificate' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ], [
+            'certificate.required' => 'File sertifikat wajib diupload',
+            'certificate.file' => 'File tidak valid',
+            'certificate.mimes' => 'Format sertifikat harus: pdf, jpg, jpeg, atau png',
+            'certificate.max' => 'Ukuran sertifikat maksimal 5MB',
+        ]);
+
+        try {
+            if ($request->hasFile('certificate')) {
+                // Hapus sertifikat lama jika ada
+                if ($experience->certificate_url && Storage::disk('public')->exists($experience->certificate_url)) {
+                    Storage::disk('public')->delete($experience->certificate_url);
+                }
+
+                // Simpan sertifikat baru
+                $path = $request->file('certificate')->store('certificates/experiences', 'public');
+                $experience->certificate_url = $path;
+                $experience->save();
+
+                Log::info('Experience certificate uploaded', [
+                    'experience_id' => $experience->id,
+                    'user_id' => Auth::id(),
+                    'path' => $path,
+                ]);
+            }
+
+            return $this->successResponse([
+                'id' => $experience->id,
+                'title' => $experience->title,
+                'certificate_url' => $experience->certificate_url,
+                'certificate_full_url' => $experience->certificate_url ? asset('storage/' . $experience->certificate_url) : null,
+            ], 'Sertifikat pengalaman berhasil diupload');
+
+        } catch (\Exception $e) {
+            Log::error('Experience certificate upload failed', [
+                'experience_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Gagal mengupload sertifikat');
+        }
+    }
+
+    /**
+     * Hapus sertifikat pengalaman
+     *
+     * Endpoint: DELETE /api/experiences/{id}/certificate
+     */
+    public function deleteCertificate(int $id): JsonResponse
+    {
+        $experience = Experience::findOrFail($id);
+        $this->authorize('update', $experience);
+
+        try {
+            if ($experience->certificate_url) {
+                if (Storage::disk('public')->exists($experience->certificate_url)) {
+                    Storage::disk('public')->delete($experience->certificate_url);
+                }
+
+                $experience->certificate_url = null;
+                $experience->save();
+
+                Log::info('Experience certificate deleted', [
+                    'experience_id' => $experience->id,
+                    'user_id' => Auth::id(),
+                ]);
+            }
+
+            return $this->successResponse(null, 'Sertifikat pengalaman berhasil dihapus');
+
+        } catch (\Exception $e) {
+            Log::error('Experience certificate deletion failed', [
+                'experience_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Gagal menghapus sertifikat');
+        }
     }
 }

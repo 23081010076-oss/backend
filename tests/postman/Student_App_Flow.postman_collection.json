@@ -1518,6 +1518,53 @@
                             }
                         },
                         {
+                            "name": "Upload Achievement Certificate",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{studentToken}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "certificate",
+                                            "type": "file",
+                                            "src": "",
+                                            "description": "File sertifikat (pdf, jpg, jpeg, png) max 5MB"
+                                        }
+                                    ]
+                                },
+                                "url": "{{baseUrl}}/achievements/1/certificate"
+                            },
+                            "description": "Upload sertifikat untuk prestasi. Format: pdf, jpg, jpeg, png. Max 5MB."
+                        },
+                        {
+                            "name": "Delete Achievement Certificate",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{studentToken}}"
+                                    }
+                                ],
+                                "url": "{{baseUrl}}/achievements/1/certificate"
+                            },
+                            "description": "Hapus sertifikat prestasi"
+                        },
+                        {
                             "name": "Get All Experiences",
                             "request": {
                                 "method": "GET",
@@ -1642,6 +1689,53 @@
                                 ],
                                 "url": "{{baseUrl}}/experiences/2"
                             }
+                        },
+                        {
+                            "name": "Upload Experience Certificate",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{studentToken}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "certificate",
+                                            "type": "file",
+                                            "src": "",
+                                            "description": "File sertifikat (pdf, jpg, jpeg, png) max 5MB"
+                                        }
+                                    ]
+                                },
+                                "url": "{{baseUrl}}/experiences/1/certificate"
+                            },
+                            "description": "Upload sertifikat untuk pengalaman kerja/magang. Format: pdf, jpg, jpeg, png. Max 5MB."
+                        },
+                        {
+                            "name": "Delete Experience Certificate",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{studentToken}}"
+                                    }
+                                ],
+                                "url": "{{baseUrl}}/experiences/1/certificate"
+                            },
+                            "description": "Hapus sertifikat pengalaman"
                         },
                         {
                             "name": "Get All Organizations",

@@ -15,6 +15,7 @@ class Achievement extends Model
         'description',
         'organization',
         'year',
+        'certificate_url',
     ];
 
     protected $casts = [
