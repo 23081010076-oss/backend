@@ -72,7 +72,7 @@ class TransactionSeeder extends Seeder
         if ($mentoringSession->isNotEmpty()) {
             foreach ($mentoringSession->whereIn('status', ['scheduled', 'completed'])->take(4) as $index => $session) {
                 $amount = $session->type === 'academic' ? 150000 : 200000;
-                
+
                 // Map mentoring session payment_method to transaction payment_method
                 $paymentMethodMap = [
                     'qris' => 'qris',
@@ -81,7 +81,7 @@ class TransactionSeeder extends Seeder
                     'manual' => 'manual',
                 ];
                 $paymentMethod = $paymentMethodMap[$session->payment_method] ?? 'qris';
-                
+
                 $transactions[] = [
                     'user_id' => $session->member_id,
                     'transaction_code' => 'TRX-MENT-' . now()->format('Ymd') . '-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
