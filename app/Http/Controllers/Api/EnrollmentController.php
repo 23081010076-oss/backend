@@ -186,4 +186,42 @@ class EnrollmentController extends Controller
             return $this->serverErrorResponse('Gagal menghapus enrollment');
         }
     }
+
+    /**
+     * Mark a curriculum item as completed
+     * Progress will be auto-calculated
+     */
+    public function markCurriculumCompleted(int $enrollmentId, int $curriculumId): JsonResponse
+    {
+        $enrollment = Enrollment::findOrFail($enrollmentId);
+        
+        // Ensure user owns this enrollment
+        if ($enrollment->user_id !== Auth::id()) {
+            return $this->forbiddenResponse('Anda tidak memiliki akses ke enrollment ini');
+        }
+
+        // Verify curriculum belongs to the course
+        $course = $enrollment->course;
+        $curriculumExists = $course->curriculums()->where('id', $curriculumId)->exists();
+        
+        if (!$curriculumExists) {
+            return $this->notFoundResponse('Materi tidak ditemukan dalam kursus ini');
+        }
+
+        try {
+            $progress = $enrollment->markCurriculumCompleted($curriculumId);
+
+            return $this->successResponse([
+                'curriculum_progress' => $progress,
+                'enrollment' => $enrollment->fresh(),
+            ], 'Materi berhasil ditandai selesai');
+        } catch (\Exception $e) {
+            Log::error('Mark curriculum completed failed', [
+                'enrollment_id' => $enrollmentId,
+                'curriculum_id' => $curriculumId,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Gagal menandai materi selesai');
+        }
+    }
 }

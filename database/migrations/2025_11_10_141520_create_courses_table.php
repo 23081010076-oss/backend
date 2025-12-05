@@ -23,9 +23,9 @@ return new class extends Migration
             $table->decimal('price', 10, 2)->default(0);
             $table->enum('access_type', ['free', 'regular', 'premium'])->default('free');
             $table->string('certificate_url')->nullable();
-            $table->text('video_url')->nullable()->comment('Video embed URL or path');
-            $table->string('video_duration')->nullable()->comment('Video duration HH:MM:SS');
-            $table->integer('total_videos')->default(0)->comment('Total number of videos in course');
+            $table->text('video_url')->nullable()->comment('Video introduction/preview URL');
+            $table->string('video_duration')->nullable()->comment('Intro video duration HH:MM:SS');
+            $table->integer('total_videos')->default(0)->comment('Total number of curriculum videos');
             $table->timestamps();
         });
     }

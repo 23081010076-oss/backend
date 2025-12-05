@@ -35,14 +35,22 @@ namespace App\Swagger;
  *         response=200,
  *         description="Users retrieved successfully",
  *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="pesan", type="string", example="Data pengguna berhasil diambil"),
  *             @OA\Property(property="data", type="array",
- *                 @OA\Items(
+ *                 @OA\Items(type="object",
  *                     @OA\Property(property="id", type="integer", example=1),
- *                     @OA\Property(property="name", type="string", example="John Doe"),
- *                     @OA\Property(property="email", type="string", example="john@example.com"),
+ *                     @OA\Property(property="name", type="string", example="Ahmad Rizki"),
+ *                     @OA\Property(property="email", type="string", example="ahmad.rizki@student.com"),
  *                     @OA\Property(property="role", type="string", example="student"),
- *                     @OA\Property(property="phone", type="string", example="08123456789"),
- *                     @OA\Property(property="institution", type="string", example="Universitas Indonesia")
+ *                     @OA\Property(property="gender", type="string", example="male"),
+ *                     @OA\Property(property="birth_date", type="string", example="2001-05-15"),
+ *                     @OA\Property(property="phone", type="string", example="08123456001"),
+ *                     @OA\Property(property="address", type="string", example="Jl. Merdeka No. 123, Jakarta Pusat"),
+ *                     @OA\Property(property="institution", type="string", example="Universitas Indonesia"),
+ *                     @OA\Property(property="major", type="string", example="Teknik Informatika"),
+ *                     @OA\Property(property="education_level", type="string", example="S1"),
+ *                     @OA\Property(property="bio", type="string", example="Mahasiswa semester 6 yang passionate dengan web development dan machine learning.")
  *                 )
  *             )
  *         )

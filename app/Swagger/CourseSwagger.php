@@ -63,7 +63,7 @@ namespace App\Swagger;
  * @OA\Get(
  *     path="/api/courses/{id}",
  *     summary="Get course detail",
- *     description="Get detailed information about a specific course",
+ *     description="Get detailed information about a specific course including curriculums",
  *     operationId="getCourseById",
  *     tags={"Courses"},
  *     @OA\Parameter(
@@ -75,7 +75,38 @@ namespace App\Swagger;
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Course detail retrieved successfully"
+ *         description="Course detail retrieved successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="pesan", type="string", example="Detail kursus berhasil diambil"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="id", type="integer", example=1),
+ *                 @OA\Property(property="title", type="string", example="Full Stack Web Development Bootcamp"),
+ *                 @OA\Property(property="description", type="string", example="Comprehensive bootcamp covering HTML, CSS, JavaScript, React, Node.js, and database management."),
+ *                 @OA\Property(property="category", type="string", example="Web Development"),
+ *                 @OA\Property(property="type", type="string", example="bootcamp"),
+ *                 @OA\Property(property="level", type="string", example="beginner"),
+ *                 @OA\Property(property="instructor", type="string", example="Dr. Ahmad Syafiq"),
+ *                 @OA\Property(property="duration", type="string", example="12 weeks"),
+ *                 @OA\Property(property="price", type="number", example=2500000),
+ *                 @OA\Property(property="access_type", type="string", example="premium"),
+ *                 @OA\Property(property="total_videos", type="integer", example=45),
+ *                 @OA\Property(property="total_materials", type="integer", example=7, description="Auto-calculated from curriculums"),
+ *                 @OA\Property(property="total_curriculum_duration", type="string", example="60 jam", description="Auto-calculated total duration"),
+ *                 @OA\Property(property="curriculums", type="array",
+ *                     @OA\Items(type="object",
+ *                         @OA\Property(property="id", type="integer", example=1),
+ *                         @OA\Property(property="section", type="string", example="Bab 1: Dasar-dasar Web"),
+ *                         @OA\Property(property="section_order", type="integer", example=1),
+ *                         @OA\Property(property="title", type="string", example="Pengenalan Web Development"),
+ *                         @OA\Property(property="description", type="string", example="Memahami dasar-dasar web dan cara kerja internet"),
+ *                         @OA\Property(property="order", type="integer", example=1),
+ *                         @OA\Property(property="duration", type="string", example="2 jam"),
+ *                         @OA\Property(property="video_url", type="string", example="https://youtube.com/embed/pengenalan-web")
+ *                     )
+ *                 )
+ *             )
+ *         )
  *     ),
  *     @OA\Response(
  *         response=404,

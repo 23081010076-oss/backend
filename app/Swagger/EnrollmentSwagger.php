@@ -14,20 +14,21 @@ namespace App\Swagger;
      * response=200,
      * description="List kursus berhasil diambil",
      * @OA\JsonContent(
-     * @OA\Property(property="success", type="boolean", example=true),
-     * @OA\Property(property="message", type="string", example="Kursus Anda berhasil diambil"),
-     * @OA\Property(property="data", type="object",
-     * @OA\Property(property="current_page", type="integer"),
+     * @OA\Property(property="sukses", type="boolean", example=true),
+     * @OA\Property(property="pesan", type="string", example="Kursus Anda berhasil diambil"),
      * @OA\Property(property="data", type="array",
-     * @OA\Items(
+     * @OA\Items(type="object",
      * @OA\Property(property="id", type="integer", example=1),
-     * @OA\Property(property="course_id", type="integer", example=5),
-     * @OA\Property(property="progress", type="integer", example=50),
+     * @OA\Property(property="course_id", type="integer", example=1),
+     * @OA\Property(property="progress", type="integer", example=45),
+     * @OA\Property(property="calculated_progress", type="integer", example=45, description="Auto-calculated dari curriculum"),
+     * @OA\Property(property="completed_materials", type="integer", example=3),
+     * @OA\Property(property="total_materials", type="integer", example=7),
      * @OA\Property(property="completed", type="boolean", example=false),
+     * @OA\Property(property="certificate_url", type="string", example="https://example.com/certificates/student1-intro-programming.pdf"),
      * @OA\Property(property="course", type="object",
-     * @OA\Property(property="title", type="string", example="Belajar Laravel Dasar"),
-     * @OA\Property(property="instructor", type="string", example="John Doe")
-     * )
+     * @OA\Property(property="title", type="string", example="Full Stack Web Development Bootcamp"),
+     * @OA\Property(property="instructor", type="string", example="Dr. Ahmad Syafiq")
      * )
      * )
      * )

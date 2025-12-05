@@ -1,7 +1,7 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "LMS API Documentation Student Rekanesia",
+        "title": "LMS API Documentation Stuident Rekanesia",
         "description": "API DOC for Learning Management System Stuident Rekanesia",
         "license": {
             "name": "Apache 2.0",
@@ -421,12 +421,12 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "ahmad.rizki@student.com"
+                                        "example": "test.admin@learningplatform.com"
                                     },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "password123"
+                                        "example": "TestAdminPass123!"
                                     }
                                 },
                                 "type": "object"
@@ -459,15 +459,15 @@
                                                         },
                                                         "name": {
                                                             "type": "string",
-                                                            "example": "Ahmad Rizki"
+                                                            "example": "Admin Platform"
                                                         },
                                                         "email": {
                                                             "type": "string",
-                                                            "example": "ahmad.rizki@student.com"
+                                                            "example": "admin@learningplatform.com"
                                                         },
                                                         "role": {
                                                             "type": "string",
-                                                            "example": "student"
+                                                            "example": "admin"
                                                         }
                                                     },
                                                     "type": "object"
@@ -1555,7 +1555,7 @@
                     "Courses"
                 ],
                 "summary": "Get course detail",
-                "description": "Get detailed information about a specific course",
+                "description": "Get detailed information about a specific course including curriculums",
                 "operationId": "getCourseById",
                 "parameters": [
                     {
@@ -1570,7 +1570,123 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Course detail retrieved successfully"
+                        "description": "Course detail retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Detail kursus berhasil diambil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Full Stack Web Development Bootcamp"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Comprehensive bootcamp covering HTML, CSS, JavaScript, React, Node.js, and database management."
+                                                },
+                                                "category": {
+                                                    "type": "string",
+                                                    "example": "Web Development"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "bootcamp"
+                                                },
+                                                "level": {
+                                                    "type": "string",
+                                                    "example": "beginner"
+                                                },
+                                                "instructor": {
+                                                    "type": "string",
+                                                    "example": "Dr. Ahmad Syafiq"
+                                                },
+                                                "duration": {
+                                                    "type": "string",
+                                                    "example": "12 weeks"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "example": 2500000
+                                                },
+                                                "access_type": {
+                                                    "type": "string",
+                                                    "example": "premium"
+                                                },
+                                                "total_videos": {
+                                                    "type": "integer",
+                                                    "example": 45
+                                                },
+                                                "total_materials": {
+                                                    "description": "Auto-calculated from curriculums",
+                                                    "type": "integer",
+                                                    "example": 7
+                                                },
+                                                "total_curriculum_duration": {
+                                                    "description": "Auto-calculated total duration",
+                                                    "type": "string",
+                                                    "example": "60 jam"
+                                                },
+                                                "curriculums": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "section": {
+                                                                "type": "string",
+                                                                "example": "Bab 1: Dasar-dasar Web"
+                                                            },
+                                                            "section_order": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Pengenalan Web Development"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Memahami dasar-dasar web dan cara kerja internet"
+                                                            },
+                                                            "order": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "duration": {
+                                                                "type": "string",
+                                                                "example": "2 jam"
+                                                            },
+                                                            "video_url": {
+                                                                "type": "string",
+                                                                "example": "https://youtube.com/embed/pengenalan-web"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Course not found"
@@ -1656,6 +1772,560 @@
                 ]
             }
         },
+        "/api/courses/{courseId}/curriculums": {
+            "get": {
+                "tags": [
+                    "Curriculum"
+                ],
+                "summary": "List semua kurikulum course",
+                "description": "Menampilkan daftar materi pembelajaran untuk course tertentu, diurutkan berdasarkan section dan order",
+                "operationId": "getCurriculums",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar kurikulum berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Daftar kurikulum berhasil diambil"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "course_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "section": {
+                                                        "type": "string",
+                                                        "example": "Bab 1: Dasar-dasar Web"
+                                                    },
+                                                    "section_order": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Pengenalan Web Development"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Memahami dasar-dasar web"
+                                                    },
+                                                    "order": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "duration": {
+                                                        "type": "string",
+                                                        "example": "2 jam"
+                                                    },
+                                                    "video_url": {
+                                                        "type": "string",
+                                                        "example": "https://youtube.com/embed/pengenalan-web"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Curriculum"
+                ],
+                "summary": "Tambah kurikulum baru",
+                "description": "Menambahkan satu materi pembelajaran baru ke course (Admin only)",
+                "operationId": "createCurriculum",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title"
+                                ],
+                                "properties": {
+                                    "section": {
+                                        "type": "string",
+                                        "example": "Bab 1: Pengenalan"
+                                    },
+                                    "section_order": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Materi Baru"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Deskripsi materi"
+                                    },
+                                    "duration": {
+                                        "type": "string",
+                                        "example": "30 menit"
+                                    },
+                                    "video_url": {
+                                        "type": "string",
+                                        "example": "https://youtube.com/embed/materi-baru"
+                                    },
+                                    "order": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Kurikulum berhasil ditambahkan"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{courseId}/curriculums/bulk": {
+            "post": {
+                "tags": [
+                    "Curriculum"
+                ],
+                "summary": "Tambah banyak kurikulum sekaligus",
+                "description": "Bulk create: Menambahkan beberapa materi pembelajaran sekaligus (Admin only)",
+                "operationId": "bulkCreateCurriculum",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "curriculums"
+                                ],
+                                "properties": {
+                                    "curriculums": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "section": {
+                                                    "type": "string",
+                                                    "example": "Bab 1: Pengenalan"
+                                                },
+                                                "section_order": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Materi 1"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Deskripsi materi"
+                                                },
+                                                "duration": {
+                                                    "type": "string",
+                                                    "example": "2 jam"
+                                                },
+                                                "video_url": {
+                                                    "type": "string",
+                                                    "example": "https://youtube.com/embed/materi-1"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "example": [
+                                            {
+                                                "section": "Bab 1: Pengenalan",
+                                                "title": "Materi 1",
+                                                "duration": "1 jam",
+                                                "video_url": "https://youtube.com/embed/materi-1"
+                                            },
+                                            {
+                                                "section": "Bab 1: Pengenalan",
+                                                "title": "Materi 2",
+                                                "duration": "2 jam",
+                                                "video_url": "https://youtube.com/embed/materi-2"
+                                            },
+                                            {
+                                                "section": "Bab 2: Lanjutan",
+                                                "title": "Materi 3",
+                                                "duration": "1 jam",
+                                                "video_url": "https://youtube.com/embed/materi-3"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Kurikulum berhasil ditambahkan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "3 kurikulum berhasil ditambahkan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{courseId}/curriculums/{id}": {
+            "put": {
+                "tags": [
+                    "Curriculum"
+                ],
+                "summary": "Update kurikulum",
+                "description": "Mengubah materi pembelajaran (Admin only)",
+                "operationId": "updateCurriculum",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "section": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "duration": {
+                                        "type": "string"
+                                    },
+                                    "video_url": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Kurikulum berhasil diupdate"
+                    },
+                    "404": {
+                        "description": "Kurikulum tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Curriculum"
+                ],
+                "summary": "Hapus kurikulum",
+                "description": "Menghapus materi pembelajaran (Admin only)",
+                "operationId": "deleteCurriculum",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Kurikulum berhasil dihapus"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{courseId}/curriculums/reorder": {
+            "put": {
+                "tags": [
+                    "Curriculum"
+                ],
+                "summary": "Ubah urutan kurikulum",
+                "description": "Mengubah urutan tampilan materi pembelajaran (Admin only)",
+                "operationId": "reorderCurriculum",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ordered_ids"
+                                ],
+                                "properties": {
+                                    "ordered_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            3,
+                                            1,
+                                            2,
+                                            4
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Urutan kurikulum berhasil diupdate"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/enrollments/{enrollmentId}/curriculums/{curriculumId}/complete": {
+            "post": {
+                "tags": [
+                    "Curriculum",
+                    "Enrollment"
+                ],
+                "summary": "Tandai materi selesai",
+                "description": "Menandai materi sebagai selesai dipelajari. Progress akan otomatis dihitung berdasarkan jumlah materi yang selesai.",
+                "operationId": "markCurriculumComplete",
+                "parameters": [
+                    {
+                        "name": "enrollmentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "curriculumId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Materi berhasil ditandai selesai",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Materi berhasil ditandai selesai"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "curriculum_progress": {
+                                                    "properties": {
+                                                        "curriculum_id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "completed": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "completed_at": {
+                                                            "type": "string",
+                                                            "example": "2025-12-05T23:00:00"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "enrollment": {
+                                                    "properties": {
+                                                        "progress": {
+                                                            "type": "integer",
+                                                            "example": 50
+                                                        },
+                                                        "calculated_progress": {
+                                                            "type": "integer",
+                                                            "example": 50
+                                                        },
+                                                        "completed_materials": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "total_materials": {
+                                                            "type": "integer",
+                                                            "example": 6
+                                                        },
+                                                        "completed": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Tidak memiliki akses ke enrollment ini"
+                    },
+                    "404": {
+                        "description": "Materi tidak ditemukan dalam kursus ini"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/my-courses": {
             "get": {
                 "tags": [
@@ -1671,58 +2341,67 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
-                                        "message": {
+                                        "pesan": {
                                             "type": "string",
                                             "example": "Kursus Anda berhasil diambil"
                                         },
                                         "data": {
-                                            "properties": {
-                                                "current_page": {
-                                                    "type": "integer"
-                                                },
-                                                "data": {
-                                                    "type": "array",
-                                                    "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "course_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "progress": {
+                                                        "type": "integer",
+                                                        "example": 45
+                                                    },
+                                                    "calculated_progress": {
+                                                        "description": "Auto-calculated dari curriculum",
+                                                        "type": "integer",
+                                                        "example": 45
+                                                    },
+                                                    "completed_materials": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "total_materials": {
+                                                        "type": "integer",
+                                                        "example": 7
+                                                    },
+                                                    "completed": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "certificate_url": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/certificates/student1-intro-programming.pdf"
+                                                    },
+                                                    "course": {
                                                         "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 1
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Full Stack Web Development Bootcamp"
                                                             },
-                                                            "course_id": {
-                                                                "type": "integer",
-                                                                "example": 5
-                                                            },
-                                                            "progress": {
-                                                                "type": "integer",
-                                                                "example": 50
-                                                            },
-                                                            "completed": {
-                                                                "type": "boolean",
-                                                                "example": false
-                                                            },
-                                                            "course": {
-                                                                "properties": {
-                                                                    "title": {
-                                                                        "type": "string",
-                                                                        "example": "Belajar Laravel Dasar"
-                                                                    },
-                                                                    "instructor": {
-                                                                        "type": "string",
-                                                                        "example": "John Doe"
-                                                                    }
-                                                                },
-                                                                "type": "object"
+                                                            "instructor": {
+                                                                "type": "string",
+                                                                "example": "Dr. Ahmad Syafiq"
                                                             }
                                                         },
                                                         "type": "object"
                                                     }
-                                                }
-                                            },
-                                            "type": "object"
+                                                },
+                                                "type": "object"
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -5989,6 +6668,14 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Data pengguna berhasil diambil"
+                                        },
                                         "data": {
                                             "type": "array",
                                             "items": {
@@ -5999,23 +6686,47 @@
                                                     },
                                                     "name": {
                                                         "type": "string",
-                                                        "example": "John Doe"
+                                                        "example": "Ahmad Rizki"
                                                     },
                                                     "email": {
                                                         "type": "string",
-                                                        "example": "john@example.com"
+                                                        "example": "ahmad.rizki@student.com"
                                                     },
                                                     "role": {
                                                         "type": "string",
                                                         "example": "student"
                                                     },
+                                                    "gender": {
+                                                        "type": "string",
+                                                        "example": "male"
+                                                    },
+                                                    "birth_date": {
+                                                        "type": "string",
+                                                        "example": "2001-05-15"
+                                                    },
                                                     "phone": {
                                                         "type": "string",
-                                                        "example": "08123456789"
+                                                        "example": "08123456001"
+                                                    },
+                                                    "address": {
+                                                        "type": "string",
+                                                        "example": "Jl. Merdeka No. 123, Jakarta Pusat"
                                                     },
                                                     "institution": {
                                                         "type": "string",
                                                         "example": "Universitas Indonesia"
+                                                    },
+                                                    "major": {
+                                                        "type": "string",
+                                                        "example": "Teknik Informatika"
+                                                    },
+                                                    "education_level": {
+                                                        "type": "string",
+                                                        "example": "S1"
+                                                    },
+                                                    "bio": {
+                                                        "type": "string",
+                                                        "example": "Mahasiswa semester 6 yang passionate dengan web development dan machine learning."
                                                     }
                                                 },
                                                 "type": "object"
@@ -6527,6 +7238,14 @@
         {
             "name": "Coaching Files",
             "description": "Mentoring session coaching file endpoints"
+        },
+        {
+            "name": "Curriculum",
+            "description": "Endpoints untuk mengelola kurikulum/materi pembelajaran course"
+        },
+        {
+            "name": "Enrollment",
+            "description": "Enrollment"
         },
         {
             "name": "Webhooks",

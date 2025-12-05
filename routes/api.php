@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\CorporateContactController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\NeedAssessmentController;
 use App\Http\Controllers\Api\CoachingFileController;
+use App\Http\Controllers\Api\CourseCurriculumController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Api\MidtransWebhookController;
 
@@ -168,12 +169,33 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/courses/{id}', [CourseController::class, 'destroy'])->name('courses.destroy');
     });
 
+    // Course Curriculum (Materi Pembelajaran)
+    Route::prefix('courses/{courseId}/curriculums')->name('courses.curriculums.')->group(function () {
+        // Public - list dan detail kurikulum
+        Route::get('/', [CourseCurriculumController::class, 'index'])->name('index');
+        Route::get('/{id}', [CourseCurriculumController::class, 'show'])->name('show');
+        
+        // Admin Only - CRUD kurikulum
+        Route::middleware('role:admin')->group(function () {
+            Route::post('/', [CourseCurriculumController::class, 'store'])->name('store');
+            Route::post('/bulk', [CourseCurriculumController::class, 'bulkStore'])->name('bulk-store');
+            Route::put('/{id}', [CourseCurriculumController::class, 'update'])->name('update');
+            Route::delete('/{id}', [CourseCurriculumController::class, 'destroy'])->name('destroy');
+            Route::put('/reorder', [CourseCurriculumController::class, 'reorder'])->name('reorder');
+        });
+    });
+
     // Enrollment
     Route::post('/courses/{id}/enroll', [EnrollmentController::class, 'enroll'])->name('courses.enroll');
     Route::get('/my-courses', [EnrollmentController::class, 'myCourses'])->name('my-courses');
     Route::apiResource('enrollments', EnrollmentController::class);
     Route::put('/enrollments/{id}/progress', [EnrollmentController::class, 'updateProgress'])
         ->name('enrollments.update-progress');
+    
+    // Mark curriculum as completed (auto-update progress)
+    Route::post('/enrollments/{enrollmentId}/curriculums/{curriculumId}/complete', 
+        [EnrollmentController::class, 'markCurriculumCompleted'])
+        ->name('enrollments.curriculum.complete');
 
     // ======================================================================
     // SCHOLARSHIPS

@@ -75,7 +75,7 @@ class CourseService
      */
     public function getCourseWithDetails(int $id): Course
     {
-        return Course::with(['enrollments', 'reviews'])->findOrFail($id);
+        return Course::with(['enrollments', 'reviews', 'curriculums'])->findOrFail($id);
     }
 
     /**
