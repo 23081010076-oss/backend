@@ -1,7 +1,7 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "LMS API Documentation Stuident Rekanesia",
+        "title": "LMS API Documentation Student Rekanesia",
         "description": "API DOC for Learning Management System Stuident Rekanesia",
         "license": {
             "name": "Apache 2.0",
@@ -421,20 +421,12 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-<<<<<<< HEAD
                                         "example": "ahmad.rizki@student.com"
-=======
-                                        "example": "admin@learningplatform.com"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-<<<<<<< HEAD
                                         "example": "password123"
-=======
-                                        "example": "AdminPass123!"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -467,7 +459,6 @@
                                                         },
                                                         "name": {
                                                             "type": "string",
-<<<<<<< HEAD
                                                             "example": "Ahmad Rizki"
                                                         },
                                                         "email": {
@@ -477,17 +468,6 @@
                                                         "role": {
                                                             "type": "string",
                                                             "example": "student"
-=======
-                                                            "example": "Admin Platform"
-                                                        },
-                                                        "email": {
-                                                            "type": "string",
-                                                            "example": "admin@learningplatform.com"
-                                                        },
-                                                        "role": {
-                                                            "type": "string",
-                                                            "example": "admin"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                                         }
                                                     },
                                                     "type": "object"
@@ -829,29 +809,17 @@
                 ]
             }
         },
-<<<<<<< HEAD
         "/mentoring-sessions/{sessionId}/coaching-files": {
-=======
-        "/api/mentoring-sessions/{mentoringSessionId}/coaching-files": {
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
             "get": {
                 "tags": [
                     "Coaching Files"
                 ],
-<<<<<<< HEAD
                 "summary": "Get Coaching Files",
-=======
-                "summary": "Get coaching files",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "description": "Get all coaching files for a mentoring session",
                 "operationId": "getCoachingFiles",
                 "parameters": [
                     {
-<<<<<<< HEAD
                         "name": "sessionId",
-=======
-                        "name": "mentoringSessionId",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -870,53 +838,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-<<<<<<< HEAD
                                                 "$ref": "#/components/schemas/CoachingFile"
-=======
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "mentoring_session_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "title": {
-                                                        "type": "string",
-                                                        "example": "React Hooks Guide"
-                                                    },
-                                                    "description": {
-                                                        "type": "string",
-                                                        "example": "Comprehensive guide to React Hooks"
-                                                    },
-                                                    "file_path": {
-                                                        "type": "string",
-                                                        "example": "coaching-files/react-hooks.pdf"
-                                                    },
-                                                    "file_name": {
-                                                        "type": "string",
-                                                        "example": "react-hooks.pdf"
-                                                    },
-                                                    "file_size": {
-                                                        "type": "integer",
-                                                        "example": 1024000
-                                                    },
-                                                    "file_type": {
-                                                        "type": "string",
-                                                        "example": "application/pdf"
-                                                    },
-                                                    "uploaded_by": {
-                                                        "type": "integer",
-                                                        "example": 2
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "datetime"
-                                                    }
-                                                },
-                                                "type": "object"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                             }
                                         }
                                     },
@@ -925,16 +847,11 @@
                             }
                         }
                     },
-<<<<<<< HEAD
                     "401": {
                         "description": "Unauthenticated"
                     },
                     "404": {
                         "description": "Session not found"
-=======
-                    "404": {
-                        "description": "Mentoring session not found"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -947,21 +864,12 @@
                 "tags": [
                     "Coaching Files"
                 ],
-<<<<<<< HEAD
                 "summary": "Upload Coaching File",
                 "description": "Upload a new coaching file (Mentor Only)",
                 "operationId": "uploadCoachingFile",
                 "parameters": [
                     {
                         "name": "sessionId",
-=======
-                "summary": "Upload coaching file",
-                "description": "Upload a new coaching file for mentoring session",
-                "operationId": "uploadCoachingFile",
-                "parameters": [
-                    {
-                        "name": "mentoringSessionId",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -976,7 +884,6 @@
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-<<<<<<< HEAD
                                     "file",
                                     "file_name"
                                 ],
@@ -990,26 +897,6 @@
                                         "description": "String (required)",
                                         "type": "string",
                                         "example": "Materi Pertemuan 1"
-=======
-                                    "title",
-                                    "file"
-                                ],
-                                "properties": {
-                                    "title": {
-                                        "description": "File title",
-                                        "type": "string",
-                                        "example": "React Hooks Complete Guide"
-                                    },
-                                    "description": {
-                                        "description": "File description",
-                                        "type": "string",
-                                        "example": "Comprehensive guide covering useState, useEffect, useContext, etc."
-                                    },
-                                    "file": {
-                                        "description": "File to upload (PDF, DOC, DOCX, images, etc.)",
-                                        "type": "string",
-                                        "format": "binary"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -1029,33 +916,7 @@
                                             "example": "File uploaded successfully"
                                         },
                                         "data": {
-<<<<<<< HEAD
                                             "$ref": "#/components/schemas/CoachingFile"
-=======
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "React Hooks Complete Guide"
-                                                },
-                                                "file_name": {
-                                                    "type": "string",
-                                                    "example": "react-hooks.pdf"
-                                                },
-                                                "file_size": {
-                                                    "type": "integer",
-                                                    "example": 1024000
-                                                },
-                                                "file_type": {
-                                                    "type": "string",
-                                                    "example": "application/pdf"
-                                                }
-                                            },
-                                            "type": "object"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         }
                                     },
                                     "type": "object"
@@ -1064,11 +925,7 @@
                         }
                     },
                     "422": {
-<<<<<<< HEAD
                         "description": "Validation Error"
-=======
-                        "description": "Validation error"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -1078,16 +935,11 @@
                 ]
             }
         },
-<<<<<<< HEAD
         "/mentoring-sessions/{sessionId}/coaching-files/{fileId}/download": {
-=======
-        "/api/mentoring-sessions/{mentoringSessionId}/coaching-files/{id}": {
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
             "get": {
                 "tags": [
                     "Coaching Files"
                 ],
-<<<<<<< HEAD
                 "summary": "Download Coaching File",
                 "description": "Download specific coaching file",
                 "operationId": "downloadCoachingFile",
@@ -1095,27 +947,13 @@
                     {
                         "name": "sessionId",
                         "in": "path",
-=======
-                "summary": "Get single coaching file",
-                "description": "Get details of a specific coaching file",
-                "operationId": "getCoachingFile",
-                "parameters": [
-                    {
-                        "name": "mentoringSessionId",
-                        "in": "path",
-                        "description": "Mentoring Session ID",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "required": true,
                         "schema": {
                             "type": "integer"
                         }
                     },
                     {
-<<<<<<< HEAD
                         "name": "fileId",
-=======
-                        "name": "id",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "in": "path",
                         "description": "Coaching File ID",
                         "required": true,
@@ -1126,7 +964,6 @@
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "File Download Stream",
                         "content": {
                             "application/octet-stream": {
@@ -1136,107 +973,6 @@
                                 }
                             }
                         }
-=======
-                        "description": "Coaching file details"
-                    },
-                    "404": {
-                        "description": "File not found"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Coaching Files"
-                ],
-                "summary": "Update coaching file",
-                "description": "Update coaching file details",
-                "operationId": "updateCoachingFile",
-                "parameters": [
-                    {
-                        "name": "mentoringSessionId",
-                        "in": "path",
-                        "description": "Mentoring Session ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Coaching File ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "title": {
-                                        "type": "string",
-                                        "example": "Updated Title"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "Updated description"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "File updated"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Coaching Files"
-                ],
-                "summary": "Delete coaching file",
-                "description": "Delete a coaching file",
-                "operationId": "deleteCoachingFile",
-                "parameters": [
-                    {
-                        "name": "mentoringSessionId",
-                        "in": "path",
-                        "description": "Mentoring Session ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Coaching File ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "File deleted successfully"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     },
                     "404": {
                         "description": "File not found"
@@ -1249,7 +985,6 @@
                 ]
             }
         },
-<<<<<<< HEAD
         "/mentoring-sessions/{sessionId}/coaching-files/{fileId}": {
             "delete": {
                 "tags": [
@@ -1262,32 +997,13 @@
                     {
                         "name": "sessionId",
                         "in": "path",
-=======
-        "/api/mentoring-sessions/{mentoringSessionId}/coaching-files/{id}/download": {
-            "get": {
-                "tags": [
-                    "Coaching Files"
-                ],
-                "summary": "Download coaching file",
-                "description": "Download a coaching file",
-                "operationId": "downloadCoachingFile",
-                "parameters": [
-                    {
-                        "name": "mentoringSessionId",
-                        "in": "path",
-                        "description": "Mentoring Session ID",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "required": true,
                         "schema": {
                             "type": "integer"
                         }
                     },
                     {
-<<<<<<< HEAD
                         "name": "fileId",
-=======
-                        "name": "id",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "in": "path",
                         "description": "Coaching File ID",
                         "required": true,
@@ -1298,7 +1014,6 @@
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "File deleted successfully",
                         "content": {
                             "application/json": {
@@ -1310,14 +1025,6 @@
                                         }
                                     },
                                     "type": "object"
-=======
-                        "description": "File download",
-                        "content": {
-                            "application/octet-stream": {
-                                "schema": {
-                                    "type": "string",
-                                    "format": "binary"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                 }
                             }
                         }
@@ -1347,68 +1054,28 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-<<<<<<< HEAD
                                     "name",
-=======
-                                    "company_name",
-                                    "contact_name",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     "email",
                                     "message"
                                 ],
                                 "properties": {
-<<<<<<< HEAD
                                     "org_id": {
                                         "type": "integer",
                                         "example": 1,
                                         "nullable": true
                                     },
                                     "name": {
-=======
-                                    "company_name": {
-                                        "type": "string",
-                                        "example": "PT ABC Technology"
-                                    },
-                                    "contact_name": {
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "type": "string",
                                         "example": "John Doe"
                                     },
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-<<<<<<< HEAD
                                         "example": "john@example.com"
                                     },
                                     "message": {
                                         "type": "string",
                                         "example": "We are interested in a corporate partnership."
-=======
-                                        "example": "john@abc-tech.com"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "08123456789"
-                                    },
-                                    "message": {
-                                        "type": "string",
-                                        "example": "We are interested in corporate training partnership"
-                                    },
-                                    "company_size": {
-                                        "type": "string",
-                                        "enum": [
-                                            "1-10",
-                                            "11-50",
-                                            "51-200",
-                                            "201-500",
-                                            "500+"
-                                        ],
-                                        "example": "51-200"
-                                    },
-                                    "industry": {
-                                        "type": "string",
-                                        "example": "Technology"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -1418,11 +1085,7 @@
                 },
                 "responses": {
                     "201": {
-<<<<<<< HEAD
                         "description": "Corporate contact submitted successfully",
-=======
-                        "description": "Inquiry submitted successfully",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1433,14 +1096,10 @@
                                         },
                                         "message": {
                                             "type": "string",
-<<<<<<< HEAD
                                             "example": "Corporate contact submitted successfully. We will get back to you soon."
                                         },
                                         "data": {
                                             "type": "object"
-=======
-                                            "example": "Thank you for your inquiry. We will contact you soon."
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         }
                                     },
                                     "type": "object"
@@ -2260,14 +1919,9 @@
                 "tags": [
                     "Mentoring"
                 ],
-<<<<<<< HEAD
                 "summary": "Get All Mentoring Sessions",
                 "description": "Get all mentoring sessions for authenticated user",
                 "operationId": "getAllMentoringSessions",
-=======
-                "summary": "List all sessions (Admin/General)",
-                "operationId": "d1b8cc73e78e2db2fadf1b6b92efd6b7",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "parameters": [
                     {
                         "name": "status",
@@ -2279,10 +1933,7 @@
                             "enum": [
                                 "pending",
                                 "scheduled",
-<<<<<<< HEAD
                                 "ongoing",
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                 "completed",
                                 "cancelled"
                             ]
@@ -2291,22 +1942,15 @@
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Mentoring sessions retrieved successfully",
-=======
-                        "description": "Success",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-<<<<<<< HEAD
                                         "success": {
                                             "type": "boolean",
                                             "example": true
                                         },
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "data": {
                                             "type": "array",
                                             "items": {
@@ -2318,12 +1962,9 @@
                                 }
                             }
                         }
-<<<<<<< HEAD
                     },
                     "401": {
                         "description": "Unauthenticated"
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -2336,17 +1977,11 @@
                 "tags": [
                     "Mentoring"
                 ],
-<<<<<<< HEAD
                 "summary": "Create Mentoring Session",
                 "description": "Create a new mentoring session booking",
                 "operationId": "createMentoringSession",
                 "requestBody": {
                     "description": "Mentoring session data",
-=======
-                "summary": "Book a new session",
-                "operationId": "6cab7fff20b22430eb031b0d341e0729",
-                "requestBody": {
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     "required": true,
                     "content": {
                         "application/json": {
@@ -2354,7 +1989,6 @@
                                 "required": [
                                     "mentor_id",
                                     "type",
-<<<<<<< HEAD
                                     "payment_method",
                                     "schedule",
                                     "status"
@@ -2367,25 +2001,15 @@
                                     },
                                     "member_id": {
                                         "description": "ID of the member (optional, defaults to authenticated user)",
-=======
-                                    "schedule"
-                                ],
-                                "properties": {
-                                    "mentor_id": {
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "type": "integer",
                                         "example": 4
                                     },
                                     "type": {
-<<<<<<< HEAD
                                         "description": "Type of mentoring session",
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "type": "string",
                                         "enum": [
                                             "academic",
                                             "life_plan"
-<<<<<<< HEAD
                                         ],
                                         "example": "academic"
                                     },
@@ -2416,16 +2040,6 @@
                                     },
                                     "note": {
                                         "description": "Additional notes",
-=======
-                                        ]
-                                    },
-                                    "schedule": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-02-20 10:00:00"
-                                    },
-                                    "note": {
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "type": "string",
                                         "example": "Saya ingin konsultasi skripsi"
                                     }
@@ -2437,7 +2051,6 @@
                 },
                 "responses": {
                     "201": {
-<<<<<<< HEAD
                         "description": "Mentoring session created successfully",
                         "content": {
                             "application/json": {
@@ -2462,50 +2075,10 @@
                     },
                     "422": {
                         "description": "Validation error",
-=======
-                        "description": "Created"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/my-mentoring-sessions": {
-            "get": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "List MY sessions (Logged in User)",
-                "description": "Get sessions specific to the authenticated user",
-                "operationId": "f6053f3532e38f8759236c95998aaeb9",
-                "parameters": [
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "pending",
-                                "scheduled",
-                                "completed",
-                                "cancelled"
-                            ]
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-<<<<<<< HEAD
                                         "success": {
                                             "type": "boolean",
                                             "example": false
@@ -2516,13 +2089,6 @@
                                         },
                                         "errors": {
                                             "type": "object"
-=======
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/MentoringSession"
-                                            }
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         }
                                     },
                                     "type": "object"
@@ -2543,22 +2109,14 @@
                 "tags": [
                     "Mentoring"
                 ],
-<<<<<<< HEAD
                 "summary": "Get Single Mentoring Session",
                 "description": "Get details of a specific mentoring session",
                 "operationId": "getSingleMentoringSession",
-=======
-                "summary": "Get session detail",
-                "operationId": "eeaae3f49fc687210b8ac1c27e4fd5e8",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-<<<<<<< HEAD
                         "description": "Mentoring session ID",
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -2567,7 +2125,6 @@
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Mentoring session details retrieved",
                         "content": {
                             "application/json": {
@@ -2603,66 +2160,10 @@
                                     },
                                     "type": "object"
                                 }
-=======
-                        "description": "Detail retrieved",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/MentoringSession"
-                                }
                             }
                         }
                     }
                 },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "Update session detail",
-                "operationId": "890908504299b52bdc0f3f9ebc0f7a00",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "schedule": {
-                                        "type": "string",
-                                        "format": "date-time"
-                                    },
-                                    "meeting_link": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
-                            }
-                        }
-                    }
-                },
-<<<<<<< HEAD
-=======
-                "responses": {
-                    "200": {
-                        "description": "Updated"
-                    }
-                },
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "security": [
                     {
                         "bearerAuth": []
@@ -2673,22 +2174,14 @@
                 "tags": [
                     "Mentoring"
                 ],
-<<<<<<< HEAD
                 "summary": "Delete Mentoring Session",
                 "description": "Delete a mentoring session",
                 "operationId": "deleteMentoringSession",
-=======
-                "summary": "Delete session",
-                "operationId": "9e38f5b072de670eed6359fd17f2a457",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-<<<<<<< HEAD
                         "description": "Mentoring session ID",
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -2697,7 +2190,6 @@
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Session deleted successfully",
                         "content": {
                             "application/json": {
@@ -2824,9 +2316,6 @@
                     },
                     "404": {
                         "description": "Mentoring session not found"
-=======
-                        "description": "Deleted"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -2841,22 +2330,14 @@
                 "tags": [
                     "Mentoring"
                 ],
-<<<<<<< HEAD
                 "summary": "Update Session Status",
                 "description": "Update mentoring session status (Mentor only)",
                 "operationId": "updateSessionStatus",
-=======
-                "summary": "Update session status",
-                "operationId": "5caf7b11c0b2b17036e51bcc3ccd114b",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-<<<<<<< HEAD
                         "description": "Mentoring session ID",
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -2864,10 +2345,7 @@
                     }
                 ],
                 "requestBody": {
-<<<<<<< HEAD
                     "description": "Status update data",
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     "required": true,
                     "content": {
                         "application/json": {
@@ -2877,7 +2355,6 @@
                                 ],
                                 "properties": {
                                     "status": {
-<<<<<<< HEAD
                                         "description": "New status for the session",
                                         "type": "string",
                                         "enum": [
@@ -2888,14 +2365,6 @@
                                             "cancelled"
                                         ],
                                         "example": "completed"
-=======
-                                        "type": "string",
-                                        "enum": [
-                                            "scheduled",
-                                            "completed",
-                                            "cancelled"
-                                        ]
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -2905,7 +2374,6 @@
                 },
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Status updated successfully",
                         "content": {
                             "application/json": {
@@ -2930,9 +2398,6 @@
                     },
                     "403": {
                         "description": "Only mentors can update status"
-=======
-                        "description": "Status updated"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -2942,117 +2407,21 @@
                 ]
             }
         },
-<<<<<<< HEAD
         "/api/my-mentoring-sessions": {
-=======
-        "/api/mentoring-sessions/{id}/feedback": {
-            "post": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "Give feedback",
-                "description": "Can only be done if status is completed",
-                "operationId": "9cf5af7a49c699281f25c00f17912002",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "rating",
-                                    "review"
-                                ],
-                                "properties": {
-                                    "rating": {
-                                        "type": "integer",
-                                        "maximum": 5,
-                                        "minimum": 1,
-                                        "example": 5
-                                    },
-                                    "review": {
-                                        "type": "string",
-                                        "example": "Mentor sangat ramah"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Feedback submitted"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/mentors/{id}/schedule": {
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
             "get": {
                 "tags": [
                     "Mentoring"
                 ],
-<<<<<<< HEAD
                 "summary": "Get My Mentoring Sessions",
                 "description": "Get all mentoring sessions for the authenticated user (as mentor or member)",
                 "operationId": "getMyMentoringSessions",
                 "responses": {
                     "200": {
                         "description": "My mentoring sessions retrieved",
-=======
-                "summary": "Check mentor availability",
-                "operationId": "9dcac9f2ae887cd75915e7ff8d9e7d07",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the Mentor",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "from_date",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "to_date",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Schedule retrieved",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-<<<<<<< HEAD
                                         "success": {
                                             "type": "boolean",
                                             "example": true
@@ -3061,13 +2430,6 @@
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/MentoringSession"
-=======
-                                        "available_slots": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string",
-                                                "format": "datetime"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                             }
                                         }
                                     },
@@ -3084,11 +2446,7 @@
                 ]
             }
         },
-<<<<<<< HEAD
         "/api/mentoring-sessions/{sessionId}/need-assessments": {
-=======
-        "/api/mentoring-sessions/{mentoringSessionId}/need-assessments": {
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
             "get": {
                 "tags": [
                     "Need Assessments"
@@ -3098,11 +2456,7 @@
                 "operationId": "getNeedAssessment",
                 "parameters": [
                     {
-<<<<<<< HEAD
                         "name": "sessionId",
-=======
-                        "name": "mentoringSessionId",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -3113,22 +2467,15 @@
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Need assessment retrieved successfully",
-=======
-                        "description": "Need assessment retrieved",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-<<<<<<< HEAD
                                         "success": {
                                             "type": "boolean",
                                             "example": true
                                         },
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "data": {
                                             "properties": {
                                                 "id": {
@@ -3141,7 +2488,6 @@
                                                 },
                                                 "form_data": {
                                                     "properties": {
-<<<<<<< HEAD
                                                         "current_situation": {
                                                             "type": "string",
                                                             "example": "3rd year CS student struggling with career direction"
@@ -3149,22 +2495,11 @@
                                                         "goals": {
                                                             "type": "string",
                                                             "example": "Become a software engineer at top tech company"
-=======
-                                                        "learning_goals": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "previous_experience": {
-                                                            "type": "string"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                                         },
                                                         "challenges": {
                                                             "type": "array",
                                                             "items": {
                                                                 "type": "string"
-<<<<<<< HEAD
                                                             },
                                                             "example": [
                                                                 "Lack of experience",
@@ -3174,18 +2509,6 @@
                                                         "expectations": {
                                                             "type": "string",
                                                             "example": "Guidance on portfolio and interviews"
-=======
-                                                            }
-                                                        },
-                                                        "expectations": {
-                                                            "type": "string"
-                                                        },
-                                                        "preferred_schedule": {
-                                                            "type": "string"
-                                                        },
-                                                        "communication_style": {
-                                                            "type": "string"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                                         }
                                                     },
                                                     "type": "object"
@@ -3193,7 +2516,6 @@
                                                 "completed_at": {
                                                     "type": "string",
                                                     "format": "datetime",
-<<<<<<< HEAD
                                                     "example": "2025-12-03T10:00:00.000000Z",
                                                     "nullable": true
                                                 },
@@ -3206,9 +2528,6 @@
                                                     "type": "string",
                                                     "format": "datetime",
                                                     "example": "2025-12-03T10:00:00.000000Z"
-=======
-                                                    "nullable": true
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                                 }
                                             },
                                             "type": "object"
@@ -3220,7 +2539,6 @@
                         }
                     },
                     "404": {
-<<<<<<< HEAD
                         "description": "Need assessment not found",
                         "content": {
                             "application/json": {
@@ -3259,9 +2577,6 @@
                                 }
                             }
                         }
-=======
-                        "description": "Need assessment not found"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -3275,19 +2590,11 @@
                     "Need Assessments"
                 ],
                 "summary": "Update need assessment",
-<<<<<<< HEAD
                 "description": "Update existing need assessment (Student only)",
                 "operationId": "updateNeedAssessment",
                 "parameters": [
                     {
                         "name": "sessionId",
-=======
-                "description": "Update existing need assessment",
-                "operationId": "updateNeedAssessment",
-                "parameters": [
-                    {
-                        "name": "mentoringSessionId",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -3297,16 +2604,12 @@
                     }
                 ],
                 "requestBody": {
-<<<<<<< HEAD
                     "description": "Updated assessment data",
                     "required": true,
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-<<<<<<< HEAD
                                     "form_data": {
                                         "properties": {
                                             "current_situation": {
@@ -3333,25 +2636,6 @@
                                             }
                                         },
                                         "type": "object"
-=======
-                                    "learning_goals": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "previous_experience": {
-                                        "type": "string"
-                                    },
-                                    "challenges": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "expectations": {
-                                        "type": "string"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -3361,7 +2645,6 @@
                 },
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Need assessment updated successfully",
                         "content": {
                             "application/json": {
@@ -3423,9 +2706,6 @@
                                 }
                             }
                         }
-=======
-                        "description": "Need assessment updated"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -3438,21 +2718,12 @@
                 "tags": [
                     "Need Assessments"
                 ],
-<<<<<<< HEAD
                 "summary": "Submit need assessment",
                 "description": "Create need assessment for a mentoring session (Student only)",
                 "operationId": "createNeedAssessment",
                 "parameters": [
                     {
                         "name": "sessionId",
-=======
-                "summary": "Create need assessment",
-                "description": "Create need assessment for a mentoring session",
-                "operationId": "createNeedAssessment",
-                "parameters": [
-                    {
-                        "name": "mentoringSessionId",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -3462,15 +2733,11 @@
                     }
                 ],
                 "requestBody": {
-<<<<<<< HEAD
                     "description": "Need assessment form data",
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-<<<<<<< HEAD
                                 "required": [
                                     "form_data"
                                 ],
@@ -3501,55 +2768,6 @@
                                             }
                                         },
                                         "type": "object"
-=======
-                                "properties": {
-                                    "learning_goals": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "example": [
-                                            "Master React.js",
-                                            "Learn backend development",
-                                            "Build full-stack project"
-                                        ]
-                                    },
-                                    "previous_experience": {
-                                        "type": "string",
-                                        "example": "Basic knowledge of HTML, CSS, JavaScript"
-                                    },
-                                    "challenges": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "example": [
-                                            "Time management",
-                                            "Understanding async programming"
-                                        ]
-                                    },
-                                    "expectations": {
-                                        "type": "string",
-                                        "example": "Want to become job-ready full-stack developer"
-                                    },
-                                    "preferred_schedule": {
-                                        "type": "string",
-                                        "enum": [
-                                            "morning",
-                                            "afternoon",
-                                            "evening"
-                                        ],
-                                        "example": "evening"
-                                    },
-                                    "communication_style": {
-                                        "type": "string",
-                                        "enum": [
-                                            "formal",
-                                            "casual",
-                                            "structured"
-                                        ],
-                                        "example": "casual"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -3559,7 +2777,6 @@
                 },
                 "responses": {
                     "201": {
-<<<<<<< HEAD
                         "description": "Need assessment created successfully",
                         "content": {
                             "application/json": {
@@ -3675,12 +2892,6 @@
                                 }
                             }
                         }
-=======
-                        "description": "Need assessment created"
-                    },
-                    "400": {
-                        "description": "Assessment already exists"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -3698,11 +2909,7 @@
                 "operationId": "deleteNeedAssessment",
                 "parameters": [
                     {
-<<<<<<< HEAD
                         "name": "sessionId",
-=======
-                        "name": "mentoringSessionId",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -3713,7 +2920,6 @@
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Need assessment deleted successfully",
                         "content": {
                             "application/json": {
@@ -3772,9 +2978,6 @@
                                 }
                             }
                         }
-=======
-                        "description": "Need assessment deleted"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -3784,29 +2987,17 @@
                 ]
             }
         },
-<<<<<<< HEAD
         "/api/mentoring-sessions/{sessionId}/need-assessments/mark-completed": {
-=======
-        "/api/mentoring-sessions/{mentoringSessionId}/need-assessments/mark-completed": {
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
             "put": {
                 "tags": [
                     "Need Assessments"
                 ],
                 "summary": "Mark assessment as completed",
-<<<<<<< HEAD
                 "description": "Mark need assessment as completed (Mentor only)",
                 "operationId": "markNeedAssessmentCompleted",
                 "parameters": [
                     {
                         "name": "sessionId",
-=======
-                "description": "Mark need assessment as completed",
-                "operationId": "markNeedAssessmentCompleted",
-                "parameters": [
-                    {
-                        "name": "mentoringSessionId",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -3817,7 +3008,6 @@
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Assessment marked as completed successfully",
                         "content": {
                             "application/json": {
@@ -3890,9 +3080,6 @@
                                 }
                             }
                         }
-=======
-                        "description": "Assessment marked as completed"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -4257,7 +3444,6 @@
                     "content": {
                         "application/json": {
                             "schema": {
-<<<<<<< HEAD
                                 "required": [
                                     "title"
                                 ],
@@ -4277,14 +3463,6 @@
                                     "year": {
                                         "type": "integer",
                                         "example": 2023
-=======
-                                "properties": {
-                                    "title": {
-                                        "type": "string"
-                                    },
-                                    "description": {
-                                        "type": "string"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -4424,19 +3602,11 @@
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-<<<<<<< HEAD
                                     "profile_photo"
                                 ],
                                 "properties": {
                                     "profile_photo": {
                                         "description": "Profile photo (JPEG, PNG, JPG, GIF, max 2MB)",
-=======
-                                    "photo"
-                                ],
-                                "properties": {
-                                    "photo": {
-                                        "description": "Profile photo (JPEG, PNG, max 2MB)",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -4453,18 +3623,14 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-<<<<<<< HEAD
                                         "success": {
                                             "type": "boolean",
                                             "example": true
                                         },
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "message": {
                                             "type": "string",
                                             "example": "Profile photo uploaded successfully"
                                         },
-<<<<<<< HEAD
                                         "data": {
                                             "properties": {
                                                 "profile_photo_url": {
@@ -4473,11 +3639,6 @@
                                                 }
                                             },
                                             "type": "object"
-=======
-                                        "photo_url": {
-                                            "type": "string",
-                                            "example": "http://localhost/storage/profile-photos/abc123.jpg"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         }
                                     },
                                     "type": "object"
@@ -4486,7 +3647,6 @@
                         }
                     },
                     "422": {
-<<<<<<< HEAD
                         "description": "Validation error",
                         "content": {
                             "application/json": {
@@ -4511,9 +3671,6 @@
                     },
                     "401": {
                         "description": "Unauthorized"
-=======
-                        "description": "Invalid file format or size"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -4541,11 +3698,7 @@
                                 ],
                                 "properties": {
                                     "cv": {
-<<<<<<< HEAD
                                         "description": "CV document (PDF, DOC, DOCX, max 2MB)",
-=======
-                                        "description": "CV document (PDF, DOC, DOCX, max 5MB)",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -4557,7 +3710,6 @@
                 },
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "CV uploaded successfully",
                         "content": {
                             "application/json": {
@@ -4588,9 +3740,6 @@
                     },
                     "422": {
                         "description": "Validation error"
-=======
-                        "description": "CV uploaded successfully"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -4606,24 +3755,15 @@
                     "Profile"
                 ],
                 "summary": "Get recommendations",
-<<<<<<< HEAD
                 "description": "Get personalized recommendations for courses, scholarships, etc. (based on user's major)",
                 "operationId": "getRecommendations",
                 "responses": {
                     "200": {
                         "description": "Personalized recommendations retrieved successfully",
-=======
-                "description": "Get personalized recommendations for courses, scholarships, etc.",
-                "operationId": "getRecommendations",
-                "responses": {
-                    "200": {
-                        "description": "Personalized recommendations",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-<<<<<<< HEAD
                                         "success": {
                                             "type": "boolean",
                                             "example": true
@@ -4696,37 +3836,15 @@
                                                 }
                                             },
                                             "type": "object"
-=======
-                                        "courses": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "scholarships": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "mentors": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
-<<<<<<< HEAD
                     },
                     "401": {
                         "description": "Unauthorized"
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -4742,24 +3860,15 @@
                     "Profile"
                 ],
                 "summary": "Get user portfolio",
-<<<<<<< HEAD
                 "description": "Get user portfolio including achievements, experiences, organizations, courses, scholarship applications, mentoring sessions, and subscriptions",
                 "operationId": "getPortfolioAuth",
                 "responses": {
                     "200": {
                         "description": "User portfolio retrieved successfully",
-=======
-                "description": "Get user portfolio including achievements, experiences, and organizations",
-                "operationId": "getPortfolioAuth",
-                "responses": {
-                    "200": {
-                        "description": "User portfolio",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-<<<<<<< HEAD
                                         "success": {
                                             "type": "boolean",
                                             "example": true
@@ -4898,37 +4007,15 @@
                                                 }
                                             },
                                             "type": "object"
-=======
-                                        "achievements": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "experiences": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "organizations": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
-<<<<<<< HEAD
                     },
                     "401": {
                         "description": "Unauthorized"
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -4944,24 +4031,15 @@
                     "Profile"
                 ],
                 "summary": "Get activity history",
-<<<<<<< HEAD
                 "description": "Get user activity history with summary and latest activities",
                 "operationId": "getActivityHistory",
                 "responses": {
                     "200": {
                         "description": "User activity history retrieved successfully",
-=======
-                "description": "Get user activity history",
-                "operationId": "getActivityHistory",
-                "responses": {
-                    "200": {
-                        "description": "User activity history",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-<<<<<<< HEAD
                                         "success": {
                                             "type": "boolean",
                                             "example": true
@@ -5056,39 +4134,15 @@
                                                 }
                                             },
                                             "type": "object"
-=======
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "type": {
-                                                        "type": "string",
-                                                        "example": "enrollment"
-                                                    },
-                                                    "description": {
-                                                        "type": "string",
-                                                        "example": "Enrolled in React Course"
-                                                    },
-                                                    "timestamp": {
-                                                        "type": "string",
-                                                        "format": "datetime"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
-<<<<<<< HEAD
                     },
                     "401": {
                         "description": "Unauthorized"
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -5106,20 +4160,6 @@
                 "summary": "Get all reviews",
                 "description": "Get list of all reviews (public)",
                 "operationId": "getReviews",
-<<<<<<< HEAD
-=======
-                "parameters": [
-                    {
-                        "name": "organization_id",
-                        "in": "query",
-                        "description": "Filter by organization ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "responses": {
                     "200": {
                         "description": "Reviews retrieved successfully",
@@ -5137,7 +4177,6 @@
                                                     },
                                                     "user_id": {
                                                         "type": "integer",
-<<<<<<< HEAD
                                                         "example": 101
                                                     },
                                                     "reviewable_type": {
@@ -5156,26 +4195,6 @@
                                                         "type": "string",
                                                         "example": "Excellent scholarship program!"
                                                     },
-=======
-                                                        "example": 1
-                                                    },
-                                                    "organization_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "John Doe"
-                                                    },
-                                                    "description": {
-                                                        "type": "string",
-                                                        "example": "Great platform..."
-                                                    },
-                                                    "focus_area": {
-                                                        "type": "integer",
-                                                        "example": 5
-                                                    },
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                                     "created_at": {
                                                         "type": "string",
                                                         "format": "datetime"
@@ -5205,7 +4224,6 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-<<<<<<< HEAD
                                     "reviewable_type",
                                     "reviewable_id",
                                     "rating",
@@ -5226,35 +4244,14 @@
                                         "example": 1
                                     },
                                     "rating": {
-=======
-                                    "description"
-                                ],
-                                "properties": {
-                                    "organization_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "Great learning platform with excellent mentors"
-                                    },
-                                    "focus_area": {
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "type": "integer",
                                         "maximum": 5,
                                         "minimum": 1,
                                         "example": 5
-<<<<<<< HEAD
                                     },
                                     "comment": {
                                         "type": "string",
                                         "example": "Excellent scholarship program!"
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -5279,11 +4276,7 @@
                 "tags": [
                     "Reviews"
                 ],
-<<<<<<< HEAD
                 "summary": "Get single review",
-=======
-                "summary": "Get review detail",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "description": "Get specific review details",
                 "operationId": "getReviewById",
                 "parameters": [
@@ -5299,7 +4292,6 @@
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Review retrieved",
                         "content": {
                             "application/json": {
@@ -5330,9 +4322,6 @@
                                 }
                             }
                         }
-=======
-                        "description": "Review retrieved"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     },
                     "404": {
                         "description": "Review not found"
@@ -5349,11 +4338,7 @@
                     "Reviews"
                 ],
                 "summary": "Update review",
-<<<<<<< HEAD
                 "description": "Update existing review",
-=======
-                "description": "Update existing review (owner only)",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "operationId": "updateReview",
                 "parameters": [
                     {
@@ -5371,7 +4356,6 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-<<<<<<< HEAD
                                     "rating": {
                                         "type": "integer",
                                         "maximum": 5,
@@ -5381,15 +4365,6 @@
                                     "comment": {
                                         "type": "string",
                                         "example": "Updated comment content"
-=======
-                                    "description": {
-                                        "type": "string"
-                                    },
-                                    "focus_area": {
-                                        "type": "integer",
-                                        "maximum": 5,
-                                        "minimum": 1
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -5413,11 +4388,7 @@
                     "Reviews"
                 ],
                 "summary": "Delete review",
-<<<<<<< HEAD
                 "description": "Delete a review",
-=======
-                "description": "Delete a review (owner only)",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "operationId": "deleteReview",
                 "parameters": [
                     {
@@ -5890,30 +4861,19 @@
                     "Subscriptions"
                 ],
                 "summary": "Get my subscriptions",
-<<<<<<< HEAD
                 "description": "Retrieve all subscriptions for the authenticated user",
                 "operationId": "getMySubscriptions",
                 "responses": {
                     "200": {
                         "description": "Subscriptions retrieved successfully",
-=======
-                "description": "Get list of user's subscriptions",
-                "operationId": "getMySubscriptions",
-                "responses": {
-                    "200": {
-                        "description": "Subscriptions retrieved",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-<<<<<<< HEAD
                                         "success": {
                                             "type": "boolean",
                                             "example": true
                                         },
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "data": {
                                             "type": "array",
                                             "items": {
@@ -5932,7 +4892,6 @@
                                                     },
                                                     "duration": {
                                                         "type": "integer",
-<<<<<<< HEAD
                                                         "example": 12
                                                     },
                                                     "duration_unit": {
@@ -5948,22 +4907,10 @@
                                                         "type": "string",
                                                         "format": "date",
                                                         "example": "2026-12-01"
-=======
-                                                        "example": 3
-                                                    },
-                                                    "start_date": {
-                                                        "type": "string",
-                                                        "format": "date"
-                                                    },
-                                                    "end_date": {
-                                                        "type": "string",
-                                                        "format": "date"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                                     },
                                                     "status": {
                                                         "type": "string",
                                                         "example": "active"
-<<<<<<< HEAD
                                                     },
                                                     "price": {
                                                         "type": "number",
@@ -5972,8 +4919,6 @@
                                                     "auto_renew": {
                                                         "type": "boolean",
                                                         "example": false
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                                     }
                                                 },
                                                 "type": "object"
@@ -5996,13 +4941,8 @@
                 "tags": [
                     "Subscriptions"
                 ],
-<<<<<<< HEAD
                 "summary": "Create a subscription",
                 "description": "Subscribe to a chosen plan",
-=======
-                "summary": "Create subscription",
-                "description": "Subscribe to a plan",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "operationId": "createSubscription",
                 "requestBody": {
                     "required": true,
@@ -6012,23 +4952,15 @@
                                 "required": [
                                     "plan",
                                     "package_type",
-<<<<<<< HEAD
                                     "duration",
                                     "duration_unit",
                                     "price"
-=======
-                                    "duration"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                 ],
                                 "properties": {
                                     "plan": {
                                         "type": "string",
                                         "enum": [
-<<<<<<< HEAD
                                             "basic",
-=======
-                                            "free",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                             "premium",
                                             "pro"
                                         ],
@@ -6043,7 +4975,6 @@
                                         "example": "all_in_one"
                                     },
                                     "duration": {
-<<<<<<< HEAD
                                         "type": "integer",
                                         "example": 12
                                     },
@@ -6056,11 +4987,6 @@
                                             "years"
                                         ],
                                         "example": "months"
-=======
-                                        "description": "Duration in months",
-                                        "type": "integer",
-                                        "example": 3
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     },
                                     "courses_ids": {
                                         "type": "array",
@@ -6072,7 +4998,6 @@
                                             2,
                                             3
                                         ]
-<<<<<<< HEAD
                                     },
                                     "price": {
                                         "type": "number",
@@ -6086,8 +5011,6 @@
                                         "type": "string",
                                         "format": "date",
                                         "example": "2025-12-03"
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -6097,7 +5020,6 @@
                 },
                 "responses": {
                     "201": {
-<<<<<<< HEAD
                         "description": "Subscription created successfully",
                         "content": {
                             "application/json": {
@@ -6330,9 +5252,6 @@
                                 }
                             }
                         }
-=======
-                        "description": "Subscription created"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -6348,22 +5267,13 @@
                     "Transactions"
                 ],
                 "summary": "Get my transactions",
-<<<<<<< HEAD
                 "description": "Retrieve all transactions for the authenticated user",
-=======
-                "description": "Get list of user's transactions",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "operationId": "getMyTransactions",
                 "parameters": [
                     {
                         "name": "status",
                         "in": "query",
-<<<<<<< HEAD
                         "description": "Filter by transaction status",
-=======
-                        "description": "Filter by status",
-                        "required": false,
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "schema": {
                             "type": "string",
                             "enum": [
@@ -6378,12 +5288,7 @@
                     {
                         "name": "type",
                         "in": "query",
-<<<<<<< HEAD
                         "description": "Filter by transaction type",
-=======
-                        "description": "Filter by type",
-                        "required": false,
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "schema": {
                             "type": "string",
                             "enum": [
@@ -6396,29 +5301,21 @@
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Transactions retrieved successfully",
-=======
-                        "description": "Transactions retrieved",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-<<<<<<< HEAD
                                         "success": {
                                             "type": "boolean",
                                             "example": true
                                         },
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                         "data": {
                                             "type": "array",
                                             "items": {
                                                 "properties": {
                                                     "id": {
                                                         "type": "integer",
-<<<<<<< HEAD
                                                         "example": 10
                                                     },
                                                     "transaction_code": {
@@ -6432,22 +5329,6 @@
                                                     "amount": {
                                                         "type": "number",
                                                         "example": 500000
-=======
-                                                        "example": 1
-                                                    },
-                                                    "transaction_code": {
-                                                        "type": "string",
-                                                        "example": "TRX-12345678"
-                                                    },
-                                                    "type": {
-                                                        "type": "string",
-                                                        "example": "course_enrollment"
-                                                    },
-                                                    "amount": {
-                                                        "type": "number",
-                                                        "format": "float",
-                                                        "example": 1500000
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                                     },
                                                     "payment_method": {
                                                         "type": "string",
@@ -6456,7 +5337,6 @@
                                                     "status": {
                                                         "type": "string",
                                                         "example": "paid"
-<<<<<<< HEAD
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -6469,8 +5349,6 @@
                                                     "transactionable_id": {
                                                         "type": "integer",
                                                         "example": 1
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                                     }
                                                 },
                                                 "type": "object"
@@ -6488,76 +5366,6 @@
                         "bearerAuth": []
                     }
                 ]
-<<<<<<< HEAD
-=======
-            },
-            "post": {
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Create transaction",
-                "description": "Create a new payment transaction",
-                "operationId": "createTransaction",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "type",
-                                    "transactionable_type",
-                                    "transactionable_id",
-                                    "amount",
-                                    "payment_method"
-                                ],
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "course_enrollment",
-                                            "subscription",
-                                            "mentoring_session"
-                                        ]
-                                    },
-                                    "transactionable_type": {
-                                        "type": "string",
-                                        "example": "App\\\\Models\\\\Course"
-                                    },
-                                    "transactionable_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "amount": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 1500000
-                                    },
-                                    "payment_method": {
-                                        "type": "string",
-                                        "enum": [
-                                            "qris",
-                                            "bank_transfer",
-                                            "virtual_account",
-                                            "credit_card"
-                                        ]
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Transaction created"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
             }
         },
         "/api/transactions/{id}": {
@@ -6565,13 +5373,8 @@
                 "tags": [
                     "Transactions"
                 ],
-<<<<<<< HEAD
                 "summary": "Get transaction details",
                 "description": "Retrieve details of a single transaction",
-=======
-                "summary": "Get transaction detail",
-                "description": "Get transaction detail",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "operationId": "getTransactionById",
                 "parameters": [
                     {
@@ -6585,7 +5388,6 @@
                 ],
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Transaction details retrieved successfully",
                         "content": {
                             "application/json": {
@@ -6653,9 +5455,6 @@
                                 }
                             }
                         }
-=======
-                        "description": "Transaction detail retrieved"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "security": [
@@ -6665,16 +5464,11 @@
                 ]
             }
         },
-<<<<<<< HEAD
         "/api/transactions/courses/{courseId}": {
-=======
-        "/api/midtrans/callback": {
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
             "post": {
                 "tags": [
                     "Transactions"
                 ],
-<<<<<<< HEAD
                 "summary": "Create course transaction",
                 "description": "Create payment transaction for course enrollment",
                 "operationId": "createCourseTransaction",
@@ -6688,17 +5482,11 @@
                         }
                     }
                 ],
-=======
-                "summary": "Midtrans webhook callback",
-                "description": "Handle Midtrans payment notification callback",
-                "operationId": "midtransCallback",
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-<<<<<<< HEAD
                                 "required": [
                                     "payment_method"
                                 ],
@@ -6954,41 +5742,6 @@
                                         "description": "Payment proof image/document",
                                         "type": "string",
                                         "format": "binary"
-=======
-                                "properties": {
-                                    "transaction_time": {
-                                        "type": "string"
-                                    },
-                                    "transaction_status": {
-                                        "type": "string"
-                                    },
-                                    "transaction_id": {
-                                        "type": "string"
-                                    },
-                                    "status_message": {
-                                        "type": "string"
-                                    },
-                                    "status_code": {
-                                        "type": "string"
-                                    },
-                                    "signature_key": {
-                                        "type": "string"
-                                    },
-                                    "order_id": {
-                                        "type": "string"
-                                    },
-                                    "merchant_id": {
-                                        "type": "string"
-                                    },
-                                    "gross_amount": {
-                                        "type": "string"
-                                    },
-                                    "fraud_status": {
-                                        "type": "string"
-                                    },
-                                    "currency": {
-                                        "type": "string"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -6998,7 +5751,6 @@
                 },
                 "responses": {
                     "200": {
-<<<<<<< HEAD
                         "description": "Payment proof uploaded successfully"
                     }
                 },
@@ -7184,11 +5936,6 @@
                         "bearerAuth": []
                     }
                 ]
-=======
-                        "description": "Callback processed"
-                    }
-                }
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
             }
         },
         "/api/admin/users": {
@@ -7520,7 +6267,6 @@
                     "content": {
                         "application/json": {
                             "schema": {
-<<<<<<< HEAD
                                 "required": [
                                     "order_id",
                                     "transaction_status",
@@ -7571,56 +6317,6 @@
                                         "description": "Fraud detection status",
                                         "type": "string",
                                         "example": "accept"
-=======
-                                "properties": {
-                                    "transaction_time": {
-                                        "type": "string",
-                                        "example": "2024-01-15 10:30:00"
-                                    },
-                                    "transaction_status": {
-                                        "type": "string",
-                                        "example": "settlement"
-                                    },
-                                    "transaction_id": {
-                                        "type": "string",
-                                        "example": "abc123-def456"
-                                    },
-                                    "status_message": {
-                                        "type": "string",
-                                        "example": "midtrans payment notification"
-                                    },
-                                    "status_code": {
-                                        "type": "string",
-                                        "example": "200"
-                                    },
-                                    "signature_key": {
-                                        "type": "string",
-                                        "example": "signature_hash_here"
-                                    },
-                                    "order_id": {
-                                        "type": "string",
-                                        "example": "TRX-12345678"
-                                    },
-                                    "merchant_id": {
-                                        "type": "string",
-                                        "example": "G123456789"
-                                    },
-                                    "gross_amount": {
-                                        "type": "string",
-                                        "example": "150000.00"
-                                    },
-                                    "fraud_status": {
-                                        "type": "string",
-                                        "example": "accept"
-                                    },
-                                    "currency": {
-                                        "type": "string",
-                                        "example": "IDR"
-                                    },
-                                    "payment_type": {
-                                        "type": "string",
-                                        "example": "qris"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                                     }
                                 },
                                 "type": "object"
@@ -7658,7 +6354,6 @@
     },
     "components": {
         "schemas": {
-<<<<<<< HEAD
             "CoachingFile": {
                 "title": "Coaching File",
                 "properties": {
@@ -7685,8 +6380,6 @@
                 },
                 "type": "object"
             },
-=======
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
             "MentoringSession": {
                 "title": "Mentoring Session Schema",
                 "properties": {
@@ -7696,19 +6389,11 @@
                     },
                     "mentor_id": {
                         "type": "integer",
-<<<<<<< HEAD
                         "example": 7
                     },
                     "member_id": {
                         "type": "integer",
                         "example": 4
-=======
-                        "example": 4
-                    },
-                    "member_id": {
-                        "type": "integer",
-                        "example": 5
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     },
                     "type": {
                         "type": "string",
@@ -7718,7 +6403,6 @@
                         ],
                         "example": "academic"
                     },
-<<<<<<< HEAD
                     "payment_method": {
                         "type": "string",
                         "enum": [
@@ -7733,19 +6417,12 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2025-12-20 10:00:00"
-=======
-                    "schedule": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-02-20 10:00:00"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     },
                     "status": {
                         "type": "string",
                         "enum": [
                             "pending",
                             "scheduled",
-<<<<<<< HEAD
                             "ongoing",
                             "completed",
                             "cancelled"
@@ -7764,16 +6441,6 @@
                     "updated_at": {
                         "type": "string",
                         "format": "date-time"
-=======
-                            "completed",
-                            "cancelled"
-                        ],
-                        "example": "scheduled"
-                    },
-                    "meeting_link": {
-                        "type": "string",
-                        "example": "https://meet.google.com/abc-defg-hij"
->>>>>>> 76b263750ba86d843dbe5b452d3ed786aa0f3259
                     }
                 },
                 "type": "object"
