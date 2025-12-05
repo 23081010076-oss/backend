@@ -88,6 +88,11 @@ class CourseService
             $data['video_url'] = $videoFile->store('course-videos', 'public');
         }
 
+        // Handle image (file upload atau URL)
+        if (isset($data['image'])) {
+            $data['image'] = $this->handleImage($data['image']);
+        }
+
         $course = Course::create($data);
         
         // Clear cache setelah create
@@ -108,6 +113,13 @@ class CourseService
             
             // Upload video baru
             $data['video_url'] = $videoFile->store('course-videos', 'public');
+        }
+
+        // Handle image (file upload atau URL)
+        if (isset($data['image'])) {
+            // Hapus image lama jika ada dan bukan URL eksternal
+            $this->deleteImage($course->image);
+            $data['image'] = $this->handleImage($data['image']);
         }
 
         $course->update($data);
@@ -206,6 +218,59 @@ class CourseService
     }
 
     /**
+     * Handle image upload atau URL
+     * 
+     * @param mixed $image File upload atau string URL
+     * @return string Path file atau URL
+     */
+    private function handleImage($image): string
+    {
+        // Jika sudah string URL, langsung return
+        if (is_string($image)) {
+            // Validasi URL jika diawali http
+            if (str_starts_with($image, 'http')) {
+                return $image;
+            }
+            return $image;
+        }
+
+        // Jika file upload
+        if ($image instanceof \Illuminate\Http\UploadedFile) {
+            // Validasi tipe file
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            if (!in_array($image->getMimeType(), $allowedMimes)) {
+                throw new \InvalidArgumentException('Format gambar harus JPG, PNG, WEBP, atau GIF');
+            }
+
+            // Validasi ukuran (max 5MB)
+            if ($image->getSize() > 5 * 1024 * 1024) {
+                throw new \InvalidArgumentException('Ukuran gambar maksimal 5MB');
+            }
+
+            // Simpan file
+            return $image->store('course-images', 'public');
+        }
+
+        return '';
+    }
+
+    /**
+     * Hapus file image jika bukan URL eksternal
+     */
+    private function deleteImage(?string $imagePath): void
+    {
+        // Skip jika null atau URL eksternal
+        if (!$imagePath || str_starts_with($imagePath, 'http')) {
+            return;
+        }
+
+        // Hapus file lokal
+        if (Storage::disk('public')->exists($imagePath)) {
+            Storage::disk('public')->delete($imagePath);
+        }
+    }
+
+    /**
      * Ambil statistik kursus (cached 30 menit)
      */
     public function getStatistics(): array
@@ -238,3 +303,4 @@ class CourseService
         // Cache::tags(['courses'])->flush();
     }
 }
+

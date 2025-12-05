@@ -49,6 +49,7 @@ class StoreCourseRequest extends FormRequest
             'access_type' => 'required|in:free,regular,premium',
             
             // FIELD OPSIONAL
+            'image'           => 'nullable|jpg,jpeg,png', // Bisa file atau URL, validasi di controller
             'description'     => 'nullable|string',
             'duration'        => 'nullable|string',
             'price'           => 'nullable|numeric|min:0',

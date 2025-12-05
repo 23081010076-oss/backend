@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->string('image')->nullable()->comment('Course thumbnail/cover image');
             $table->string('category')->nullable();
             $table->text('description')->nullable();
             $table->enum('type', ['bootcamp', 'course'])->default('course');

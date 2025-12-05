@@ -45,6 +45,7 @@ namespace App\Swagger;
  *                 @OA\Items(
  *                     @OA\Property(property="id", type="integer", example=1),
  *                     @OA\Property(property="title", type="string", example="Full Stack Web Development Bootcamp"),
+ *                     @OA\Property(property="image", type="string", example="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800"),
  *                     @OA\Property(property="description", type="string", example="Comprehensive bootcamp covering..."),
  *                     @OA\Property(property="type", type="string", example="bootcamp"),
  *                     @OA\Property(property="level", type="string", example="beginner"),
@@ -52,7 +53,7 @@ namespace App\Swagger;
  *                     @OA\Property(property="duration", type="string", example="12 weeks"),
  *                     @OA\Property(property="price", type="number", format="float", example=2500000),
  *                     @OA\Property(property="access_type", type="string", example="premium"),
- *                     @OA\Property(property="video_url", type="string", example="https://youtube.com/embed/..."),
+ *                     @OA\Property(property="video_url", type="string", example="https://youtube.com/embed/intro"),
  *                     @OA\Property(property="total_videos", type="integer", example=45)
  *                 )
  *             )

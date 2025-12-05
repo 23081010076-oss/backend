@@ -1403,6 +1403,10 @@
                                                         "type": "string",
                                                         "example": "Full Stack Web Development Bootcamp"
                                                     },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800"
+                                                    },
                                                     "description": {
                                                         "type": "string",
                                                         "example": "Comprehensive bootcamp covering..."
@@ -1434,7 +1438,7 @@
                                                     },
                                                     "video_url": {
                                                         "type": "string",
-                                                        "example": "https://youtube.com/embed/..."
+                                                        "example": "https://youtube.com/embed/intro"
                                                     },
                                                     "total_videos": {
                                                         "type": "integer",

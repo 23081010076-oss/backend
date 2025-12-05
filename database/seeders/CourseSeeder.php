@@ -16,6 +16,7 @@ class CourseSeeder extends Seeder
         $courses = [
             [
                 'title' => 'Full Stack Web Development Bootcamp',
+                'image' => 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800',
                 'description' => 'Comprehensive bootcamp covering HTML, CSS, JavaScript, React, Node.js, and database management. Perfect for beginners who want to become full-stack developers.',
                 'category' => 'Web Development',
                 'type' => 'bootcamp',
@@ -38,6 +39,7 @@ class CourseSeeder extends Seeder
             ],
             [
                 'title' => 'JavaScript Fundamentals',
+                'image' => 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800',
                 'description' => 'Learn JavaScript from basics to advanced concepts including ES6+, DOM manipulation, and asynchronous programming.',
                 'category' => 'Web Development',
                 'type' => 'course',
@@ -59,6 +61,7 @@ class CourseSeeder extends Seeder
             ],
             [
                 'title' => 'Introduction to Programming',
+                'image' => 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=800',
                 'description' => 'Perfect first course for complete beginners. Learn programming concepts using Python with hands-on exercises.',
                 'category' => 'Programming',
                 'type' => 'course',
@@ -80,6 +83,7 @@ class CourseSeeder extends Seeder
             ],
             [
                 'title' => 'React Advanced Patterns',
+                'image' => 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
                 'description' => 'Advanced React concepts including hooks, context, performance optimization, and testing strategies.',
                 'category' => 'Web Development',
                 'type' => 'course',
@@ -100,6 +104,7 @@ class CourseSeeder extends Seeder
             ],
             [
                 'title' => 'Machine Learning with Python',
+                'image' => 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800',
                 'description' => 'Learn machine learning algorithms, data preprocessing, and model evaluation using scikit-learn and TensorFlow.',
                 'category' => 'Data Science',
                 'type' => 'bootcamp',
@@ -120,6 +125,7 @@ class CourseSeeder extends Seeder
             ],
             [
                 'title' => 'Mobile App Development with Flutter',
+                'image' => 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800',
                 'description' => 'Build cross-platform mobile applications using Flutter and Dart programming language.',
                 'category' => 'Mobile Development',
                 'type' => 'course',
@@ -140,6 +146,7 @@ class CourseSeeder extends Seeder
             ],
             [
                 'title' => 'Database Design and SQL',
+                'image' => 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800',
                 'description' => 'Master database design principles, SQL queries, and database optimization techniques.',
                 'category' => 'Database',
                 'type' => 'course',
@@ -160,6 +167,7 @@ class CourseSeeder extends Seeder
             ],
             [
                 'title' => 'UI/UX Design Fundamentals',
+                'image' => 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800',
                 'description' => 'Learn user interface and user experience design principles using Figma and design thinking methodology.',
                 'category' => 'Design',
                 'type' => 'course',
@@ -180,6 +188,7 @@ class CourseSeeder extends Seeder
             ],
             [
                 'title' => 'Cloud Computing with AWS',
+                'image' => 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800',
                 'description' => 'Learn Amazon Web Services including EC2, S3, Lambda, and deployment strategies for scalable applications.',
                 'category' => 'Cloud Computing',
                 'type' => 'bootcamp',
@@ -200,6 +209,7 @@ class CourseSeeder extends Seeder
             ],
             [
                 'title' => 'Git and Version Control',
+                'image' => 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800',
                 'description' => 'Essential skills for developers: master Git version control, branching strategies, and collaborative development.',
                 'category' => 'DevOps',
                 'type' => 'course',
