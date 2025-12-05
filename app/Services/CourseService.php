@@ -42,6 +42,11 @@ class CourseService
                 $query->where('type', $filters['type']);
             }
 
+            // Filter berdasarkan kategori
+            if (!empty($filters['category'])) {
+                $query->where('category', $filters['category']);
+            }
+
             // Filter berdasarkan level
             if (!empty($filters['level'])) {
                 $query->where('level', $filters['level']);

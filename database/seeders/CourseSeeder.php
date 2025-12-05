@@ -16,6 +16,7 @@ class CourseSeeder extends Seeder
             [
                 'title' => 'Full Stack Web Development Bootcamp',
                 'description' => 'Comprehensive bootcamp covering HTML, CSS, JavaScript, React, Node.js, and database management. Perfect for beginners who want to become full-stack developers.',
+                'category' => 'Web Development',
                 'type' => 'bootcamp',
                 'level' => 'beginner',
                 'instructor' => 'Dr. Ahmad Syafiq',
@@ -30,6 +31,7 @@ class CourseSeeder extends Seeder
             [
                 'title' => 'JavaScript Fundamentals',
                 'description' => 'Learn JavaScript from basics to advanced concepts including ES6+, DOM manipulation, and asynchronous programming.',
+                'category' => 'Web Development',
                 'type' => 'course',
                 'level' => 'beginner',
                 'instructor' => 'Sari Wijayanti, M.Kom',
@@ -44,6 +46,7 @@ class CourseSeeder extends Seeder
             [
                 'title' => 'Introduction to Programming',
                 'description' => 'Perfect first course for complete beginners. Learn programming concepts using Python with hands-on exercises.',
+                'category' => 'Programming',
                 'type' => 'course',
                 'level' => 'beginner',
                 'instructor' => 'Budi Santoso, S.Kom',
@@ -58,6 +61,7 @@ class CourseSeeder extends Seeder
             [
                 'title' => 'React Advanced Patterns',
                 'description' => 'Advanced React concepts including hooks, context, performance optimization, and testing strategies.',
+                'category' => 'Web Development',
                 'type' => 'course',
                 'level' => 'advanced',
                 'instructor' => 'Prof. Indira Sari',
@@ -72,6 +76,7 @@ class CourseSeeder extends Seeder
             [
                 'title' => 'Machine Learning with Python',
                 'description' => 'Learn machine learning algorithms, data preprocessing, and model evaluation using scikit-learn and TensorFlow.',
+                'category' => 'Data Science',
                 'type' => 'bootcamp',
                 'level' => 'intermediate',
                 'instructor' => 'Dr. Ravi Kumar',
@@ -86,6 +91,7 @@ class CourseSeeder extends Seeder
             [
                 'title' => 'Mobile App Development with Flutter',
                 'description' => 'Build cross-platform mobile applications using Flutter and Dart programming language.',
+                'category' => 'Mobile Development',
                 'type' => 'course',
                 'level' => 'intermediate',
                 'instructor' => 'Maya Sari, M.T',
@@ -100,6 +106,7 @@ class CourseSeeder extends Seeder
             [
                 'title' => 'Database Design and SQL',
                 'description' => 'Master database design principles, SQL queries, and database optimization techniques.',
+                'category' => 'Database',
                 'type' => 'course',
                 'level' => 'intermediate',
                 'instructor' => 'Agus Prasetyo, S.T',
@@ -114,6 +121,7 @@ class CourseSeeder extends Seeder
             [
                 'title' => 'UI/UX Design Fundamentals',
                 'description' => 'Learn user interface and user experience design principles using Figma and design thinking methodology.',
+                'category' => 'Design',
                 'type' => 'course',
                 'level' => 'beginner',
                 'instructor' => 'Rina Kartika, S.Des',
@@ -128,6 +136,7 @@ class CourseSeeder extends Seeder
             [
                 'title' => 'Cloud Computing with AWS',
                 'description' => 'Learn Amazon Web Services including EC2, S3, Lambda, and deployment strategies for scalable applications.',
+                'category' => 'Cloud Computing',
                 'type' => 'bootcamp',
                 'level' => 'advanced',
                 'instructor' => 'Dr. Farid Wajdi',
@@ -142,6 +151,7 @@ class CourseSeeder extends Seeder
             [
                 'title' => 'Git and Version Control',
                 'description' => 'Essential skills for developers: master Git version control, branching strategies, and collaborative development.',
+                'category' => 'DevOps',
                 'type' => 'course',
                 'level' => 'beginner',
                 'instructor' => 'Doni Pratama, S.Kom',

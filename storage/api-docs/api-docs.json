@@ -421,12 +421,12 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "admin@learningplatform.com"
+                                        "example": "ahmad.rizki@student.com"
                                     },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "AdminPass123!"
+                                        "example": "password123"
                                     }
                                 },
                                 "type": "object"
@@ -459,15 +459,15 @@
                                                         },
                                                         "name": {
                                                             "type": "string",
-                                                            "example": "Admin Platform"
+                                                            "example": "Ahmad Rizki"
                                                         },
                                                         "email": {
                                                             "type": "string",
-                                                            "example": "admin@learningplatform.com"
+                                                            "example": "ahmad.rizki@student.com"
                                                         },
                                                         "role": {
                                                             "type": "string",
-                                                            "example": "admin"
+                                                            "example": "student"
                                                         }
                                                     },
                                                     "type": "object"
@@ -809,17 +809,17 @@
                 ]
             }
         },
-        "/api/mentoring-sessions/{mentoringSessionId}/coaching-files": {
+        "/mentoring-sessions/{sessionId}/coaching-files": {
             "get": {
                 "tags": [
                     "Coaching Files"
                 ],
-                "summary": "Get coaching files",
+                "summary": "Get Coaching Files",
                 "description": "Get all coaching files for a mentoring session",
                 "operationId": "getCoachingFiles",
                 "parameters": [
                     {
-                        "name": "mentoringSessionId",
+                        "name": "sessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -838,49 +838,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "mentoring_session_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "title": {
-                                                        "type": "string",
-                                                        "example": "React Hooks Guide"
-                                                    },
-                                                    "description": {
-                                                        "type": "string",
-                                                        "example": "Comprehensive guide to React Hooks"
-                                                    },
-                                                    "file_path": {
-                                                        "type": "string",
-                                                        "example": "coaching-files/react-hooks.pdf"
-                                                    },
-                                                    "file_name": {
-                                                        "type": "string",
-                                                        "example": "react-hooks.pdf"
-                                                    },
-                                                    "file_size": {
-                                                        "type": "integer",
-                                                        "example": 1024000
-                                                    },
-                                                    "file_type": {
-                                                        "type": "string",
-                                                        "example": "application/pdf"
-                                                    },
-                                                    "uploaded_by": {
-                                                        "type": "integer",
-                                                        "example": 2
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "datetime"
-                                                    }
-                                                },
-                                                "type": "object"
+                                                "$ref": "#/components/schemas/CoachingFile"
                                             }
                                         }
                                     },
@@ -889,8 +847,11 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
                     "404": {
-                        "description": "Mentoring session not found"
+                        "description": "Session not found"
                     }
                 },
                 "security": [
@@ -903,12 +864,12 @@
                 "tags": [
                     "Coaching Files"
                 ],
-                "summary": "Upload coaching file",
-                "description": "Upload a new coaching file for mentoring session",
+                "summary": "Upload Coaching File",
+                "description": "Upload a new coaching file (Mentor Only)",
                 "operationId": "uploadCoachingFile",
                 "parameters": [
                     {
-                        "name": "mentoringSessionId",
+                        "name": "sessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -923,24 +884,19 @@
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-                                    "title",
-                                    "file"
+                                    "file",
+                                    "file_name"
                                 ],
                                 "properties": {
-                                    "title": {
-                                        "description": "File title",
-                                        "type": "string",
-                                        "example": "React Hooks Complete Guide"
-                                    },
-                                    "description": {
-                                        "description": "File description",
-                                        "type": "string",
-                                        "example": "Comprehensive guide covering useState, useEffect, useContext, etc."
-                                    },
                                     "file": {
-                                        "description": "File to upload (PDF, DOC, DOCX, images, etc.)",
+                                        "description": "File (required)",
                                         "type": "string",
                                         "format": "binary"
+                                    },
+                                    "file_name": {
+                                        "description": "String (required)",
+                                        "type": "string",
+                                        "example": "Materi Pertemuan 1"
                                     }
                                 },
                                 "type": "object"
@@ -960,29 +916,7 @@
                                             "example": "File uploaded successfully"
                                         },
                                         "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "React Hooks Complete Guide"
-                                                },
-                                                "file_name": {
-                                                    "type": "string",
-                                                    "example": "react-hooks.pdf"
-                                                },
-                                                "file_size": {
-                                                    "type": "integer",
-                                                    "example": 1024000
-                                                },
-                                                "file_type": {
-                                                    "type": "string",
-                                                    "example": "application/pdf"
-                                                }
-                                            },
-                                            "type": "object"
+                                            "$ref": "#/components/schemas/CoachingFile"
                                         }
                                     },
                                     "type": "object"
@@ -991,7 +925,7 @@
                         }
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -1001,167 +935,25 @@
                 ]
             }
         },
-        "/api/mentoring-sessions/{mentoringSessionId}/coaching-files/{id}": {
+        "/mentoring-sessions/{sessionId}/coaching-files/{fileId}/download": {
             "get": {
                 "tags": [
                     "Coaching Files"
                 ],
-                "summary": "Get single coaching file",
-                "description": "Get details of a specific coaching file",
-                "operationId": "getCoachingFile",
-                "parameters": [
-                    {
-                        "name": "mentoringSessionId",
-                        "in": "path",
-                        "description": "Mentoring Session ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Coaching File ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Coaching file details"
-                    },
-                    "404": {
-                        "description": "File not found"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Coaching Files"
-                ],
-                "summary": "Update coaching file",
-                "description": "Update coaching file details",
-                "operationId": "updateCoachingFile",
-                "parameters": [
-                    {
-                        "name": "mentoringSessionId",
-                        "in": "path",
-                        "description": "Mentoring Session ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Coaching File ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "title": {
-                                        "type": "string",
-                                        "example": "Updated Title"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "Updated description"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "File updated"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Coaching Files"
-                ],
-                "summary": "Delete coaching file",
-                "description": "Delete a coaching file",
-                "operationId": "deleteCoachingFile",
-                "parameters": [
-                    {
-                        "name": "mentoringSessionId",
-                        "in": "path",
-                        "description": "Mentoring Session ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Coaching File ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "File deleted successfully"
-                    },
-                    "404": {
-                        "description": "File not found"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/mentoring-sessions/{mentoringSessionId}/coaching-files/{id}/download": {
-            "get": {
-                "tags": [
-                    "Coaching Files"
-                ],
-                "summary": "Download coaching file",
-                "description": "Download a coaching file",
+                "summary": "Download Coaching File",
+                "description": "Download specific coaching file",
                 "operationId": "downloadCoachingFile",
                 "parameters": [
                     {
-                        "name": "mentoringSessionId",
+                        "name": "sessionId",
                         "in": "path",
-                        "description": "Mentoring Session ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
                         }
                     },
                     {
-                        "name": "id",
+                        "name": "fileId",
                         "in": "path",
                         "description": "Coaching File ID",
                         "required": true,
@@ -1172,12 +964,67 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "File download",
+                        "description": "File Download Stream",
                         "content": {
                             "application/octet-stream": {
                                 "schema": {
                                     "type": "string",
                                     "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "File not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mentoring-sessions/{sessionId}/coaching-files/{fileId}": {
+            "delete": {
+                "tags": [
+                    "Coaching Files"
+                ],
+                "summary": "Delete Coaching File",
+                "description": "Delete a coaching file (Mentor Only)",
+                "operationId": "deleteCoachingFile",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "fileId",
+                        "in": "path",
+                        "description": "Coaching File ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "File deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -1207,47 +1054,28 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "company_name",
-                                    "contact_name",
+                                    "name",
                                     "email",
                                     "message"
                                 ],
                                 "properties": {
-                                    "company_name": {
-                                        "type": "string",
-                                        "example": "PT ABC Technology"
+                                    "org_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
                                     },
-                                    "contact_name": {
+                                    "name": {
                                         "type": "string",
                                         "example": "John Doe"
                                     },
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "john@abc-tech.com"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "08123456789"
+                                        "example": "john@example.com"
                                     },
                                     "message": {
                                         "type": "string",
-                                        "example": "We are interested in corporate training partnership"
-                                    },
-                                    "company_size": {
-                                        "type": "string",
-                                        "enum": [
-                                            "1-10",
-                                            "11-50",
-                                            "51-200",
-                                            "201-500",
-                                            "500+"
-                                        ],
-                                        "example": "51-200"
-                                    },
-                                    "industry": {
-                                        "type": "string",
-                                        "example": "Technology"
+                                        "example": "We are interested in a corporate partnership."
                                     }
                                 },
                                 "type": "object"
@@ -1257,7 +1085,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Inquiry submitted successfully",
+                        "description": "Corporate contact submitted successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1268,7 +1096,10 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Thank you for your inquiry. We will contact you soon."
+                                            "example": "Corporate contact submitted successfully. We will get back to you soon."
+                                        },
+                                        "data": {
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -2088,8 +1919,9 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "List all sessions (Admin/General)",
-                "operationId": "d1b8cc73e78e2db2fadf1b6b92efd6b7",
+                "summary": "Get All Mentoring Sessions",
+                "description": "Get all mentoring sessions for authenticated user",
+                "operationId": "getAllMentoringSessions",
                 "parameters": [
                     {
                         "name": "status",
@@ -2101,6 +1933,7 @@
                             "enum": [
                                 "pending",
                                 "scheduled",
+                                "ongoing",
                                 "completed",
                                 "cancelled"
                             ]
@@ -2109,11 +1942,15 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "Mentoring sessions retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "data": {
                                             "type": "array",
                                             "items": {
@@ -2125,6 +1962,9 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -2137,9 +1977,11 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Book a new session",
-                "operationId": "6cab7fff20b22430eb031b0d341e0729",
+                "summary": "Create Mentoring Session",
+                "description": "Create a new mentoring session booking",
+                "operationId": "createMentoringSession",
                 "requestBody": {
+                    "description": "Mentoring session data",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -2147,26 +1989,57 @@
                                 "required": [
                                     "mentor_id",
                                     "type",
-                                    "schedule"
+                                    "payment_method",
+                                    "schedule",
+                                    "status"
                                 ],
                                 "properties": {
                                     "mentor_id": {
+                                        "description": "ID of the mentor",
+                                        "type": "integer",
+                                        "example": 7
+                                    },
+                                    "member_id": {
+                                        "description": "ID of the member (optional, defaults to authenticated user)",
                                         "type": "integer",
                                         "example": 4
                                     },
                                     "type": {
+                                        "description": "Type of mentoring session",
                                         "type": "string",
                                         "enum": [
                                             "academic",
                                             "life_plan"
-                                        ]
+                                        ],
+                                        "example": "academic"
+                                    },
+                                    "payment_method": {
+                                        "description": "Payment method",
+                                        "type": "string",
+                                        "enum": [
+                                            "qris",
+                                            "bank_transfer",
+                                            "credit_card",
+                                            "e_wallet"
+                                        ],
+                                        "example": "qris"
                                     },
                                     "schedule": {
+                                        "description": "Scheduled date and time",
                                         "type": "string",
                                         "format": "date-time",
-                                        "example": "2024-02-20 10:00:00"
+                                        "example": "2025-12-20 10:00:00"
+                                    },
+                                    "status": {
+                                        "description": "Initial status (always pending)",
+                                        "type": "string",
+                                        "enum": [
+                                            "pending"
+                                        ],
+                                        "example": "pending"
                                     },
                                     "note": {
+                                        "description": "Additional notes",
                                         "type": "string",
                                         "example": "Saya ingin konsultasi skripsi"
                                     }
@@ -2178,52 +2051,44 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Created"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/my-mentoring-sessions": {
-            "get": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "List MY sessions (Logged in User)",
-                "description": "Get sessions specific to the authenticated user",
-                "operationId": "f6053f3532e38f8759236c95998aaeb9",
-                "parameters": [
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "pending",
-                                "scheduled",
-                                "completed",
-                                "cancelled"
-                            ]
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
+                        "description": "Mentoring session created successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mentoring session created successfully"
+                                        },
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/MentoringSession"
-                                            }
+                                            "$ref": "#/components/schemas/MentoringSession"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -2244,12 +2109,14 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Get session detail",
-                "operationId": "eeaae3f49fc687210b8ac1c27e4fd5e8",
+                "summary": "Get Single Mentoring Session",
+                "description": "Get details of a specific mentoring session",
+                "operationId": "getSingleMentoringSession",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "Mentoring session ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -2258,59 +2125,43 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Detail retrieved",
+                        "description": "Mentoring session details retrieved",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/MentoringSession"
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/MentoringSession"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "Update session detail",
-                "operationId": "890908504299b52bdc0f3f9ebc0f7a00",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "schedule": {
-                                        "type": "string",
-                                        "format": "date-time"
+                    },
+                    "404": {
+                        "description": "Mentoring session not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mentoring session not found"
+                                        }
                                     },
-                                    "meeting_link": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
+                                    "type": "object"
+                                }
                             }
                         }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Updated"
                     }
                 },
                 "security": [
@@ -2323,12 +2174,14 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Delete session",
-                "operationId": "9e38f5b072de670eed6359fd17f2a457",
+                "summary": "Delete Mentoring Session",
+                "description": "Delete a mentoring session",
+                "operationId": "deleteMentoringSession",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "Mentoring session ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -2337,7 +2190,132 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Deleted"
+                        "description": "Session deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mentoring session deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Session not found"
+                    },
+                    "403": {
+                        "description": "Not authorized to delete this session"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentoring-sessions/{id}/schedule": {
+            "post": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Schedule Mentoring Session",
+                "description": "Endpoint for Mentor to set schedule and meeting link",
+                "operationId": "scheduleMentoringSession",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Mentoring session ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Schedule and meeting link data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "schedule",
+                                    "meeting_link"
+                                ],
+                                "properties": {
+                                    "schedule": {
+                                        "description": "Format: YYYY-MM-DD HH:MM:SS",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-12-15 14:00:00"
+                                    },
+                                    "meeting_link": {
+                                        "description": "Zoom/Google Meet link",
+                                        "type": "string",
+                                        "example": "https://zoom.us/j/123456789"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Schedule updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mentoring session scheduled successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/MentoringSession"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized - User is not mentor or not owner of session",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Only mentors can schedule sessions"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mentoring session not found"
                     }
                 },
                 "security": [
@@ -2352,12 +2330,14 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Update session status",
-                "operationId": "5caf7b11c0b2b17036e51bcc3ccd114b",
+                "summary": "Update Session Status",
+                "description": "Update mentoring session status (Mentor only)",
+                "operationId": "updateSessionStatus",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "Mentoring session ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -2365,6 +2345,7 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "Status update data",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -2374,12 +2355,16 @@
                                 ],
                                 "properties": {
                                     "status": {
+                                        "description": "New status for the session",
                                         "type": "string",
                                         "enum": [
+                                            "pending",
                                             "scheduled",
+                                            "ongoing",
                                             "completed",
                                             "cancelled"
-                                        ]
+                                        ],
+                                        "example": "completed"
                                     }
                                 },
                                 "type": "object"
@@ -2389,118 +2374,62 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Status updated"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/mentoring-sessions/{id}/feedback": {
-            "post": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "Give feedback",
-                "description": "Can only be done if status is completed",
-                "operationId": "9cf5af7a49c699281f25c00f17912002",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "rating",
-                                    "review"
-                                ],
-                                "properties": {
-                                    "rating": {
-                                        "type": "integer",
-                                        "maximum": 5,
-                                        "minimum": 1,
-                                        "example": 5
-                                    },
-                                    "review": {
-                                        "type": "string",
-                                        "example": "Mentor sangat ramah"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Feedback submitted"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/mentors/{id}/schedule": {
-            "get": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "Check mentor availability",
-                "operationId": "9dcac9f2ae887cd75915e7ff8d9e7d07",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the Mentor",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "from_date",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "to_date",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Schedule retrieved",
+                        "description": "Status updated successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "available_slots": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Session status updated successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/MentoringSession"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Only mentors can update status"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/my-mentoring-sessions": {
+            "get": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Get My Mentoring Sessions",
+                "description": "Get all mentoring sessions for the authenticated user (as mentor or member)",
+                "operationId": "getMyMentoringSessions",
+                "responses": {
+                    "200": {
+                        "description": "My mentoring sessions retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
                                             "type": "array",
                                             "items": {
-                                                "type": "string",
-                                                "format": "datetime"
+                                                "$ref": "#/components/schemas/MentoringSession"
                                             }
                                         }
                                     },
@@ -2517,7 +2446,7 @@
                 ]
             }
         },
-        "/api/mentoring-sessions/{mentoringSessionId}/need-assessments": {
+        "/api/mentoring-sessions/{sessionId}/need-assessments": {
             "get": {
                 "tags": [
                     "Need Assessments"
@@ -2527,7 +2456,7 @@
                 "operationId": "getNeedAssessment",
                 "parameters": [
                     {
-                        "name": "mentoringSessionId",
+                        "name": "sessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -2538,11 +2467,15 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Need assessment retrieved",
+                        "description": "Need assessment retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "data": {
                                             "properties": {
                                                 "id": {
@@ -2555,29 +2488,27 @@
                                                 },
                                                 "form_data": {
                                                     "properties": {
-                                                        "learning_goals": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "type": "string"
-                                                            }
+                                                        "current_situation": {
+                                                            "type": "string",
+                                                            "example": "3rd year CS student struggling with career direction"
                                                         },
-                                                        "previous_experience": {
-                                                            "type": "string"
+                                                        "goals": {
+                                                            "type": "string",
+                                                            "example": "Become a software engineer at top tech company"
                                                         },
                                                         "challenges": {
                                                             "type": "array",
                                                             "items": {
                                                                 "type": "string"
-                                                            }
+                                                            },
+                                                            "example": [
+                                                                "Lack of experience",
+                                                                "Interview preparation"
+                                                            ]
                                                         },
                                                         "expectations": {
-                                                            "type": "string"
-                                                        },
-                                                        "preferred_schedule": {
-                                                            "type": "string"
-                                                        },
-                                                        "communication_style": {
-                                                            "type": "string"
+                                                            "type": "string",
+                                                            "example": "Guidance on portfolio and interviews"
                                                         }
                                                     },
                                                     "type": "object"
@@ -2585,7 +2516,18 @@
                                                 "completed_at": {
                                                     "type": "string",
                                                     "format": "datetime",
+                                                    "example": "2025-12-03T10:00:00.000000Z",
                                                     "nullable": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "datetime",
+                                                    "example": "2025-12-02T10:00:00.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "datetime",
+                                                    "example": "2025-12-03T10:00:00.000000Z"
                                                 }
                                             },
                                             "type": "object"
@@ -2597,7 +2539,44 @@
                         }
                     },
                     "404": {
-                        "description": "Need assessment not found"
+                        "description": "Need assessment not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Need assessment not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2611,11 +2590,11 @@
                     "Need Assessments"
                 ],
                 "summary": "Update need assessment",
-                "description": "Update existing need assessment",
+                "description": "Update existing need assessment (Student only)",
                 "operationId": "updateNeedAssessment",
                 "parameters": [
                     {
-                        "name": "mentoringSessionId",
+                        "name": "sessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -2625,27 +2604,38 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "Updated assessment data",
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "learning_goals": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "previous_experience": {
-                                        "type": "string"
-                                    },
-                                    "challenges": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "expectations": {
-                                        "type": "string"
+                                    "form_data": {
+                                        "properties": {
+                                            "current_situation": {
+                                                "type": "string",
+                                                "example": "Updated current situation"
+                                            },
+                                            "goals": {
+                                                "type": "string",
+                                                "example": "Updated goals"
+                                            },
+                                            "challenges": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "example": [
+                                                    "New challenge 1",
+                                                    "New challenge 2"
+                                                ]
+                                            },
+                                            "expectations": {
+                                                "type": "string",
+                                                "example": "Updated expectations"
+                                            }
+                                        },
+                                        "type": "object"
                                     }
                                 },
                                 "type": "object"
@@ -2655,7 +2645,67 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Need assessment updated"
+                        "description": "Need assessment updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Need assessment berhasil diupdate"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Only students can update assessments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Hanya student yang dapat mengupdate assessment"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Assessment not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Assessment tidak ditemukan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2668,12 +2718,12 @@
                 "tags": [
                     "Need Assessments"
                 ],
-                "summary": "Create need assessment",
-                "description": "Create need assessment for a mentoring session",
+                "summary": "Submit need assessment",
+                "description": "Create need assessment for a mentoring session (Student only)",
                 "operationId": "createNeedAssessment",
                 "parameters": [
                     {
-                        "name": "mentoringSessionId",
+                        "name": "sessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -2683,57 +2733,41 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "Need assessment form data",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "form_data"
+                                ],
                                 "properties": {
-                                    "learning_goals": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
+                                    "form_data": {
+                                        "properties": {
+                                            "current_situation": {
+                                                "type": "string",
+                                                "example": "3rd year CS student struggling with career direction"
+                                            },
+                                            "goals": {
+                                                "type": "string",
+                                                "example": "Become a software engineer at top tech company"
+                                            },
+                                            "challenges": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "example": [
+                                                    "Lack of experience",
+                                                    "Interview preparation"
+                                                ]
+                                            },
+                                            "expectations": {
+                                                "type": "string",
+                                                "example": "Guidance on portfolio and interviews"
+                                            }
                                         },
-                                        "example": [
-                                            "Master React.js",
-                                            "Learn backend development",
-                                            "Build full-stack project"
-                                        ]
-                                    },
-                                    "previous_experience": {
-                                        "type": "string",
-                                        "example": "Basic knowledge of HTML, CSS, JavaScript"
-                                    },
-                                    "challenges": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "example": [
-                                            "Time management",
-                                            "Understanding async programming"
-                                        ]
-                                    },
-                                    "expectations": {
-                                        "type": "string",
-                                        "example": "Want to become job-ready full-stack developer"
-                                    },
-                                    "preferred_schedule": {
-                                        "type": "string",
-                                        "enum": [
-                                            "morning",
-                                            "afternoon",
-                                            "evening"
-                                        ],
-                                        "example": "evening"
-                                    },
-                                    "communication_style": {
-                                        "type": "string",
-                                        "enum": [
-                                            "formal",
-                                            "casual",
-                                            "structured"
-                                        ],
-                                        "example": "casual"
+                                        "type": "object"
                                     }
                                 },
                                 "type": "object"
@@ -2743,10 +2777,121 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Need assessment created"
+                        "description": "Need assessment created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Need assessment berhasil dibuat"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "mentoring_session_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "form_data": {
+                                                    "type": "object"
+                                                },
+                                                "completed_at": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "datetime"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "400": {
-                        "description": "Assessment already exists"
+                        "description": "Assessment already exists or bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Assessment sudah ada untuk sesi ini"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Only students can create assessments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Hanya student yang dapat membuat assessment"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "form_data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The form data field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2764,7 +2909,7 @@
                 "operationId": "deleteNeedAssessment",
                 "parameters": [
                     {
-                        "name": "mentoringSessionId",
+                        "name": "sessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -2775,7 +2920,64 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Need assessment deleted"
+                        "description": "Need assessment deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Assessment berhasil dihapus"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Assessment not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Assessment tidak ditemukan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Not authorized to delete this assessment",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Anda tidak memiliki akses untuk menghapus assessment ini"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2785,17 +2987,17 @@
                 ]
             }
         },
-        "/api/mentoring-sessions/{mentoringSessionId}/need-assessments/mark-completed": {
+        "/api/mentoring-sessions/{sessionId}/need-assessments/mark-completed": {
             "put": {
                 "tags": [
                     "Need Assessments"
                 ],
                 "summary": "Mark assessment as completed",
-                "description": "Mark need assessment as completed",
+                "description": "Mark need assessment as completed (Mentor only)",
                 "operationId": "markNeedAssessmentCompleted",
                 "parameters": [
                     {
-                        "name": "mentoringSessionId",
+                        "name": "sessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -2806,7 +3008,78 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Assessment marked as completed"
+                        "description": "Assessment marked as completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Assessment berhasil ditandai sebagai selesai"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "completed_at": {
+                                                    "type": "string",
+                                                    "format": "datetime",
+                                                    "example": "2025-12-03T10:00:00.000000Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Only mentors can mark as completed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Hanya mentor yang dapat menandai assessment sebagai selesai"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Assessment not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Assessment tidak ditemukan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -3171,12 +3444,25 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "title"
+                                ],
                                 "properties": {
                                     "title": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Best Student Award2"
                                     },
                                     "description": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Awarded for academic excellence"
+                                    },
+                                    "organization": {
+                                        "type": "string",
+                                        "example": "University of Indonesia"
+                                    },
+                                    "year": {
+                                        "type": "integer",
+                                        "example": 2023
                                     }
                                 },
                                 "type": "object"
@@ -3316,11 +3602,11 @@
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-                                    "photo"
+                                    "profile_photo"
                                 ],
                                 "properties": {
-                                    "photo": {
-                                        "description": "Profile photo (JPEG, PNG, max 2MB)",
+                                    "profile_photo": {
+                                        "description": "Profile photo (JPEG, PNG, JPG, GIF, max 2MB)",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -3337,13 +3623,22 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "Profile photo uploaded successfully"
                                         },
-                                        "photo_url": {
-                                            "type": "string",
-                                            "example": "http://localhost/storage/profile-photos/abc123.jpg"
+                                        "data": {
+                                            "properties": {
+                                                "profile_photo_url": {
+                                                    "type": "string",
+                                                    "example": "http://127.0.0.1:8000/storage/profile-photos/abc123.jpg"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -3352,7 +3647,30 @@
                         }
                     },
                     "422": {
-                        "description": "Invalid file format or size"
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 },
                 "security": [
@@ -3380,7 +3698,7 @@
                                 ],
                                 "properties": {
                                     "cv": {
-                                        "description": "CV document (PDF, DOC, DOCX, max 5MB)",
+                                        "description": "CV document (PDF, DOC, DOCX, max 2MB)",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -3392,7 +3710,36 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "CV uploaded successfully"
+                        "description": "CV uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "CV berhasil diupload"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "cv_path": {
+                                                    "type": "string",
+                                                    "example": "http://127.0.0.1:8000/storage/cvs/cv_123.pdf"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -3408,38 +3755,96 @@
                     "Profile"
                 ],
                 "summary": "Get recommendations",
-                "description": "Get personalized recommendations for courses, scholarships, etc.",
+                "description": "Get personalized recommendations for courses, scholarships, etc. (based on user's major)",
                 "operationId": "getRecommendations",
                 "responses": {
                     "200": {
-                        "description": "Personalized recommendations",
+                        "description": "Personalized recommendations retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "courses": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "scholarships": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "mentors": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
+                                        "data": {
+                                            "properties": {
+                                                "courses": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Full Stack Web Development"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "bootcamp"
+                                                            },
+                                                            "level": {
+                                                                "type": "string",
+                                                                "example": "intermediate"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "scholarships": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "LPDP Scholarship"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "open"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "mentors": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 7
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Dr. Tech Expert"
+                                                            },
+                                                            "major": {
+                                                                "type": "string",
+                                                                "example": "Computer Science"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 },
                 "security": [
@@ -3455,38 +3860,162 @@
                     "Profile"
                 ],
                 "summary": "Get user portfolio",
-                "description": "Get user portfolio including achievements, experiences, and organizations",
+                "description": "Get user portfolio including achievements, experiences, organizations, courses, scholarship applications, mentoring sessions, and subscriptions",
                 "operationId": "getPortfolioAuth",
                 "responses": {
                     "200": {
-                        "description": "User portfolio",
+                        "description": "User portfolio retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "achievements": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "experiences": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "organizations": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
+                                        "data": {
+                                            "properties": {
+                                                "profile": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Ahmad Rizki"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "ahmad@example.com"
+                                                        },
+                                                        "major": {
+                                                            "type": "string",
+                                                            "example": "Computer Science"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "prestasi": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Best Graduate Award"
+                                                            },
+                                                            "issuer": {
+                                                                "type": "string",
+                                                                "example": "Universitas Indonesia"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "pengalaman": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Software Engineer Intern"
+                                                            },
+                                                            "company": {
+                                                                "type": "string",
+                                                                "example": "Google Indonesia"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "organisasi": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Tech Student Association"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "kursus": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "course_title": {
+                                                                "type": "string",
+                                                                "example": "React Development"
+                                                            },
+                                                            "progress": {
+                                                                "type": "integer",
+                                                                "example": 75
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "lamaran_beasiswa": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "scholarship_name": {
+                                                                "type": "string",
+                                                                "example": "LPDP"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "pending"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "sesi_mentoring": {
+                                                    "properties": {
+                                                        "sebagai_murid": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "sebagai_mentor": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "langganan": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "plan": {
+                                                                "type": "string",
+                                                                "example": "premium"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "active"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 },
                 "security": [
@@ -3502,40 +4031,118 @@
                     "Profile"
                 ],
                 "summary": "Get activity history",
-                "description": "Get user activity history",
+                "description": "Get user activity history with summary and latest activities",
                 "operationId": "getActivityHistory",
                 "responses": {
                     "200": {
-                        "description": "User activity history",
+                        "description": "User activity history retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "type": {
-                                                        "type": "string",
-                                                        "example": "enrollment"
+                                            "properties": {
+                                                "ringkasan": {
+                                                    "properties": {
+                                                        "kursus_selesai": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "kursus_sedang_diambil": {
+                                                            "type": "integer",
+                                                            "example": 2
+                                                        },
+                                                        "mentoring_selesai": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "lamaran_beasiswa": {
+                                                            "type": "integer",
+                                                            "example": 2
+                                                        },
+                                                        "jumlah_prestasi": {
+                                                            "type": "integer",
+                                                            "example": 4
+                                                        },
+                                                        "jumlah_pengalaman": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "jumlah_organisasi": {
+                                                            "type": "integer",
+                                                            "example": 2
+                                                        }
                                                     },
-                                                    "description": {
-                                                        "type": "string",
-                                                        "example": "Enrolled in React Course"
-                                                    },
-                                                    "timestamp": {
-                                                        "type": "string",
-                                                        "format": "datetime"
-                                                    }
+                                                    "type": "object"
                                                 },
-                                                "type": "object"
-                                            }
+                                                "terbaru": {
+                                                    "properties": {
+                                                        "kursus_terbaru": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "properties": {
+                                                                    "course_title": {
+                                                                        "type": "string",
+                                                                        "example": "React Development"
+                                                                    },
+                                                                    "enrolled_at": {
+                                                                        "type": "string",
+                                                                        "format": "datetime"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "lamaran_terbaru": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "properties": {
+                                                                    "scholarship_name": {
+                                                                        "type": "string",
+                                                                        "example": "LPDP"
+                                                                    },
+                                                                    "applied_at": {
+                                                                        "type": "string",
+                                                                        "format": "datetime"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "mentoring_terbaru": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "properties": {
+                                                                    "mentor_name": {
+                                                                        "type": "string",
+                                                                        "example": "Dr. Tech Expert"
+                                                                    },
+                                                                    "schedule": {
+                                                                        "type": "string",
+                                                                        "format": "datetime"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 },
                 "security": [
@@ -3553,17 +4160,6 @@
                 "summary": "Get all reviews",
                 "description": "Get list of all reviews (public)",
                 "operationId": "getReviews",
-                "parameters": [
-                    {
-                        "name": "organization_id",
-                        "in": "query",
-                        "description": "Filter by organization ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Reviews retrieved successfully",
@@ -3581,23 +4177,23 @@
                                                     },
                                                     "user_id": {
                                                         "type": "integer",
-                                                        "example": 1
+                                                        "example": 101
                                                     },
-                                                    "organization_id": {
+                                                    "reviewable_type": {
+                                                        "type": "string",
+                                                        "example": "App\\\\Models\\\\Scholarship"
+                                                    },
+                                                    "reviewable_id": {
                                                         "type": "integer",
                                                         "example": 1
                                                     },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "John Doe"
-                                                    },
-                                                    "description": {
-                                                        "type": "string",
-                                                        "example": "Great platform..."
-                                                    },
-                                                    "focus_area": {
+                                                    "rating": {
                                                         "type": "integer",
                                                         "example": 5
+                                                    },
+                                                    "comment": {
+                                                        "type": "string",
+                                                        "example": "Excellent scholarship program!"
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -3628,26 +4224,34 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "description"
+                                    "reviewable_type",
+                                    "reviewable_id",
+                                    "rating",
+                                    "comment"
                                 ],
                                 "properties": {
-                                    "organization_id": {
+                                    "reviewable_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "App\\\\Models\\\\Scholarship",
+                                            "App\\\\Models\\\\Organization",
+                                            "App\\\\Models\\\\Course"
+                                        ],
+                                        "example": "App\\Models\\Scholarship"
+                                    },
+                                    "reviewable_id": {
                                         "type": "integer",
                                         "example": 1
                                     },
-                                    "name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "Great learning platform with excellent mentors"
-                                    },
-                                    "focus_area": {
+                                    "rating": {
                                         "type": "integer",
                                         "maximum": 5,
                                         "minimum": 1,
                                         "example": 5
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "example": "Excellent scholarship program!"
                                     }
                                 },
                                 "type": "object"
@@ -3672,7 +4276,7 @@
                 "tags": [
                     "Reviews"
                 ],
-                "summary": "Get review detail",
+                "summary": "Get single review",
                 "description": "Get specific review details",
                 "operationId": "getReviewById",
                 "parameters": [
@@ -3688,7 +4292,36 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Review retrieved"
+                        "description": "Review retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "reviewable_type": {
+                                            "type": "string",
+                                            "example": "App\\\\Models\\\\Scholarship"
+                                        },
+                                        "reviewable_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "rating": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "comment": {
+                                            "type": "string",
+                                            "example": "Excellent scholarship program!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Review not found"
@@ -3705,7 +4338,7 @@
                     "Reviews"
                 ],
                 "summary": "Update review",
-                "description": "Update existing review (owner only)",
+                "description": "Update existing review",
                 "operationId": "updateReview",
                 "parameters": [
                     {
@@ -3723,13 +4356,15 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "description": {
-                                        "type": "string"
-                                    },
-                                    "focus_area": {
+                                    "rating": {
                                         "type": "integer",
                                         "maximum": 5,
-                                        "minimum": 1
+                                        "minimum": 1,
+                                        "example": 4
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "example": "Updated comment content"
                                     }
                                 },
                                 "type": "object"
@@ -3753,7 +4388,7 @@
                     "Reviews"
                 ],
                 "summary": "Delete review",
-                "description": "Delete a review (owner only)",
+                "description": "Delete a review",
                 "operationId": "deleteReview",
                 "parameters": [
                     {
@@ -4226,15 +4861,19 @@
                     "Subscriptions"
                 ],
                 "summary": "Get my subscriptions",
-                "description": "Get list of user's subscriptions",
+                "description": "Retrieve all subscriptions for the authenticated user",
                 "operationId": "getMySubscriptions",
                 "responses": {
                     "200": {
-                        "description": "Subscriptions retrieved",
+                        "description": "Subscriptions retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "data": {
                                             "type": "array",
                                             "items": {
@@ -4253,19 +4892,33 @@
                                                     },
                                                     "duration": {
                                                         "type": "integer",
-                                                        "example": 3
+                                                        "example": 12
+                                                    },
+                                                    "duration_unit": {
+                                                        "type": "string",
+                                                        "example": "months"
                                                     },
                                                     "start_date": {
                                                         "type": "string",
-                                                        "format": "date"
+                                                        "format": "date",
+                                                        "example": "2025-12-01"
                                                     },
                                                     "end_date": {
                                                         "type": "string",
-                                                        "format": "date"
+                                                        "format": "date",
+                                                        "example": "2026-12-01"
                                                     },
                                                     "status": {
                                                         "type": "string",
                                                         "example": "active"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "example": 500000
+                                                    },
+                                                    "auto_renew": {
+                                                        "type": "boolean",
+                                                        "example": false
                                                     }
                                                 },
                                                 "type": "object"
@@ -4288,8 +4941,8 @@
                 "tags": [
                     "Subscriptions"
                 ],
-                "summary": "Create subscription",
-                "description": "Subscribe to a plan",
+                "summary": "Create a subscription",
+                "description": "Subscribe to a chosen plan",
                 "operationId": "createSubscription",
                 "requestBody": {
                     "required": true,
@@ -4299,13 +4952,15 @@
                                 "required": [
                                     "plan",
                                     "package_type",
-                                    "duration"
+                                    "duration",
+                                    "duration_unit",
+                                    "price"
                                 ],
                                 "properties": {
                                     "plan": {
                                         "type": "string",
                                         "enum": [
-                                            "free",
+                                            "basic",
                                             "premium",
                                             "pro"
                                         ],
@@ -4320,9 +4975,18 @@
                                         "example": "all_in_one"
                                     },
                                     "duration": {
-                                        "description": "Duration in months",
                                         "type": "integer",
-                                        "example": 3
+                                        "example": 12
+                                    },
+                                    "duration_unit": {
+                                        "type": "string",
+                                        "enum": [
+                                            "days",
+                                            "weeks",
+                                            "months",
+                                            "years"
+                                        ],
+                                        "example": "months"
                                     },
                                     "courses_ids": {
                                         "type": "array",
@@ -4334,6 +4998,19 @@
                                             2,
                                             3
                                         ]
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "example": 500000
+                                    },
+                                    "auto_renew": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-03"
                                     }
                                 },
                                 "type": "object"
@@ -4343,7 +5020,238 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Subscription created"
+                        "description": "Subscription created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Subscription created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "plan": {
+                                                    "type": "string",
+                                                    "example": "premium"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "active"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/subscriptions/{id}": {
+            "get": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Get subscription details",
+                "description": "Get details of a specific subscription",
+                "operationId": "getSubscriptionById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription details retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Update subscription",
+                "description": "Update subscription settings",
+                "operationId": "updateSubscription",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "auto_renew": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Subscription updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Cancel subscription",
+                "description": "Cancel an active subscription",
+                "operationId": "deleteSubscription",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription cancelled successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/subscriptions/{id}/upgrade": {
+            "post": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Upgrade subscription",
+                "description": "Upgrade to a higher tier subscription",
+                "operationId": "upgradeSubscription",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "new_plan",
+                                    "payment_method"
+                                ],
+                                "properties": {
+                                    "new_plan": {
+                                        "type": "string",
+                                        "enum": [
+                                            "basic",
+                                            "premium",
+                                            "pro"
+                                        ],
+                                        "example": "premium"
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "qris",
+                                            "bank_transfer",
+                                            "credit_card",
+                                            "e_wallet"
+                                        ],
+                                        "example": "qris"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Subscription upgrade initiated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Subscription upgrade initiated"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "transaction": {
+                                                    "type": "object"
+                                                },
+                                                "snap_token": {
+                                                    "type": "string"
+                                                },
+                                                "redirect_url": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -4359,14 +5267,13 @@
                     "Transactions"
                 ],
                 "summary": "Get my transactions",
-                "description": "Get list of user's transactions",
+                "description": "Retrieve all transactions for the authenticated user",
                 "operationId": "getMyTransactions",
                 "parameters": [
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by status",
-                        "required": false,
+                        "description": "Filter by transaction status",
                         "schema": {
                             "type": "string",
                             "enum": [
@@ -4381,8 +5288,7 @@
                     {
                         "name": "type",
                         "in": "query",
-                        "description": "Filter by type",
-                        "required": false,
+                        "description": "Filter by transaction type",
                         "schema": {
                             "type": "string",
                             "enum": [
@@ -4395,31 +5301,34 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Transactions retrieved",
+                        "description": "Transactions retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "data": {
                                             "type": "array",
                                             "items": {
                                                 "properties": {
                                                     "id": {
                                                         "type": "integer",
-                                                        "example": 1
+                                                        "example": 10
                                                     },
                                                     "transaction_code": {
                                                         "type": "string",
-                                                        "example": "TRX-12345678"
+                                                        "example": "TRX-20251203-001"
                                                     },
                                                     "type": {
                                                         "type": "string",
-                                                        "example": "course_enrollment"
+                                                        "example": "subscription"
                                                     },
                                                     "amount": {
                                                         "type": "number",
-                                                        "format": "float",
-                                                        "example": 1500000
+                                                        "example": 500000
                                                     },
                                                     "payment_method": {
                                                         "type": "string",
@@ -4428,6 +5337,18 @@
                                                     "status": {
                                                         "type": "string",
                                                         "example": "paid"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "datetime"
+                                                    },
+                                                    "transactionable_type": {
+                                                        "type": "string",
+                                                        "example": "App\\\\Models\\\\Subscription"
+                                                    },
+                                                    "transactionable_id": {
+                                                        "type": "integer",
+                                                        "example": 1
                                                     }
                                                 },
                                                 "type": "object"
@@ -4445,73 +5366,6 @@
                         "bearerAuth": []
                     }
                 ]
-            },
-            "post": {
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Create transaction",
-                "description": "Create a new payment transaction",
-                "operationId": "createTransaction",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "type",
-                                    "transactionable_type",
-                                    "transactionable_id",
-                                    "amount",
-                                    "payment_method"
-                                ],
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "course_enrollment",
-                                            "subscription",
-                                            "mentoring_session"
-                                        ]
-                                    },
-                                    "transactionable_type": {
-                                        "type": "string",
-                                        "example": "App\\\\Models\\\\Course"
-                                    },
-                                    "transactionable_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "amount": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 1500000
-                                    },
-                                    "payment_method": {
-                                        "type": "string",
-                                        "enum": [
-                                            "qris",
-                                            "bank_transfer",
-                                            "virtual_account",
-                                            "credit_card"
-                                        ]
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Transaction created"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
             }
         },
         "/api/transactions/{id}": {
@@ -4519,8 +5373,8 @@
                 "tags": [
                     "Transactions"
                 ],
-                "summary": "Get transaction detail",
-                "description": "Get transaction detail",
+                "summary": "Get transaction details",
+                "description": "Retrieve details of a single transaction",
                 "operationId": "getTransactionById",
                 "parameters": [
                     {
@@ -4534,7 +5388,73 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Transaction detail retrieved"
+                        "description": "Transaction details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "transaction_code": {
+                                                    "type": "string",
+                                                    "example": "TRX-20251203-001"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "subscription"
+                                                },
+                                                "amount": {
+                                                    "type": "number",
+                                                    "example": 500000
+                                                },
+                                                "payment_method": {
+                                                    "type": "string",
+                                                    "example": "qris"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "paid"
+                                                },
+                                                "midtrans_order_id": {
+                                                    "type": "string",
+                                                    "example": "ORDER-123456"
+                                                },
+                                                "snap_token": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "payment_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "expired_at": {
+                                                    "type": "string",
+                                                    "format": "datetime"
+                                                },
+                                                "paid_at": {
+                                                    "type": "string",
+                                                    "format": "datetime",
+                                                    "nullable": true
+                                                },
+                                                "transactionable": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -4544,52 +5464,284 @@
                 ]
             }
         },
-        "/api/midtrans/callback": {
+        "/api/transactions/courses/{courseId}": {
             "post": {
                 "tags": [
                     "Transactions"
                 ],
-                "summary": "Midtrans webhook callback",
-                "description": "Handle Midtrans payment notification callback",
-                "operationId": "midtransCallback",
+                "summary": "Create course transaction",
+                "description": "Create payment transaction for course enrollment",
+                "operationId": "createCourseTransaction",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "payment_method"
+                                ],
                                 "properties": {
-                                    "transaction_time": {
-                                        "type": "string"
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "qris",
+                                            "bank_transfer",
+                                            "credit_card",
+                                            "e_wallet"
+                                        ],
+                                        "example": "qris"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Course transaction created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Transaction created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "transaction": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 15
+                                                        },
+                                                        "transaction_code": {
+                                                            "type": "string",
+                                                            "example": "TRX-20251203-002"
+                                                        },
+                                                        "amount": {
+                                                            "type": "number",
+                                                            "example": 2500000
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "snap_token": {
+                                                    "type": "string",
+                                                    "example": "abc123def456"
+                                                },
+                                                "redirect_url": {
+                                                    "type": "string",
+                                                    "example": "https://app.midtrans.com/snap/v2/vtweb/abc123"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
                                     },
-                                    "transaction_status": {
-                                        "type": "string"
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transactions/subscriptions": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Create subscription transaction",
+                "description": "Create payment transaction for subscription",
+                "operationId": "createSubscriptionTransaction",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "plan",
+                                    "package_type",
+                                    "duration",
+                                    "duration_unit",
+                                    "payment_method"
+                                ],
+                                "properties": {
+                                    "plan": {
+                                        "type": "string",
+                                        "enum": [
+                                            "basic",
+                                            "premium",
+                                            "pro"
+                                        ],
+                                        "example": "premium"
                                     },
-                                    "transaction_id": {
-                                        "type": "string"
+                                    "package_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "single_course",
+                                            "all_in_one"
+                                        ],
+                                        "example": "all_in_one"
                                     },
-                                    "status_message": {
-                                        "type": "string"
+                                    "duration": {
+                                        "type": "integer",
+                                        "example": 12
                                     },
-                                    "status_code": {
-                                        "type": "string"
+                                    "duration_unit": {
+                                        "type": "string",
+                                        "enum": [
+                                            "days",
+                                            "weeks",
+                                            "months",
+                                            "years"
+                                        ],
+                                        "example": "months"
                                     },
-                                    "signature_key": {
-                                        "type": "string"
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "qris",
+                                            "bank_transfer",
+                                            "credit_card",
+                                            "e_wallet"
+                                        ],
+                                        "example": "qris"
                                     },
-                                    "order_id": {
-                                        "type": "string"
-                                    },
-                                    "merchant_id": {
-                                        "type": "string"
-                                    },
-                                    "gross_amount": {
-                                        "type": "string"
-                                    },
-                                    "fraud_status": {
-                                        "type": "string"
-                                    },
-                                    "currency": {
-                                        "type": "string"
+                                    "courses_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Subscription transaction created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transactions/mentoring-sessions/{sessionId}": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Create mentoring transaction",
+                "description": "Create payment transaction for mentoring session",
+                "operationId": "createMentoringTransaction",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "payment_method"
+                                ],
+                                "properties": {
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "qris",
+                                            "bank_transfer",
+                                            "credit_card",
+                                            "e_wallet"
+                                        ],
+                                        "example": "qris"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Mentoring transaction created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transactions/{id}/payment-proof": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Upload payment proof",
+                "description": "Upload payment proof for manual verification",
+                "operationId": "uploadPaymentProof",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "payment_proof"
+                                ],
+                                "properties": {
+                                    "payment_proof": {
+                                        "description": "Payment proof image/document",
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -4599,9 +5751,191 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Callback processed"
+                        "description": "Payment proof uploaded successfully"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transactions/{id}/refund": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Request refund",
+                "description": "Submit refund request for a transaction",
+                "operationId": "requestRefund",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "reason"
+                                ],
+                                "properties": {
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Course tidak sesuai dengan ekspektasi"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Refund request submitted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transactions/{id}/confirm": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Confirm payment (Admin only)",
+                "description": "Manually confirm payment for a transaction",
+                "operationId": "confirmPayment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "paid",
+                                            "failed"
+                                        ],
+                                        "example": "paid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment confirmed successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transactions/statistics": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Get transaction statistics (Admin only)",
+                "description": "Get transaction statistics and analytics",
+                "operationId": "getTransactionStatistics",
+                "responses": {
+                    "200": {
+                        "description": "Statistics retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "total_revenue": {
+                                                    "type": "number",
+                                                    "example": 50000000
+                                                },
+                                                "total_transactions": {
+                                                    "type": "integer",
+                                                    "example": 150
+                                                },
+                                                "pending_transactions": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "completed_transactions": {
+                                                    "type": "integer",
+                                                    "example": 130
+                                                },
+                                                "failed_transactions": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "revenue_by_type": {
+                                                    "properties": {
+                                                        "course": {
+                                                            "type": "number",
+                                                            "example": 20000000
+                                                        },
+                                                        "subscription": {
+                                                            "type": "number",
+                                                            "example": 25000000
+                                                        },
+                                                        "mentoring": {
+                                                            "type": "number",
+                                                            "example": 5000000
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/admin/users": {
@@ -4933,54 +6267,56 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "order_id",
+                                    "transaction_status",
+                                    "status_code",
+                                    "gross_amount",
+                                    "signature_key",
+                                    "payment_type",
+                                    "transaction_time",
+                                    "fraud_status"
+                                ],
                                 "properties": {
-                                    "transaction_time": {
+                                    "order_id": {
+                                        "description": "Order ID generated by your system",
                                         "type": "string",
-                                        "example": "2024-01-15 10:30:00"
+                                        "example": "TRX20251202ABC123"
                                     },
                                     "transaction_status": {
+                                        "description": "Status of the transaction",
                                         "type": "string",
                                         "example": "settlement"
                                     },
-                                    "transaction_id": {
-                                        "type": "string",
-                                        "example": "abc123-def456"
-                                    },
-                                    "status_message": {
-                                        "type": "string",
-                                        "example": "midtrans payment notification"
-                                    },
                                     "status_code": {
+                                        "description": "Midtrans status code",
                                         "type": "string",
                                         "example": "200"
                                     },
-                                    "signature_key": {
-                                        "type": "string",
-                                        "example": "signature_hash_here"
-                                    },
-                                    "order_id": {
-                                        "type": "string",
-                                        "example": "TRX-12345678"
-                                    },
-                                    "merchant_id": {
-                                        "type": "string",
-                                        "example": "G123456789"
-                                    },
                                     "gross_amount": {
+                                        "description": "Total transaction amount",
                                         "type": "string",
-                                        "example": "150000.00"
+                                        "example": "500000"
                                     },
-                                    "fraud_status": {
+                                    "signature_key": {
+                                        "description": "Security signature for validation",
                                         "type": "string",
-                                        "example": "accept"
-                                    },
-                                    "currency": {
-                                        "type": "string",
-                                        "example": "IDR"
+                                        "example": "abc123def456..."
                                     },
                                     "payment_type": {
+                                        "description": "Payment method used by user",
                                         "type": "string",
                                         "example": "qris"
+                                    },
+                                    "transaction_time": {
+                                        "description": "Payment transaction time",
+                                        "type": "string",
+                                        "example": "2025-12-02 18:00:00"
+                                    },
+                                    "fraud_status": {
+                                        "description": "Fraud detection status",
+                                        "type": "string",
+                                        "example": "accept"
                                     }
                                 },
                                 "type": "object"
@@ -5018,6 +6354,32 @@
     },
     "components": {
         "schemas": {
+            "CoachingFile": {
+                "title": "Coaching File",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "session_id": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "file_name": {
+                        "type": "string",
+                        "example": "react-guide.pdf"
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "example": "uploads/coaching/react-guide.pdf"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    }
+                },
+                "type": "object"
+            },
             "MentoringSession": {
                 "title": "Mentoring Session Schema",
                 "properties": {
@@ -5027,11 +6389,11 @@
                     },
                     "mentor_id": {
                         "type": "integer",
-                        "example": 4
+                        "example": 7
                     },
                     "member_id": {
                         "type": "integer",
-                        "example": 5
+                        "example": 4
                     },
                     "type": {
                         "type": "string",
@@ -5041,24 +6403,44 @@
                         ],
                         "example": "academic"
                     },
+                    "payment_method": {
+                        "type": "string",
+                        "enum": [
+                            "qris",
+                            "bank_transfer",
+                            "credit_card",
+                            "e_wallet"
+                        ],
+                        "example": "qris"
+                    },
                     "schedule": {
                         "type": "string",
                         "format": "date-time",
-                        "example": "2024-02-20 10:00:00"
+                        "example": "2025-12-20 10:00:00"
                     },
                     "status": {
                         "type": "string",
                         "enum": [
                             "pending",
                             "scheduled",
+                            "ongoing",
                             "completed",
                             "cancelled"
                         ],
-                        "example": "scheduled"
+                        "example": "pending"
                     },
                     "meeting_link": {
                         "type": "string",
-                        "example": "https://meet.google.com/abc-defg-hij"
+                        "example": "https://zoom.us/j/123456789",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"

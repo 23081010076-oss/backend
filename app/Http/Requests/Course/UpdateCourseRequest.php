@@ -30,6 +30,7 @@ class UpdateCourseRequest extends FormRequest
     {
         return [
             'title'           => 'sometimes|string|max:255',
+            'category'        => 'nullable|string|max:100',
             'description'     => 'nullable|string',
             'type'            => 'sometimes|in:bootcamp,course',
             'level'           => 'sometimes|in:beginner,intermediate,advanced',
