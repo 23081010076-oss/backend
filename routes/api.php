@@ -206,6 +206,14 @@ Route::middleware('auth:api')->group(function () {
         ->name('mentoring-sessions.feedback');
     Route::get('/my-mentoring-sessions', [MentoringSessionController::class, 'mySessions'])
         ->name('my-mentoring-sessions');
+    Route::put('/mentoring-sessions/{id}/status', [MentoringSessionController::class, 'updateStatus'])
+        ->name('mentoring-sessions.update-status');
+    Route::post('/mentoring-sessions/{id}/feedback', [MentoringSessionController::class, 'feedback'])
+        ->name('mentoring-sessions.feedback');
+    Route::get('/mentors/{id}/schedule', [MentoringSessionController::class, 'schedule'])
+        ->name('mentors.schedule');
+
+
 
     // Need Assessment (nested under mentoring sessions)
     Route::prefix('mentoring-sessions/{mentoringSessionId}/need-assessments')->name('need-assessments.')->group(function () {
