@@ -207,15 +207,36 @@ sequenceDiagram
     Note right of Mentor: Conduct Session
     
     Mentor->>API: PUT /../mark-completed
-    API-->>Mentor: Session Closed
-    
-    Student->>FE: Give Feedback (Review)
-    FE->>API: POST /reviews
+    API-->>Mentor: Assessment & Session Closed
 ```
 
 ---
 
-## 7. Article & Blog System
+## 7. Scholarship Portal
+
+Flow for students applying for financial aid.
+
+```mermaid
+graph TD
+    A[Student] -->|Browse| B[Scholarship List]
+    B -->|Select| C[Scholarship Detail]
+    C -->|Click Apply| D[Application Form]
+    
+    D -->|Upload| E[Documents (CV, Transcript)]
+    D -->|Submit| F[Backend API]
+    F -->|Store| G[(Database)]
+    F -->|Notify| H[Admin]
+    
+    H -->|Review| I{Decision}
+    I -->|Accept| J[Update Status: Accepted]
+    I -->|Reject| K[Update Status: Rejected]
+    
+    J & K -->|Notification| L[Student Dashboard]
+```
+
+---
+
+## 8. Article & Blog System
 
 Content management system for educational articles.
 
