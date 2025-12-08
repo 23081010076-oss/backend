@@ -1,58 +1,94 @@
-# Application User Flows
+# Application Architecture & User Flows
 
-This document outlines the primary user flows within the application, visualizing the interaction between users, the frontend, and the backend services.
+This document provides a comprehensive technical overview of the application's features, detailing the interaction between users, the frontend, and the backend API services.
 
-## 1. Authentication Authorization
+## Table of Contents
+1. [Authentication & User Profile](#1-authentication--user-profile)
+2. [Portfolio & Experience Management](#2-portfolio--experience-management)
+3. [Learning Management System (LMS)](#3-learning-management-system-lms)
+4. [Course Management (Admin/Instructor)](#4-course-management-admininstructor)
+5. [Subscription & Payment System](#5-subscription--payment-system)
+6. [Mentoring System](#6-mentoring-system)
+7. [Article & Blog System](#7-article--blog-system)
+8. [Corporate Services](#8-corporate-services)
+
+---
+
+## 1. Authentication & User Profile
 
 ### Registration & Login Logic
+Handles user onboarding and session management using JWT.
+
 ```mermaid
 sequenceDiagram
     actor User
     participant FE as Frontend
-    participant API as Backend API
+    participant Auth as AuthController
+    participant Google as Google OAuth
     participant DB as Database
 
-    User->>FE: Register (Name, Email, Password, Role)
-    FE->>API: POST /auth/register
-    API->>DB: Create User (Inactive)
-    API-->>FE: Success (Verify Email)
-    
+    Note over User, DB: Traditional Login
     User->>FE: Login (Email, Password)
-    FE->>API: POST /auth/login
-    API->>DB: Validate Credentials
+    FE->>Auth: POST /auth/login
+    Auth->>DB: Validate Credentials
     
     alt Invalid
-        API-->>FE: 401 Unauthorized
+        Auth-->>FE: 401 Unauthorized
     else Valid
-        API->>API: Generate Token
-        API-->>FE: 200 OK (Token + User Data)
-        FE->>FE: Store Token
+        Auth->>Auth: Generate JWT Token
+        Auth-->>FE: 200 OK (Token + User Data)
     end
-```
 
-### Google OAuth Flow
-```mermaid
-sequenceDiagram
-    actor User
-    participant FE as Frontend
-    participant API as Backend API
-    participant Google as Google Auth
-
+    Note over User, DB: Google OAuth
     User->>FE: Click "Login with Google"
-    FE->>API: GET /auth/google/url
-    API-->>FE: Return Google Redirect URL
+    FE->>Auth: GET /auth/google/url
+    Auth-->>FE: Return Redirect URL
     FE->>Google: Redirect User
     User->>Google: Approve Access
-    Google->>FE: Redirect Callback?code=xyz
-    FE->>API: POST /auth/google/callback (code)
-    API->>Google: Exchange Code for Profile
-    API->>API: Find or Create User
-    API-->>FE: Return Token
+    Google->>FE: Callback?code=xyz
+    FE->>Auth: POST /auth/google/callback (code)
+    Auth->>Google: Exchange Code for Profile
+    Auth->>DB: Find/Create User
+    Auth-->>FE: Return JWT Token
 ```
 
 ---
 
-## 2. Learning Management System (LMS)
+## 2. Portfolio & Experience Management
+
+Allows users to build their professional profile by adding work experience and education.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant FE as Frontend
+    participant Exp as ExperienceController
+    participant S3 as Storage (Public)
+    participant DB as Database
+
+    User->>FE: View Profile
+    FE->>Exp: GET /experiences/user/{id}
+    Exp-->>FE: Return List
+
+    Note over User, DB: Add Work Experience
+    User->>FE: Add Experience (Title, Company, Date)
+    FE->>Exp: POST /experiences
+    Exp->>DB: Save Record
+    Exp-->>FE: 201 Created
+
+    Note over User, DB: Upload Certificate
+    User->>FE: Upload File (PDF/Image)
+    FE->>Exp: POST /experiences/{id}/certificate
+    Exp->>S3: Store File
+    Exp->>DB: Update certificate_url
+    Exp-->>FE: 200 OK (File URL)
+```
+
+---
+
+## 3. Learning Management System (LMS)
+
+The core learning flow for students.
 
 ### Course Enrollment & Learning Journey
 ```mermaid
@@ -73,97 +109,80 @@ stateDiagram-v2
     state LearningMode {
         [*] --> ViewMaterial
         ViewMaterial --> MarkComplete : Finish Video/Reading
-        MarkComplete --> CheckProgress
+        MarkComplete --> CheckProgress : Auto-Calculate
         CheckProgress --> ViewMaterial : Next Item
         CheckProgress --> CourseCompleted : Progress 100%
     }
     
-    CourseCompleted --> Certificate : Auto-Generated
+    CourseCompleted --> Certificate : Auto-Generated (PDF)
     Certificate --> [*]
 ```
 
 ---
 
-## 3. Subscription & Payment System
+## 4. Course Management (Admin/Instructor)
 
-### Subscription Purchase Flow
+Flow for creating and managing educational content.
+
+```mermaid
+graph TD
+    A[Admin/Instructor] -->|Create Course| B[Course Basic Info]
+    B -->|Define| C{Course Type}
+    C -->|Regular| D[Standard Curriculum]
+    C -->|Bootcamp| E[Intensive Curriculum]
+    
+    D & E --> F[Add Sections]
+    F --> G[Add Materials]
+    G -->|Video URL + Duration| H[Curriculum Item]
+    
+    H --> I[Review Course]
+    I -->|Publish| J[(Database)]
+    J -->|Visible to| K[Students]
+```
+
+---
+
+## 5. Subscription & Payment System
+
+Handles billing, upgrades, and Midtrans integration.
+
+### Purchase Flow
 ```mermaid
 sequenceDiagram
     actor User
     participant FE as Frontend
-    participant API as Backend API
+    participant Sub as SubscriptionController
     participant Midtrans as Payment Gateway
+    participant Webhook as MidtransWebhook
 
     User->>FE: Select Plan (Regular/Premium)
-    FE->>API: POST /subscriptions/purchase
-    API->>API: Validate Request
-    API->>Midtrans: Create Transaction (Snap Token)
-    Midtrans-->>API: Return Token & Redirect URL
-    API-->>FE: Return Payment Data
+    FE->>Sub: POST /subscriptions/purchase
+    Sub->>Sub: Create Pending Transaction
+    Sub->>Midtrans: Request Snap Token
+    Midtrans-->>Sub: Token & Redirect URL
+    Sub-->>FE: Payment Data
     
     FE->>Midtrans: Open Payment Popup
     User->>Midtrans: Complete Payment
     
     par Async Webhook
-        Midtrans->>API: POST /webhooks/midtrans
-        API->>API: Validate Signature
-        API->>API: Update Transaction Status
-        API->>API: Activate Subscription
+        Midtrans->>Webhook: POST /webhooks/midtrans
+        Webhook->>Webhook: Validate Signature
+        Webhook->>DB: Update Transaction (PAID)
+        Webhook->>DB: Create/Update Subscription (Active)
     and Frontend Check
-        FE->>API: Check Status
-        API-->>FE: "Paid"
+        FE->>Sub: Poll Status
+        Sub-->>FE: "Paid"
     end
-    
-    FE->>User: Show Success Message
 ```
 
 ---
 
-## 4. Mentoring System
+## 6. Mentoring System
+
+Connects students with mentors for personalized guidance.
 
 ### Booking & Session Flow
-```mermaid
-sequenceDiagram
-    actor Student
-    actor Mentor
-    participant API as Backend API
-
-    Student->>API: GET /mentors (Browse)
-    Student->>API: POST /mentoring/book (Select Slot)
-    
-    alt Paid Session
-        API->>Student: Request Payment (Midtrans Flow)
-        Student->>API: Payment Success
-    end
-    
-    API->>Mentor: Notify New Booking
-    
-    Note over Student, Mentor: Session Time
-    
-    Student->>API: GET /mentoring/session/{id}
-    Mentor->>API: GET /mentoring/session/{id}
-    
-    API-->>Student: Return Meeting Link/Details
-    API-->>Mentor: Return Meeting Link/Details
-```
-
----
-
-## 5. Specialized Features
-
-### Scholarship Application
-```mermaid
-graph LR
-    A[User] -->|Submit| B(Scholarship Form)
-    B -->|POST| C[Backend API]
-    C -->|Store| D[(Database)]
-    E[Admin] -->|Review| D
-    E -->|Update Status| F{Decision}
-    F -->|Approved| G[Notify User]
-    F -->|Rejected| H[Notify User]
-```
-
-### Mentoring Need Assessment
 ```mermaid
 sequenceDiagram
     actor Student
@@ -175,18 +194,67 @@ sequenceDiagram
     FE->>API: POST /mentoring/book
     API-->>FE: Session Created (Pending)
     
+    Note over Student, API: Assessment
     Student->>FE: Fill Need Assessment
     FE->>API: POST /mentoring-sessions/{id}/need-assessments
     Note right of FE: Goals, Challenges, Expectations
+    API->>DB: Save Assessment
     
-    API->>API: Validates Student Access
-    API-->>FE: Assessment Saved
-    
+    Note over Student, Mentor: Session Time
     Mentor->>API: GET /mentoring-sessions/{id}/need-assessments
     API-->>Mentor: Show Student Goals
     
-    Note over Student, Mentor: Session Conducted
+    Note right of Mentor: Conduct Session
     
     Mentor->>API: PUT /../mark-completed
-    API-->>Mentor: Assessment & Session Closed
+    API-->>Mentor: Session Closed
+    
+    Student->>FE: Give Feedback (Review)
+    FE->>API: POST /reviews
+```
+
+---
+
+## 7. Article & Blog System
+
+Content management system for educational articles.
+
+```mermaid
+graph LR
+    A[Admin/Mentor] -->|Write| B(Create Article)
+    B -->|Upload| C[Cover Image]
+    B -->|Tag| D[Category]
+    D -->|Publish| E[(Database)]
+    
+    F[Public User] -->|Search/Filter| G{Article List}
+    E --> G
+    G -->|Click| H[Read Article]
+    H -->|View| I[Author Profile]
+```
+
+---
+
+## 8. Corporate Services
+
+Flow for companies to request partnerships or training.
+
+```mermaid
+sequenceDiagram
+    actor Company
+    participant FE as Frontend
+    participant Corp as CorporateContactController
+    participant Admin
+
+    Company->>FE: Fill Contact Form (Name, Email, Message)
+    FE->>Corp: POST /corporate-contacts
+    Corp->>DB: Store Inquiry (Status: New)
+    Corp-->>FE: Success Message
+
+    Note over Admin: Dashboard Logic
+    Admin->>Corp: GET /corporate-contacts
+    Corp-->>Admin: List Inquiries
+    
+    Admin->>Company: Contact via Email/Phone
+    Admin->>Corp: PUT /corporate-contacts/{id}/status
+    Note right of Admin: Update to 'Contacted'/'Closed'
 ```
