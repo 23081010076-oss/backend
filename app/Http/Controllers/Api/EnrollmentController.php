@@ -209,12 +209,9 @@ class EnrollmentController extends Controller
         }
 
         try {
-            $progress = $enrollment->markCurriculumCompleted($curriculumId);
+            $result = $this->enrollmentService->markCurriculumCompleted($enrollment, $curriculumId);
 
-            return $this->successResponse([
-                'curriculum_progress' => $progress,
-                'enrollment' => $enrollment->fresh(),
-            ], 'Materi berhasil ditandai selesai');
+            return $this->successResponse($result, 'Materi berhasil ditandai selesai');
         } catch (\Exception $e) {
             Log::error('Mark curriculum completed failed', [
                 'enrollment_id' => $enrollmentId,

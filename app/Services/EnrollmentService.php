@@ -95,23 +95,8 @@ class EnrollmentService
 
             $enrollment->progress = $progress;
             
-            // Auto-complete if progress is 100%
-            if ($progress >= 100) {
-                $enrollment->completed = true;
-                
-                // Generate Certificate
-                $certificateUrl = $this->generateCertificate($enrollment);
-                if ($certificateUrl) {
-                    $enrollment->certificate_url = $certificateUrl;
-                }
-
-                Log::info('Course completed and certificate generated', [
-                    'enrollment_id' => $enrollment->id,
-                    'user_id' => $enrollment->user_id,
-                    'course_id' => $enrollment->course_id,
-                    'certificate_url' => $certificateUrl,
-                ]);
-            }
+            // Check for completion and generate certificate
+            $this->checkAndCompleteEnrollment($enrollment);
             
             $enrollment->save();
 
@@ -133,6 +118,77 @@ class EnrollmentService
             ]);
             throw new \RuntimeException('Failed to update progress. Please try again later.');
         }
+    }
+
+    /**
+     * Mark a curriculum as completed and update progress
+     * 
+     * @param Enrollment $enrollment
+     * @param int $curriculumId
+     * @return array
+     */
+    public function markCurriculumCompleted(Enrollment $enrollment, int $curriculumId): array
+    {
+        try {
+            DB::beginTransaction();
+
+            // Delegate to model for the database update
+            $curriculumProgress = $enrollment->markCurriculumCompleted($curriculumId);
+            
+            // Check for course completion
+            $this->checkAndCompleteEnrollment($enrollment);
+            
+            $enrollment->save();
+            DB::commit();
+
+            return [
+                'curriculum_progress' => $curriculumProgress,
+                'enrollment' => $enrollment->fresh()
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to mark curriculum completed', [
+                'enrollment_id' => $enrollment->id,
+                'curriculum_id' => $curriculumId,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Check if enrollment is complete and generate certificate if needed
+     * 
+     * @param Enrollment $enrollment
+     * @return void
+     */
+    private function checkAndCompleteEnrollment(Enrollment $enrollment): void
+    {
+        // 1. Check progress threshold
+        if ($enrollment->progress < 100) {
+            return;
+        }
+
+        // 2. Avoid regenerating if already completed and has certificate
+        if ($enrollment->completed && $enrollment->certificate_url) {
+            return;
+        }
+
+        // 3. Mark as completed
+        $enrollment->completed = true;
+        
+        // 4. Generate Certificate
+        $certificateUrl = $this->generateCertificate($enrollment);
+        if ($certificateUrl) {
+            $enrollment->certificate_url = $certificateUrl;
+        }
+        
+        Log::info('Course completed and certificate generated', [
+            'enrollment_id' => $enrollment->id,
+            'user_id' => $enrollment->user_id,
+            'course_id' => $enrollment->course_id,
+            'certificate_url' => $certificateUrl,
+        ]);
     }
     
     /**
