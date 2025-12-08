@@ -2,18 +2,6 @@
 
 This document provides a comprehensive technical overview of the application's features, detailing the interaction between users, the frontend, and the backend API services.
 
-## Table of Contents
-1. [Authentication & User Profile](#1-authentication--user-profile)
-2. [Portfolio & Experience Management](#2-portfolio--experience-management)
-3. [Learning Management System (LMS)](#3-learning-management-system-lms)
-4. [Course Management (Admin/Instructor)](#4-course-management-admininstructor)
-5. [Subscription & Payment System](#5-subscription--payment-system)
-6. [Mentoring System](#6-mentoring-system)
-7. [Article & Blog System](#7-article--blog-system)
-8. [Corporate Services](#8-corporate-services)
-
----
-
 ## 1. Authentication & User Profile
 
 ### Registration & Login Logic
@@ -207,15 +195,36 @@ sequenceDiagram
     Note right of Mentor: Conduct Session
     
     Mentor->>API: PUT /../mark-completed
-    API-->>Mentor: Session Closed
-    
-    Student->>FE: Give Feedback (Review)
-    FE->>API: POST /reviews
+    API-->>Mentor: Assessment & Session Closed
 ```
 
 ---
 
-## 7. Article & Blog System
+## 7. Scholarship Portal
+
+Flow for students applying for financial aid.
+
+```mermaid
+graph TD
+    A[Student] -->|Browse| B[Scholarship List]
+    B -->|Select| C[Scholarship Detail]
+    C -->|Click Apply| D[Application Form]
+    
+    D -->|Upload| E[Documents (CV, Transcript)]
+    D -->|Submit| F[Backend API]
+    F -->|Store| G[(Database)]
+    F -->|Notify| H[Admin]
+    
+    H -->|Review| I{Decision}
+    I -->|Accept| J[Update Status: Accepted]
+    I -->|Reject| K[Update Status: Rejected]
+    
+    J & K -->|Notification| L[Student Dashboard]
+```
+
+---
+
+## 8. Article & Blog System
 
 Content management system for educational articles.
 
