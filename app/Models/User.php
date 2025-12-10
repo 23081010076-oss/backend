@@ -33,6 +33,7 @@ class User extends Authenticatable implements JWTSubject
         'cv_path',
         'google_id',
         'avatar',
+        'specialization',
     ];
 
     /**
@@ -56,6 +57,7 @@ class User extends Authenticatable implements JWTSubject
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'birth_date' => 'date',
+            'specialization' => 'array',
         ];
     }
 

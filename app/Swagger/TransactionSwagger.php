@@ -132,7 +132,7 @@ namespace App\Swagger;
  *         @OA\JsonContent(
  *             required={"new_plan", "payment_method"},
  *             @OA\Property(property="new_plan", type="string", enum={"basic", "premium", "pro"}, example="premium"),
- *             @OA\Property(property="payment_method", type="string", enum={"qris", "bank_transfer", "credit_card", "e_wallet"}, example="qris")
+ *             @OA\Property(property="payment_method", type="string", enum={"manual", "bank_transfer"}, example="manual")
  *         )
  *     ),
  *     @OA\Response(
@@ -142,9 +142,7 @@ namespace App\Swagger;
  *             @OA\Property(property="success", type="boolean", example=true),
  *             @OA\Property(property="message", type="string", example="Subscription upgrade initiated"),
  *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="transaction", type="object"),
- *                 @OA\Property(property="snap_token", type="string"),
- *                 @OA\Property(property="redirect_url", type="string")
+ *                 @OA\Property(property="transaction", type="object")
  *             )
  *         )
  *     )
@@ -235,11 +233,8 @@ namespace App\Swagger;
  *                 @OA\Property(property="transaction_code", type="string", example="TRX-20251203-001"),
  *                 @OA\Property(property="type", type="string", example="subscription"),
  *                 @OA\Property(property="amount", type="number", example=500000),
- *                 @OA\Property(property="payment_method", type="string", example="qris"),
+ *                 @OA\Property(property="payment_method", type="string", example="manual"),
  *                 @OA\Property(property="status", type="string", example="paid"),
- *                 @OA\Property(property="midtrans_order_id", type="string", example="ORDER-123456"),
- *                 @OA\Property(property="snap_token", type="string", nullable=true),
- *                 @OA\Property(property="payment_url", type="string", nullable=true),
  *                 @OA\Property(property="expired_at", type="string", format="datetime"),
  *                 @OA\Property(property="paid_at", type="string", format="datetime", nullable=true),
  *                 @OA\Property(property="transactionable", type="object")
@@ -265,7 +260,7 @@ namespace App\Swagger;
  *         required=true,
  *         @OA\JsonContent(
  *             required={"payment_method"},
- *             @OA\Property(property="payment_method", type="string", enum={"qris", "bank_transfer", "credit_card", "e_wallet"}, example="qris")
+ *             @OA\Property(property="payment_method", type="string", enum={"manual", "bank_transfer"}, example="manual")
  *         )
  *     ),
  *     @OA\Response(
@@ -279,9 +274,7 @@ namespace App\Swagger;
  *                     @OA\Property(property="id", type="integer", example=15),
  *                     @OA\Property(property="transaction_code", type="string", example="TRX-20251203-002"),
  *                     @OA\Property(property="amount", type="number", example=2500000)
- *                 ),
- *                 @OA\Property(property="snap_token", type="string", example="abc123def456"),
- *                 @OA\Property(property="redirect_url", type="string", example="https://app.midtrans.com/snap/v2/vtweb/abc123")
+ *                 )
  *             )
  *         )
  *     )
@@ -302,7 +295,7 @@ namespace App\Swagger;
  *             @OA\Property(property="package_type", type="string", enum={"single_course", "all_in_one"}, example="all_in_one"),
  *             @OA\Property(property="duration", type="integer", example=12),
  *             @OA\Property(property="duration_unit", type="string", enum={"days", "weeks", "months", "years"}, example="months"),
- *             @OA\Property(property="payment_method", type="string", enum={"qris", "bank_transfer", "credit_card", "e_wallet"}, example="qris"),
+ *             @OA\Property(property="payment_method", type="string", enum={"manual", "bank_transfer"}, example="manual"),
  *             @OA\Property(property="courses_ids", type="array", @OA\Items(type="integer"), example={1, 2})
  *         )
  *     ),
@@ -329,7 +322,7 @@ namespace App\Swagger;
  *         required=true,
  *         @OA\JsonContent(
  *             required={"payment_method"},
- *             @OA\Property(property="payment_method", type="string", enum={"qris", "bank_transfer", "credit_card", "e_wallet"}, example="qris")
+ *             @OA\Property(property="payment_method", type="string", enum={"manual", "bank_transfer"}, example="manual")
  *         )
  *     ),
  *     @OA\Response(

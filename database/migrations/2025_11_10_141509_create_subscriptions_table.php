@@ -23,7 +23,7 @@ return new class extends Migration
             $table->json('courses_ids')->nullable(); // JSON array of course IDs
             $table->decimal('price', 12, 2)->nullable();
             $table->boolean('auto_renew')->default(false);
-            $table->enum('status', ['active', 'expired', 'cancelled'])->default('active');
+            $table->enum('status', ['active', 'expired', 'cancelled', 'pending'])->default('pending');
             $table->timestamps();
         });
     }

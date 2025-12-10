@@ -44,6 +44,8 @@ class UpdateProfileRequest extends FormRequest
             'institution'     => 'nullable|string|max:255',
             'major'           => 'nullable|string|max:255',
             'education_level' => 'nullable|in:high_school,diploma,bachelor,master,phd',
+            'specialization'  => 'nullable|array',
+            'specialization.*'=> 'string|max:50',
             
             // DATA PROFIL
             'bio' => 'nullable|string|max:1000',

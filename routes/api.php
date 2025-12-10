@@ -19,7 +19,6 @@ use App\Http\Controllers\Api\NeedAssessmentController;
 use App\Http\Controllers\Api\CoachingFileController;
 use App\Http\Controllers\Api\CourseCurriculumController;
 use App\Http\Controllers\Auth\GoogleAuthController;
-use App\Http\Controllers\Api\MidtransWebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,8 +39,8 @@ use App\Http\Controllers\Api\MidtransWebhookController;
 // WEBHOOK ROUTES (Public - untuk callback dari payment gateway)
 // ==========================================================================
 
-Route::post('/midtrans/webhook', [MidtransWebhookController::class, 'handleNotification'])
-    ->name('midtrans.webhook');
+// Route::post('/midtrans/webhook', [MidtransWebhookController::class, 'handleNotification'])
+//    ->name('midtrans.webhook');
 
 // ==========================================================================
 // PUBLIC ROUTES (Tanpa Autentikasi)

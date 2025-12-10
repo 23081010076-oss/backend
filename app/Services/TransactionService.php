@@ -79,21 +79,13 @@ class TransactionService
         }
 
         return DB::transaction(function () use ($course, $user, $paymentMethod) {
-            // Buat enrollment
-            $enrollment = Enrollment::create([
-                'user_id'   => $user->id,
-                'course_id' => $course->id,
-                'progress'  => 0,
-                'completed' => false,
-            ]);
-
-            // Buat transaksi
+            // Buat transaksi (link ke Course dulu karena belum enrolled)
             $transaction = Transaction::create([
                 'user_id'              => $user->id,
                 'transaction_code'     => Transaction::generateTransactionCode(),
                 'type'                 => 'course_enrollment',
-                'transactionable_id'   => $enrollment->id,
-                'transactionable_type' => Enrollment::class,
+                'transactionable_id'   => $course->id,
+                'transactionable_type' => Course::class,
                 'amount'               => $course->price,
                 'payment_method'       => $paymentMethod,
                 'status'               => 'pending',
@@ -102,7 +94,7 @@ class TransactionService
 
             return [
                 'transaction' => $transaction->load('transactionable'),
-                'enrollment'  => $enrollment,
+                'instructions' => $this->getPaymentInstructions(),
             ];
         });
     }
@@ -113,13 +105,13 @@ class TransactionService
     public function createSubscriptionTransaction(User $user, string $plan, string $paymentMethod): array
     {
         return DB::transaction(function () use ($user, $plan, $paymentMethod) {
-            // Buat subscription
+            // Buat subscription (status pending)
             $subscription = Subscription::create([
                 'user_id'    => $user->id,
                 'plan'       => $plan,
                 'start_date' => now(),
                 'end_date'   => now()->addYear(),
-                'status'     => 'active',
+                'status'     => 'pending',
             ]);
 
             // Buat transaksi
@@ -138,6 +130,7 @@ class TransactionService
             return [
                 'transaction'  => $transaction->load('transactionable'),
                 'subscription' => $subscription,
+                'instructions' => $this->getPaymentInstructions(),
             ];
         });
     }
@@ -147,7 +140,7 @@ class TransactionService
      * 
      * @throws \Exception jika bukan member sesi
      */
-    public function createMentoringTransaction(MentoringSession $session, User $user, string $paymentMethod): Transaction
+    public function createMentoringTransaction(MentoringSession $session, User $user, string $paymentMethod): array
     {
         // Verifikasi user adalah member sesi
         if ($session->member_id !== $user->id) {
@@ -167,7 +160,10 @@ class TransactionService
                 'expired_at'           => now()->addHours(24),
             ]);
 
-            return $transaction->load('transactionable');
+            return [
+                'transaction' => $transaction->load('transactionable'),
+                'instructions' => $this->getPaymentInstructions(),
+            ];
         });
     }
 
@@ -188,17 +184,59 @@ class TransactionService
      */
     public function confirmPayment(Transaction $transaction): Transaction
     {
-        $transaction->update([
-            'status'  => 'paid',
-            'paid_at' => now(),
-        ]);
+        return DB::transaction(function () use ($transaction) {
+            $transaction->update([
+                'status'  => 'paid',
+                'paid_at' => now(),
+            ]);
 
-        // Update status model terkait jika perlu
-        if ($transaction->transactionable_type === MentoringSession::class) {
-            $transaction->transactionable->update(['status' => 'scheduled']);
-        }
+            // Handle Course Enrollment
+            if ($transaction->transactionable_type === Course::class) {
+                $courseId = $transaction->transactionable_id;
+                
+                // Create Enrollment
+                $enrollment = Enrollment::create([
+                    'user_id'   => $transaction->user_id,
+                    'course_id' => $courseId,
+                    'progress'  => 0,
+                    'completed' => false,
+                ]);
 
-        return $transaction->fresh();
+                // Update transaction to point to enrollment (optional but good for history)
+                $transaction->update([
+                    'transactionable_id'   => $enrollment->id,
+                    'transactionable_type' => Enrollment::class,
+                ]);
+            }
+            // Handle Subscription Activation
+            elseif ($transaction->transactionable_type === Subscription::class) {
+                $transaction->transactionable->update(['status' => 'active']);
+            }
+            // Handle Mentoring Session
+            elseif ($transaction->transactionable_type === MentoringSession::class) {
+                $transaction->transactionable->update(['status' => 'scheduled']);
+            }
+
+            return $transaction->fresh();
+        });
+    }
+
+    /**
+     * Get payment instructions
+     */
+    private function getPaymentInstructions(): array
+    {
+        return [
+            'bank_name'      => 'BCA',
+            'account_number' => '1234567890',
+            'account_holder' => 'PT Edukasi Masa Depan',
+            'instructions'   => [
+                'Transfer sesuai nominal yang tertera.',
+                'Simpan bukti transfer.',
+                'Upload bukti transfer melalui menu "Riwayat Transaksi".',
+                'Tunggu verifikasi admin (maksimal 1x24 jam).'
+            ]
+        ];
     }
 
     /**

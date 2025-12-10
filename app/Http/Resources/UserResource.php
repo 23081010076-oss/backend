@@ -62,6 +62,7 @@ class UserResource extends JsonResource
             'institution'     => $this->institution,      // Nama institusi/sekolah/kampus
             'major'           => $this->major,            // Jurusan/program studi
             'education_level' => $this->education_level,  // Jenjang: SMA/D3/S1/S2/S3
+            'specialization'  => $this->specialization,   // Spesialisasi (array)
             
             // ============================================================
             // DATA PROFIL

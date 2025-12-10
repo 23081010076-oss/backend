@@ -154,7 +154,8 @@ namespace App\Swagger;
  *                 @OA\Property(property="gender", type="string", example="male"),
  *                 @OA\Property(property="birth_date", type="string", example="2000-01-15"),
  *                 @OA\Property(property="institution", type="string", example="Universitas Indonesia"),
- *                 @OA\Property(property="major", type="string", example="Teknik Informatika")
+ *                 @OA\Property(property="major", type="string", example="Teknik Informatika"),
+ *                 @OA\Property(property="specialization", type="array", @OA\Items(type="string"), example={"Web Development", "Data Science"})
  *             )
  *         )
  *     ),
@@ -191,7 +192,8 @@ namespace App\Swagger;
  *             @OA\Property(property="address", type="string", example="Jl. Merdeka No. 123"),
  *             @OA\Property(property="institution", type="string", example="Universitas Indonesia"),
  *             @OA\Property(property="major", type="string", example="Teknik Informatika"),
- *             @OA\Property(property="bio", type="string", example="Software Developer")
+ *             @OA\Property(property="bio", type="string", example="Software Developer"),
+ *             @OA\Property(property="specialization", type="array", @OA\Items(type="string"), example={"Web Development", "Data Science"})
  *         )
  *     ),
  *     @OA\Response(

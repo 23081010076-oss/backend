@@ -32,7 +32,7 @@ class CreateSubscriptionTransactionRequest extends FormRequest
     {
         return [
             'plan'           => 'required|in:regular,premium',
-            'payment_method' => 'required|in:qris,bank_transfer,virtual_account,credit_card,manual',
+            'payment_method' => 'required|in:manual,bank_transfer',
         ];
     }
 
