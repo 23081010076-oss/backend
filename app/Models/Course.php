@@ -36,6 +36,7 @@ class Course extends Model
     protected $appends = [
         'total_materials',
         'total_curriculum_duration',
+        'summary',
     ];
 
     // Relationships
@@ -121,5 +122,19 @@ class Course extends Model
             return "{$minutes} menit";
         }
     }
+
+    /**
+     * Get summary/overview untuk tab "Kilasan"
+     * Mengembalikan object dengan video dan deskripsi lengkap
+     */
+    public function getSummaryAttribute(): array
+    {
+        return [
+            'video_url' => $this->video_url,
+            'video_duration' => $this->video_duration,
+            'description' => $this->description,
+        ];
+    }
 }
+
 

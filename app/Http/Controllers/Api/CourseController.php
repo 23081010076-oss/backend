@@ -13,6 +13,9 @@ use Illuminate\Http\Request;
 use App\Http\Requests\Course\StoreCourseRequest;
 use App\Http\Requests\Course\UpdateCourseRequest;
 
+// Import Resource Classes
+use App\Http\Resources\ReviewResource;
+
 /**
  * ==========================================================================
  * COURSE CONTROLLER (Controller untuk Kursus)
@@ -74,8 +77,12 @@ class CourseController extends Controller
     public function show(int $id): JsonResponse
     {
         $course = $this->courseService->getCourseWithDetails($id);
+        
+        // Format response dengan reviews yang sudah include user data
+        $response = $course->toArray();
+        $response['reviews'] = ReviewResource::collection($course->reviews);
 
-        return $this->successResponse($course, 'Detail kursus berhasil diambil');
+        return $this->successResponse($response, 'Detail kursus berhasil diambil');
     }
 
     /**
