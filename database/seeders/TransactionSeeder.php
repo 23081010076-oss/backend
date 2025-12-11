@@ -28,20 +28,24 @@ class TransactionSeeder extends Seeder
 
         $transactions = [];
 
-        // Course enrollment transactions
+        // Course enrollment transactions (linked to courses, not enrollments - matches new flow)
         if ($enrollments->isNotEmpty()) {
             foreach ($enrollments->take(5) as $index => $enrollment) {
                 $transactions[] = [
                     'user_id' => $enrollment->user_id,
                     'transaction_code' => 'TRX-COURSE-' . now()->format('Ymd') . '-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
                     'type' => 'course_enrollment',
-                    'transactionable_id' => $enrollment->id,
-                    'transactionable_type' => 'App\Models\Enrollment',
+                    'transactionable_id' => $enrollment->course_id, // Link to Course, not Enrollment
+                    'transactionable_type' => 'App\Models\Course',
                     'amount' => rand(500000, 2500000),
-                    'payment_method' => ['qris', 'bank_transfer', 'virtual_account', 'credit_card'][array_rand(['qris', 'bank_transfer', 'virtual_account', 'credit_card'])],
+                    'payment_method' => ['manual', 'bank_transfer'][array_rand(['manual', 'bank_transfer'])],
                     'status' => 'paid',
-                    'payment_proof' => null,
-                    'payment_details' => json_encode(['snap_token' => 'snap-token-' . uniqid()]),
+                    'payment_proof' => 'payment_proofs/sample-proof-' . ($index + 1) . '.jpg',
+                    'payment_details' => json_encode([
+                        'bank_name' => 'BCA',
+                        'account_number' => '1234567890',
+                        'account_holder' => 'PT Karir Impian',
+                    ]),
                     'paid_at' => now()->subDays(rand(1, 30)),
                     'expired_at' => now()->addHours(24),
                 ];
@@ -58,10 +62,14 @@ class TransactionSeeder extends Seeder
                     'transactionable_id' => $subscription->id,
                     'transactionable_type' => 'App\Models\Subscription',
                     'amount' => $subscription->price,
-                    'payment_method' => ['qris', 'bank_transfer', 'virtual_account'][array_rand(['qris', 'bank_transfer', 'virtual_account'])],
+                    'payment_method' => ['manual', 'bank_transfer'][array_rand(['manual', 'bank_transfer'])],
                     'status' => 'paid',
-                    'payment_proof' => null,
-                    'payment_details' => json_encode(['snap_token' => 'snap-token-' . uniqid()]),
+                    'payment_proof' => 'payment_proofs/sample-subscription-' . ($index + 1) . '.jpg',
+                    'payment_details' => json_encode([
+                        'bank_name' => 'BCA',
+                        'account_number' => '1234567890',
+                        'account_holder' => 'PT Karir Impian',
+                    ]),
                     'paid_at' => $subscription->start_date,
                     'expired_at' => now()->addHours(24),
                 ];
@@ -73,15 +81,6 @@ class TransactionSeeder extends Seeder
             foreach ($mentoringSession->whereIn('status', ['scheduled', 'completed'])->take(4) as $index => $session) {
                 $amount = $session->type === 'academic' ? 150000 : 200000;
 
-                // Map mentoring session payment_method to transaction payment_method
-                $paymentMethodMap = [
-                    'qris' => 'qris',
-                    'bank' => 'bank_transfer',
-                    'va' => 'virtual_account',
-                    'manual' => 'manual',
-                ];
-                $paymentMethod = $paymentMethodMap[$session->payment_method] ?? 'qris';
-
                 $transactions[] = [
                     'user_id' => $session->member_id,
                     'transaction_code' => 'TRX-MENT-' . now()->format('Ymd') . '-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
@@ -89,10 +88,14 @@ class TransactionSeeder extends Seeder
                     'transactionable_id' => $session->id,
                     'transactionable_type' => 'App\Models\MentoringSession',
                     'amount' => $amount,
-                    'payment_method' => $paymentMethod,
+                    'payment_method' => ['manual', 'bank_transfer'][array_rand(['manual', 'bank_transfer'])],
                     'status' => $session->status === 'completed' ? 'paid' : 'pending',
-                    'payment_proof' => null,
-                    'payment_details' => json_encode(['snap_token' => 'snap-token-' . uniqid()]),
+                    'payment_proof' => $session->status === 'completed' ? 'payment_proofs/mentoring-' . ($index + 1) . '.jpg' : null,
+                    'payment_details' => json_encode([
+                        'bank_name' => 'BCA',
+                        'account_number' => '1234567890',
+                        'account_holder' => 'PT Karir Impian',
+                    ]),
                     'paid_at' => $session->status === 'completed' ? $session->schedule : null,
                     'expired_at' => now()->addHours(24),
                 ];

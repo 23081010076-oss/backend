@@ -16,6 +16,9 @@ use App\Http\Requests\Transaction\CreateCourseTransactionRequest;
 use App\Http\Requests\Transaction\CreateSubscriptionTransactionRequest;
 use App\Http\Requests\Transaction\UploadPaymentProofRequest;
 
+// Import Resource
+use App\Http\Resources\TransactionResource;
+
 /**
  * ==========================================================================
  * TRANSACTION CONTROLLER (Controller untuk Transaksi)
@@ -62,7 +65,10 @@ class TransactionController extends Controller
             $request->all()
         );
 
-        return $this->paginatedResponse($transactions, 'Daftar transaksi berhasil diambil');
+        return $this->paginatedResponse(
+            TransactionResource::collection($transactions),
+            'Daftar transaksi berhasil diambil'
+        );
     }
 
     /**
@@ -75,7 +81,10 @@ class TransactionController extends Controller
         // Cek akses dengan Policy
         $this->authorize('view', $transaction);
 
-        return $this->successResponse($transaction, 'Detail transaksi berhasil diambil');
+        return $this->successResponse(
+            new TransactionResource($transaction),
+            'Detail transaksi berhasil diambil'
+        );
     }
 
     /*
@@ -104,7 +113,10 @@ class TransactionController extends Controller
                 $validated['payment_method']
             );
 
-            return $this->createdResponse($result, 'Transaksi berhasil dibuat');
+            return $this->createdResponse(
+                new TransactionResource($result),
+                'Transaksi berhasil dibuat'
+            );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 422);
         }
@@ -135,7 +147,10 @@ class TransactionController extends Controller
                 $validated['payment_method']
             );
 
-            return $this->createdResponse($result, 'Transaksi langganan berhasil dibuat');
+            return $this->createdResponse(
+                new TransactionResource($result),
+                'Transaksi langganan berhasil dibuat'
+            );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 422);
         }
@@ -171,7 +186,10 @@ class TransactionController extends Controller
                 $validated['payment_method']
             );
 
-            return $this->createdResponse($result, 'Transaksi mentoring berhasil dibuat');
+            return $this->createdResponse(
+                new TransactionResource($result),
+                'Transaksi mentoring berhasil dibuat'
+            );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 422);
         }
@@ -200,7 +218,10 @@ class TransactionController extends Controller
             $request->file('payment_proof')
         );
 
-        return $this->successResponse($transaction, 'Bukti pembayaran berhasil diupload');
+        return $this->successResponse(
+            new TransactionResource($transaction->load(['user', 'transactionable'])),
+            'Bukti pembayaran berhasil diupload'
+        );
     }
 
     /**
@@ -215,7 +236,10 @@ class TransactionController extends Controller
 
         $transaction = $this->transactionService->confirmPayment($transaction);
 
-        return $this->successResponse($transaction, 'Pembayaran berhasil dikonfirmasi');
+        return $this->successResponse(
+            new TransactionResource($transaction->load(['user', 'transactionable'])),
+            'Pembayaran berhasil dikonfirmasi'
+        );
     }
 
     /**
@@ -240,7 +264,10 @@ class TransactionController extends Controller
             $validated['reason']
         );
 
-        return $this->successResponse($transaction, 'Pengembalian dana berhasil diajukan');
+        return $this->successResponse(
+            new TransactionResource($transaction->load(['user', 'transactionable'])),
+            'Pengembalian dana berhasil diajukan'
+        );
     }
 
     /*
