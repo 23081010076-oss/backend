@@ -55,7 +55,9 @@ class UpdateProfileRequest extends FormRequest
             // DATA PENDIDIKAN
             'institution'     => 'nullable|string|max:255',
             'major'           => 'nullable|string|max:255',
-            'education_level' => 'nullable|in:high_school,diploma,bachelor,master,phd',
+            'education_level' => 'nullable|in:SD,SMP,SMA,D3,S1,S2,S3,Other',
+            'specialization'  => 'nullable|array',
+            'specialization.*'=> 'string|max:50',
             
             // DATA PROFIL
             'bio' => 'nullable|string|max:1000',
@@ -90,7 +92,7 @@ class UpdateProfileRequest extends FormRequest
             'address.max' => 'Alamat maksimal 500 karakter',
             
             // Pesan untuk EDUCATION_LEVEL
-            'education_level.in' => 'Jenjang pendidikan tidak valid (pilih: high_school/diploma/bachelor/master/phd)',
+            'education_level.in' => 'Jenjang pendidikan tidak valid',
             
             // Pesan untuk BIO
             'bio.max' => 'Bio maksimal 1000 karakter',

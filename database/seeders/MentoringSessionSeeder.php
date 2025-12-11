@@ -111,7 +111,7 @@ class MentoringSessionSeeder extends Seeder
                 'type' => 'academic',
                 'schedule' => now()->subDays(5)->setTime(15, 0),
                 'meeting_link' => 'https://meet.google.com/cancelled-session',
-                'payment_method' => 'qris',
+                'payment_method' => 'manual',
                 'status' => 'cancelled',
                 'need_assessment_status' => 'pending',
             ],
