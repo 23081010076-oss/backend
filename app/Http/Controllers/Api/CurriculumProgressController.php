@@ -79,11 +79,11 @@ class CurriculumProgressController extends Controller
 
     /**
      * Update overall enrollment progress percentage
+     * ✅ FIX: Auto-generate certificate when course 100% completed
      */
     private function updateEnrollmentProgress(int $userId, int $courseId): void
     {
-        $enrollment = DB::table('enrollments')
-            ->where('user_id', $userId)
+        $enrollment = \App\Models\Enrollment::where('user_id', $userId)
             ->where('course_id', $courseId)
             ->first();
 
@@ -101,12 +101,31 @@ class CurriculumProgressController extends Controller
 
         $percentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 100) : 0;
 
-        DB::table('enrollments')
-            ->where('user_id', $userId)
-            ->where('course_id', $courseId)
-            ->update([
-                'progress' => $percentage,
-                'completed' => $percentage >= 100,
-            ]);
+        // Update progress
+        $enrollment->progress = $percentage;
+        
+        // ✅ FIX: Auto-generate certificate when reaching 100%
+        if ($percentage >= 100 && !$enrollment->completed) {
+            $enrollment->completed = true;
+            
+            // Generate certificate (only if not exists)
+            if (!$enrollment->certificate_url) {
+                $enrollmentService = app(\App\Services\EnrollmentService::class);
+                $certificateUrl = $enrollmentService->generateCertificate($enrollment);
+                
+                if ($certificateUrl) {
+                    $enrollment->certificate_url = $certificateUrl;
+                    
+                    \Illuminate\Support\Facades\Log::info('Certificate auto-generated on course completion', [
+                        'enrollment_id' => $enrollment->id,
+                        'user_id' => $userId,
+                        'course_id' => $courseId,
+                        'certificate_url' => $certificateUrl,
+                    ]);
+                }
+            }
+        }
+        
+        $enrollment->save();
     }
 }

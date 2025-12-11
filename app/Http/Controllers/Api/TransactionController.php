@@ -65,8 +65,13 @@ class TransactionController extends Controller
             $request->all()
         );
 
+        // Transform items with TransactionResource
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
         return $this->paginatedResponse(
-            TransactionResource::collection($transactions),
+            $transactions,
             'Daftar transaksi berhasil diambil'
         );
     }
