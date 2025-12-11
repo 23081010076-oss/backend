@@ -191,10 +191,11 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/enrollments/{id}/progress', [EnrollmentController::class, 'updateProgress'])
         ->name('enrollments.update-progress');
     
-    // Mark curriculum as completed (auto-update progress)
-    Route::post('/enrollments/{enrollmentId}/curriculums/{curriculumId}/complete', 
-        [EnrollmentController::class, 'markCurriculumCompleted'])
-        ->name('enrollments.curriculum.complete');
+    // ✅ NEW: Curriculum Progress Tracking
+    Route::get('/courses/{courseId}/progress', [App\Http\Controllers\Api\CurriculumProgressController::class, 'index'])
+        ->name('curriculum.progress.index');
+    Route::post('/curriculums/{curriculumId}/complete', [App\Http\Controllers\Api\CurriculumProgressController::class, 'markCompleted'])
+        ->name('curriculum.progress.complete');
 
     // ======================================================================
     // SCHOLARSHIPS

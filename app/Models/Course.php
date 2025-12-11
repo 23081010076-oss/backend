@@ -37,6 +37,8 @@ class Course extends Model
         'total_materials',
         'total_curriculum_duration',
         'summary',
+        'average_rating',
+        'total_reviews',
     ];
 
     // Relationships
@@ -134,6 +136,22 @@ class Course extends Model
             'video_duration' => $this->video_duration,
             'description' => $this->description,
         ];
+    }
+
+    /**
+     * Get average rating dari semua reviews
+     */
+    public function getAverageRatingAttribute(): float
+    {
+        return round($this->reviews()->avg('rating') ?? 0, 1);
+    }
+
+    /**
+     * Get total jumlah reviews
+     */
+    public function getTotalReviewsAttribute(): int
+    {
+        return $this->reviews()->count();
     }
 }
 

@@ -76,6 +76,7 @@ class ReviewController extends Controller
 
     /**
      * Store a new review
+     * User must have enrolled or have active subscription to review a course
      *
      * @param StoreReviewRequest $request
      * @return JsonResponse

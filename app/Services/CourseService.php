@@ -188,6 +188,15 @@ class CourseService
             return true;
         }
 
+        // ✅ FIX: Cek apakah user punya enrollment untuk course ini (beli satuan)
+        $hasEnrollment = $user->enrollments()
+            ->where('course_id', $course->id)
+            ->exists();
+
+        if ($hasEnrollment) {
+            return true; // User sudah beli course ini secara terpisah
+        }
+
         // Cek subscription user
         $subscription = $user->subscriptions()
             ->where('status', 'active')

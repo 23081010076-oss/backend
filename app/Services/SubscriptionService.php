@@ -32,8 +32,18 @@ class SubscriptionService
         try {
             DB::beginTransaction();
 
+            // ✅ FIX: Check for duplicate active subscription
+            $existingSubscription = $user->subscriptions()
+                ->where('status', 'active')
+                ->where('end_date', '>=', now())
+                ->first();
+
+            if ($existingSubscription) {
+                throw new InvalidArgumentException('You already have an active subscription. Please upgrade or wait until it expires.');
+            }
+
             $data['user_id'] = $user->id;
-            $data['status'] = 'active'; // New subscriptions always start as active
+            $data['status'] = 'pending'; // ✅ FIX: Start as pending, activate after payment
             
             // Validate course selection for single_course package
             if ($data['package_type'] === 'single_course') {
