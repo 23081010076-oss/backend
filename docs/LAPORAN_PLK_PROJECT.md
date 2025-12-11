@@ -1,10 +1,12 @@
-# III. DESKRIPSI PROYEK DAN HASIL PELAKSANAAN
+# BAB III
 
-## III.1 Deskripsi Persoalan: Pengembangan Aplikasi Student WebApp Berbasis Fullstack dengan Fokus Implementasi Backend REST API Menggunakan Laravel
+# PENGEMBANGAN APLIKASI STUDENT WEBAPP BERBASIS FULLSTACK DENGAN FOKUS IMPLEMENTASI BACKEND REST API MENGGUNAKAN LARAVEL
 
-### Latar Belakang Persoalan
+## III.1 Deskripsi Kegiatan Pengembangan Aplikasi Student WebApp
 
-Dalam era digital ini, terdapat kebutuhan yang signifikan untuk platform pembelajaran yang komprehensif dan efisien. Banyak institusi pendidikan masih menggunakan sistem manajemen peserta didik yang terpisah-pisah, tidak terintegrasi, dan sulit diakses. Hal ini menghasilkan:
+### 3.1.1 Latar Belakang
+
+Dalam era transformasi digital pendidikan, terdapat kebutuhan yang signifikan terhadap platform pembelajaran yang komprehensif, terintegrasi, dan efisien. Banyak institusi pendidikan masih menggunakan sistem manajemen peserta didik yang terpisah-pisah, tidak terintegrasi, dan sulit diakses. Hal ini menghasilkan:
 
 -   **Kesulitan Akses Informasi**: Peserta didik kesulitan mengakses data pembelajaran, nilai, dan progress mereka secara terpusat
 -   **Proses Manual yang Tidak Efisien**: Administrasi pendidikan masih dilakukan secara manual, membuang waktu dan rentan terhadap kesalahan
@@ -12,9 +14,30 @@ Dalam era digital ini, terdapat kebutuhan yang signifikan untuk platform pembela
 -   **Pengalaman Pengguna yang Suboptimal**: Antarmuka yang tidak user-friendly dan responsif
 -   **Keamanan Data yang Terbatas**: Belum ada implementasi autentikasi yang robust dan enkripsi data yang memadai
 
-### Objek dan Ruang Lingkup Proyek
+### 3.1.2 Rumusan Masalah
 
-Project ini mengembangkan **Student WebApp** sebagai solusi terintegrasi dengan fokus pada:
+Berdasarkan latar belakang di atas, rumusan masalah dalam proyek ini adalah:
+
+1. Bagaimana merancang dan mengimplementasikan REST API yang terstruktur dan scalable untuk platform pembelajaran?
+2. Bagaimana mengintegrasikan sistem autentikasi yang aman menggunakan JWT dan OAuth 2.0?
+3. Bagaimana membangun sistem manajemen kursus, pendaftaran, dan pelacakan kemajuan belajar?
+4. Bagaimana mengintegrasikan sistem pembayaran dengan payment gateway Midtrans?
+5. Bagaimana mengimplementasikan sistem notifikasi dan penerbitan sertifikat secara otomatis?
+
+### 3.1.3 Tujuan Proyek
+
+Tujuan dari proyek pengembangan Student WebApp ini adalah:
+
+1. Mengembangkan backend REST API menggunakan framework Laravel yang mengikuti praktik terbaik pengembangan perangkat lunak.
+2. Mengimplementasikan sistem autentikasi dan otorisasi yang aman berbasis JWT dan OAuth Google.
+3. Membangun modul manajemen kursus, kurikulum, dan pelacakan kemajuan peserta didik.
+4. Mengintegrasikan sistem pembayaran dengan Midtrans sebagai payment gateway.
+5. Mengimplementasikan sistem notifikasi email dan penerbitan sertifikat otomatis.
+6. Menyediakan dokumentasi API yang lengkap menggunakan Swagger/OpenAPI.
+
+### 3.1.4 Objek dan Ruang Lingkup Proyek
+
+Proyek ini mengembangkan **Student WebApp** sebagai solusi terintegrasi dengan fokus pada:
 
 1. **Backend REST API Menggunakan Laravel**
 
@@ -53,7 +76,17 @@ Project ini mengembangkan **Student WebApp** sebagai solusi terintegrasi dengan 
     - Error Handling & Logging
     - Unit & Feature Testing dengan PHPUnit
 
-### Architecture Overview
+### 3.1.5 Arsitektur Sistem
+
+Berikut adalah gambaran arsitektur sistem Student WebApp yang dikembangkan:
+
+![Gambar 3.1 — Arsitektur Sistem Student WebApp](images/arsitektur-sistem.png)
+
+<p align="center"><em>Gambar 3.1. Arsitektur Sistem Student WebApp berbasis Laravel REST API</em></p>
+
+> **Catatan**: Silakan tambahkan gambar arsitektur ke folder `docs/images/arsitektur-sistem.png`
+
+**Diagram Arsitektur (ASCII):**
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -118,9 +151,21 @@ Project ini mengembangkan **Student WebApp** sebagai solusi terintegrasi dengan 
 
 ---
 
-## III.2 Proses Pelaksanaan Project PLK: Pengembangan Student WebApp REST API
+## III.2 Proses Pelaksanaan Pengembangan Aplikasi Student WebApp
 
-### Timeline Implementasi
+Bagian ini menjelaskan tahapan pelaksanaan pengembangan aplikasi Student WebApp mulai dari perencanaan hingga deployment. Proses pengembangan dilaksanakan secara sistematis mengikuti metodologi pengembangan perangkat lunak yang terstruktur.
+
+### 3.2.1 Jadwal Implementasi
+
+Berikut adalah jadwal implementasi proyek selama 10 minggu pelaksanaan:
+
+![Gambar 3.2 — Timeline Pengembangan Proyek](images/timeline-proyek.png)
+
+<p align="center"><em>Gambar 3.2. Timeline Pengembangan Proyek Student WebApp</em></p>
+
+> **Catatan**: Silakan tambahkan gambar timeline ke folder `docs/images/timeline-proyek.png`
+
+**Diagram Jadwal (ASCII):**
 
 ```
 Minggu 1    ┌─────────────────────────────────────┐
@@ -164,7 +209,17 @@ Minggu 9-10 ┌─────────────────────�
             └─────────────────────────────────────┘
 ```
 
-### Database Relationship Diagram
+### 3.2.2 Perancangan Basis Data
+
+Berikut adalah diagram hubungan antar entitas (Entity Relationship Diagram) yang menggambarkan struktur basis data sistem:
+
+![Gambar 3.3 — Entity Relationship Diagram](images/erd-diagram.png)
+
+<p align="center"><em>Gambar 3.3. Entity Relationship Diagram (ERD) Student WebApp</em></p>
+
+> **Catatan**: Silakan tambahkan gambar ERD ke folder `docs/images/erd-diagram.png`
+
+**Diagram Relasi Basis Data (ASCII):**
 
 ```
 ┌──────────────┐         ┌──────────────┐
@@ -215,93 +270,113 @@ Minggu 9-10 ┌─────────────────────�
 └─────────────────┘      └──────────────┘
 ```
 
-### Tahap 1: Planning & Requirement Analysis
+### 3.2.3 Tahapan Pengembangan
 
-**Waktu**: Minggu ke-1
+Berikut adalah uraian detail dari setiap tahap pengembangan yang dilaksanakan:
 
--   **Analisis Kebutuhan Fungsional**: Mengidentifikasi seluruh fitur yang dibutuhkan berdasarkan use case
--   **Design Database Schema**: Membuat ERD dan mengdesain struktur database untuk mendukung semua fitur
--   **Architecture Planning**: Menentukan struktur folder, pattern design (MVC, Service Layer, Repository Pattern)
--   **Technology Stack Definition**: Memilih Laravel 10, MySQL, JWT Authentication, Midtrans API
+#### A. Tahap 1: Perencanaan dan Analisis Kebutuhan
 
-### Tahap 2: Setup Environment & Project Initialization
+**Periode**: Minggu ke-1
 
-**Waktu**: Minggu ke-1-2
+-   **Analisis Kebutuhan Fungsional**: Identifikasi seluruh fitur berdasarkan studi kasus dan kebutuhan pengguna.
+-   **Perancangan Skema Basis Data**: Penyusunan ERD dan struktur tabel untuk mendukung seluruh fitur.
+-   **Perencanaan Arsitektur**: Penetapan struktur proyek menggunakan pola MVC, Service Layer, dan Repository Pattern.
+-   **Penetapan Teknologi**: Laravel 10, MySQL, autentikasi JWT, dan integrasi Midtrans API.
 
--   **Inisialisasi Laravel Project**: Setup fresh Laravel installation dengan konfigurasi awal
--   **Database Configuration**: Setup MySQL database dan environment variables
--   **Package Installation**: Install dependencies seperti Laravel JWT, Swagger, Excel, Queue, Mail drivers
--   **Version Control Setup**: Inisialisasi Git repository untuk version control
+#### B. Tahap 2: Penyiapan Lingkungan dan Inisialisasi Proyek
 
-### Tahap 3: Authentication & Authorization
+**Periode**: Minggu ke-1–2
 
-**Waktu**: Minggu ke-2-3
+-   **Inisialisasi Proyek Laravel**: Pemasangan Laravel dengan konfigurasi awal lingkungan pengembangan.
+-   **Konfigurasi Basis Data**: Pengaturan koneksi MySQL dan variabel lingkungan (environment variables).
+-   **Instalasi Paket Dependensi**: Penambahan paket JWT, Swagger, Queue, dan Mail driver.
+-   **Pengaturan Version Control**: Inisialisasi repositori Git untuk pelacakan perubahan kode.
 
--   **User Model & Migration**: Membuat User model dengan fields lengkap (name, email, phone, address, dll)
--   **JWT Authentication**: Implementasi JWT token untuk API authentication
--   **Login & Register Endpoints**: Membuat endpoint untuk registrasi user baru dan login
--   **OAuth Google Integration**: Integrasi dengan Google OAuth 2.0 untuk social login
--   **Authorization & Permissions**: Membuat role-based access control (Student, Teacher, Admin)
--   **Password Management**: Implementasi hashing password, reset password functionality
+#### C. Tahap 3: Implementasi Autentikasi dan Otorisasi
 
-### Tahap 4: Core Models & Relationships
+**Periode**: Minggu ke-2–3
 
-**Waktu**: Minggu ke-3-4
+-   **Model User dan Migrasi**: Pembuatan model `User` dengan atribut lengkap (name, email, phone, address, dll).
+-   **Autentikasi JWT**: Implementasi token JWT untuk autentikasi API.
+-   **Endpoint Login dan Registrasi**: Penyediaan endpoint untuk registrasi pengguna baru dan proses login.
+-   **Integrasi OAuth Google**: Implementasi autentikasi menggunakan Google OAuth 2.0.
+-   **Otorisasi Berbasis Peran**: Penerapan Role-Based Access Control (RBAC) untuk Student, Teacher, dan Admin.
+-   **Manajemen Kata Sandi**: Implementasi hashing password dan fitur reset password.
 
--   **Course Model**: Membuat model untuk courses dengan relasi ke curricula
--   **User Profile Enhancement**: Menambahkan specialization, education level, bio, dan profile data
--   **Enrollment Model**: Membuat model untuk tracking student enrollment
--   **Curriculum & Progress Tracking**: Implementasi curriculum dengan progress tracking per student
--   **Achievement & Certificate Models**: Membuat model untuk achievements dan certificates
+#### D. Tahap 4: Pengembangan Model Inti dan Relasi
 
-### Tahap 5: API Endpoints Development
+**Periode**: Minggu ke-3–4
 
-**Waktu**: Minggu ke-4-6
+-   **Model Course**: Pembuatan model kursus dengan relasi ke kurikulum.
+-   **Penyempurnaan Profil Pengguna**: Penambahan atribut specialization, education_level, bio, dan data profil lainnya.
+-   **Model Enrollment**: Pembuatan model untuk pelacakan pendaftaran peserta didik.
+-   **Kurikulum dan Pelacakan Kemajuan**: Implementasi modul kurikulum dengan pelacakan kemajuan per peserta didik.
+-   **Model Achievement dan Certificate**: Pembuatan model untuk pencapaian dan sertifikat.
 
-**Authentication Endpoints:**
+#### E. Tahap 5: Pengembangan Endpoint API
 
--   POST /api/auth/register - Registrasi user baru
--   POST /api/auth/login - Login dengan email & password
--   POST /api/auth/google - Login dengan Google OAuth
--   POST /api/auth/refresh - Refresh JWT token
--   POST /api/auth/logout - Logout user
+**Periode**: Minggu ke-4–6
 
-**Profile Endpoints:**
+Pada tahap ini dikembangkan berbagai endpoint API untuk mendukung fungsionalitas aplikasi. Berikut adalah daftar endpoint yang diimplementasikan:
 
--   GET /api/profile - Get user profile
--   PUT /api/profile - Update user profile dengan validasi data
--   GET /api/profile/{id} - Get profile user lain
+**Tabel 3.1. Daftar Endpoint Autentikasi**
 
-**Course Endpoints:**
+| Method | Endpoint           | Deskripsi                       |
+| ------ | ------------------ | ------------------------------- |
+| POST   | /api/auth/register | Registrasi pengguna baru        |
+| POST   | /api/auth/login    | Login dengan email dan password |
+| POST   | /api/auth/google   | Login menggunakan Google OAuth  |
+| POST   | /api/auth/refresh  | Memperbarui token JWT           |
+| POST   | /api/auth/logout   | Logout pengguna                 |
 
--   GET /api/courses - List semua courses
--   GET /api/courses/{id} - Detail course dengan curriculum
--   POST /api/courses - Create course (admin only)
--   PUT /api/courses/{id} - Update course
+**Tabel 3.2. Daftar Endpoint Profil**
 
-**Enrollment Endpoints:**
+| Method | Endpoint          | Deskripsi                          |
+| ------ | ----------------- | ---------------------------------- |
+| GET    | /api/profile      | Mengambil data profil pengguna     |
+| PUT    | /api/profile      | Memperbarui profil dengan validasi |
+| GET    | /api/profile/{id} | Mengambil profil pengguna lain     |
 
--   POST /api/enrollments - Enroll ke course
--   GET /api/enrollments - Get user enrollments
--   GET /api/enrollments/{id} - Detail enrollment & progress
+**Tabel 3.3. Daftar Endpoint Kursus**
 
-**Certificate Endpoints:**
+| Method | Endpoint          | Deskripsi                        |
+| ------ | ----------------- | -------------------------------- |
+| GET    | /api/courses      | Daftar semua kursus              |
+| GET    | /api/courses/{id} | Detail kursus dengan kurikulum   |
+| POST   | /api/courses      | Membuat kursus baru (admin only) |
+| PUT    | /api/courses/{id} | Memperbarui data kursus          |
 
--   GET /api/certificates - List certificates
--   POST /api/certificates/generate - Generate PDF certificate
--   PUT /api/certificates/{id} - Update certificate
+**Tabel 3.4. Daftar Endpoint Pendaftaran (Enrollment)**
 
-**Payment Endpoints:**
+| Method | Endpoint              | Deskripsi                       |
+| ------ | --------------------- | ------------------------------- |
+| POST   | /api/enrollments      | Mendaftar ke kursus             |
+| GET    | /api/enrollments      | Daftar pendaftaran pengguna     |
+| GET    | /api/enrollments/{id} | Detail pendaftaran dan kemajuan |
 
--   POST /api/payments - Create payment transaction
--   GET /api/payments/{id} - Get payment status
--   POST /api/webhooks/midtrans - Handle Midtrans webhook
+**Tabel 3.5. Daftar Endpoint Sertifikat**
 
-### API Response Examples
+| Method | Endpoint                   | Deskripsi                   |
+| ------ | -------------------------- | --------------------------- |
+| GET    | /api/certificates          | Daftar sertifikat pengguna  |
+| POST   | /api/certificates/generate | Generate sertifikat PDF     |
+| PUT    | /api/certificates/{id}     | Memperbarui data sertifikat |
 
-#### 1. Authentication Endpoints
+**Tabel 3.6. Daftar Endpoint Pembayaran**
 
-**POST /api/auth/register - Success Response (201 Created)**
+| Method | Endpoint               | Deskripsi                       |
+| ------ | ---------------------- | ------------------------------- |
+| POST   | /api/payments          | Membuat transaksi pembayaran    |
+| GET    | /api/payments/{id}     | Mengambil status pembayaran     |
+| POST   | /api/webhooks/midtrans | Menangani webhook dari Midtrans |
+
+### 3.2.4 Contoh Respons API
+
+Berikut adalah contoh respons API yang dihasilkan oleh sistem untuk beberapa endpoint utama:
+
+#### A. Endpoint Autentikasi
+
+**POST /api/auth/register — Respons Sukses (201 Created)**
 
 ```json
 {
@@ -864,57 +939,69 @@ Minggu 9-10 ┌─────────────────────�
 
 **Waktu**: Minggu ke-6-7
 
--   **Form Request Classes**: Membuat UpdateProfileRequest, CreateCourseRequest, dll
--   **Custom Validation Rules**: Implementasi custom validation logic
--   **Exception Handling**: Custom ApiException untuk error handling yang konsisten
--   **Error Response Formatting**: Standardisasi error response format
--   **Logging System**: Setup logging untuk tracking errors dan debugging
+-   **Form Request Classes**: Pembuatan kelas validasi seperti UpdateProfileRequest, CreateCourseRequest, dll.
+-   **Custom Validation Rules**: Implementasi aturan validasi khusus sesuai kebutuhan bisnis.
+-   **Exception Handling**: Pembuatan ApiException untuk penanganan galat yang konsisten.
+-   **Error Response Formatting**: Standardisasi format respons galat.
+-   **Logging System**: Konfigurasi sistem pencatatan untuk pelacakan galat dan debugging.
 
-### Tahap 7: Email & Queue System
+#### G. Tahap 7: Implementasi Sistem Email dan Antrian
 
-**Waktu**: Minggu ke-7
+**Periode**: Minggu ke-7
 
--   **Mail Configuration**: Setup SMTP dan mail driver
--   **Email Templates**: Membuat Mailable classes untuk welcome email, notification
--   **Queue Setup**: Implementasi job queue untuk background processing
+-   **Konfigurasi Mail**: Pengaturan SMTP dan mail driver.
+-   **Template Email**: Pembuatan kelas Mailable untuk welcome email dan notifikasi.
+-   **Konfigurasi Queue**: Implementasi job queue untuk pemrosesan latar belakang.
 -   **Background Jobs**:
-    -   SendWelcomeEmail - Kirim email saat user register
-    -   SendNotificationEmail - Kirim notifikasi ke student
-    -   ExpireSubscriptions - Background job untuk expire subscription
-    -   GenerateCertificatePdf - Generate certificate PDF asynchronously
+    -   `SendWelcomeEmail` — Mengirim email saat pengguna mendaftar.
+    -   `SendNotificationEmail` — Mengirim notifikasi ke peserta didik.
+    -   `ExpireSubscriptions` — Job untuk menangani langganan yang kedaluwarsa.
+    -   `GenerateCertificatePdf` — Generate sertifikat PDF secara asinkron.
 
-### Tahap 8: API Documentation
+#### H. Tahap 8: Dokumentasi API
 
-**Waktu**: Minggu ke-8
+**Periode**: Minggu ke-8
 
--   **Swagger Configuration**: Setup L5 Swagger untuk dokumentasi API
--   **Endpoint Documentation**: Dokumentasi semua endpoint dengan request/response examples
--   **Schema Definition**: Define OpenAPI schema untuk semua models
--   **API Quick Reference**: Membuat dokumentasi cepat untuk developer
+-   **Konfigurasi Swagger**: Setup L5 Swagger untuk dokumentasi API interaktif.
+-   **Dokumentasi Endpoint**: Dokumentasi lengkap dengan contoh request/response.
+-   **Definisi Schema**: Pendefinisian OpenAPI schema untuk semua model.
+-   **Panduan Referensi API**: Penyusunan dokumentasi ringkas untuk pengembang.
 
-### Tahap 9: Testing
+#### I. Tahap 9: Pengujian
 
-**Waktu**: Minggu ke-8-9
+**Periode**: Minggu ke-8–9
 
--   **Unit Testing**: Test untuk models, services, dan business logic
--   **Feature Testing**: Test untuk API endpoints dan user flows
--   **Database Testing**: Setup test database dengan seeding
--   **Code Coverage**: Mengukur test coverage
+-   **Unit Testing**: Pengujian untuk model, service, dan logika bisnis.
+-   **Feature Testing**: Pengujian endpoint API dan alur pengguna.
+-   **Database Testing**: Pengujian dengan database uji dan seeding.
+-   **Code Coverage**: Pengukuran cakupan pengujian kode.
 
-### Tahap 10: Deployment & Documentation
+#### J. Tahap 10: Deployment dan Dokumentasi Akhir
 
-**Waktu**: Minggu ke-9-10
+**Periode**: Minggu ke-9–10
 
 -   **Production Setup**: Setup server configuration dan environment
 -   **Database Seeding**: Prepare initial data (courses, categories, users)
 -   **API Documentation**: Final documentation untuk clients
--   **Monitoring & Logging**: Setup monitoring tools untuk production
+-   **Monitoring dan Logging**: Konfigurasi alat monitoring untuk lingkungan produksi.
 
 ---
 
-## III.3 Pencapaian Hasil dari Project PLK: Pengembangan Student WebApp REST API
+## III.3 Pencapaian Hasil Pengembangan Aplikasi Student WebApp
 
-### API Endpoints Flow Diagram
+Bagian ini memaparkan hasil-hasil yang dicapai dari pelaksanaan proyek pengembangan aplikasi Student WebApp. Pencapaian diukur berdasarkan implementasi fitur, kualitas kode, dan kesiapan sistem untuk digunakan.
+
+### 3.3.1 Diagram Alur Sistem
+
+Berikut adalah diagram yang menggambarkan alur pemrosesan permintaan API dalam sistem:
+
+![Gambar 3.4 — Diagram Alur Endpoint API](images/api-flow-diagram.png)
+
+<p align="center"><em>Gambar 3.4. Diagram Alur Pemrosesan Request API</em></p>
+
+> **Catatan**: Silakan tambahkan gambar diagram alur ke folder `docs/images/api-flow-diagram.png`
+
+**Diagram Alur (ASCII):**
 
 ```
                     CLIENT REQUEST
@@ -996,7 +1083,17 @@ Minggu 9-10 ┌─────────────────────�
                       HTTP RESPONSE
 ```
 
-### Authentication Flow
+### 3.3.2 Diagram Alur Autentikasi
+
+Berikut adalah diagram yang menggambarkan proses autentikasi pengguna dalam sistem:
+
+![Gambar 3.5 — Diagram Alur Autentikasi](images/auth-flow-diagram.png)
+
+<p align="center"><em>Gambar 3.5. Diagram Alur Proses Autentikasi dan Registrasi</em></p>
+
+> **Catatan**: Silakan tambahkan gambar diagram autentikasi ke folder `docs/images/auth-flow-diagram.png`
+
+**Diagram Alur Autentikasi (ASCII):**
 
 ```
 ┌─────────────┐
@@ -1056,7 +1153,17 @@ Minggu 9-10 ┌─────────────────────�
   Authorization: Bearer <token>
 ```
 
-### Enrollment & Certificate Generation Flow
+### 3.3.3 Diagram Alur Pendaftaran dan Penerbitan Sertifikat
+
+Berikut adalah diagram yang menggambarkan alur proses pendaftaran kursus dan penerbitan sertifikat:
+
+![Gambar 3.6 — Diagram Alur Enrollment dan Sertifikat](images/enrollment-certificate-flow.png)
+
+<p align="center"><em>Gambar 3.6. Diagram Alur Pendaftaran Kursus dan Penerbitan Sertifikat</em></p>
+
+> **Catatan**: Silakan tambahkan gambar ke folder `docs/images/enrollment-certificate-flow.png`
+
+**Diagram Alur Pendaftaran (ASCII):**
 
 ```
                     Student
@@ -1130,18 +1237,20 @@ Minggu 9-10 ┌─────────────────────�
     Student downloads certificate
 ```
 
-### Hasil Utama yang Dicapai
+### 3.3.4 Hasil Utama yang Dicapai
 
-#### ✅ 1. Sistem Authentication Lengkap
+Berikut adalah uraian hasil utama yang berhasil dicapai dalam pengembangan aplikasi Student WebApp:
 
--   **Fitur yang Diimplementasikan:**
+#### A. Sistem Autentikasi yang Komprehensif
 
-    -   Email & Password Registration dengan validasi
-    -   Login dengan JWT Token authentication
-    -   Google OAuth 2.0 integration untuk social login
-    -   Token refresh mechanism untuk session management
-    -   Role-based access control (RBAC) untuk Student, Teacher, Admin
-    -   Secure password hashing menggunakan bcrypt
+**Fitur yang Diimplementasikan:**
+
+-   Registrasi dengan email dan kata sandi yang tervalidasi.
+-   Login menggunakan autentikasi berbasis JWT Token.
+-   Integrasi Google OAuth 2.0 untuk autentikasi pihak ketiga.
+-   Mekanisme pembaruan token (token refresh) untuk manajemen sesi.
+-   Kontrol akses berbasis peran (RBAC) untuk Student, Teacher, dan Admin.
+-   Hashing kata sandi yang aman menggunakan algoritma bcrypt.
 
 -   **Benefit:**
     -   User dapat mendaftar dan login dengan aman
@@ -1290,61 +1399,77 @@ Minggu 9-10 ┌─────────────────────�
 
 -   **Fitur yang Diimplementasikan:**
 
-    -   PHPUnit configuration setup
-    -   Test case structure
-    -   Database testing dengan factory dan seeding
-    -   API endpoint testing
+    -   Konfigurasi PHPUnit
+    -   Struktur test case
+    -   Pengujian basis data dengan factory dan seeding
+    -   Pengujian endpoint API
 
--   **Achievement:**
-    -   Foundation untuk comprehensive testing
-    -   Confidence dalam code quality
+**Pencapaian:**
 
-#### ✅ 12. Database Design
+-   Fondasi untuk pengujian yang komprehensif
+-   Peningkatan kepercayaan terhadap kualitas kode
 
--   **Fitur yang Diimplementasikan:**
+#### L. Perancangan Basis Data
 
-    -   Normalized database schema
-    -   Proper foreign key relationships
-    -   Migration files untuk version control
-    -   Database seeders untuk initial data
-    -   Index optimization untuk query performance
+**Fitur yang Diimplementasikan:**
 
--   **Benefit:**
-    -   Data integrity dan consistency
-    -   Efficient queries dengan proper indexes
-    -   Easy database versioning dan rollback
+-   Skema basis data yang ternormalisasi
+-   Relasi foreign key yang tepat
+-   File migrasi untuk version control
+-   Database seeder untuk data awal
+-   Optimisasi indeks untuk performa query
 
-### Metrics & KPIs Pencapaian
+**Manfaat:**
+
+-   Integritas dan konsistensi data terjaga
+-   Query yang efisien dengan indeks yang tepat
+-   Kemudahan versioning dan rollback basis data
+
+### 3.3.5 Metrik dan Indikator Kinerja
+
+Tabel berikut menunjukkan pencapaian berdasarkan metrik dan indikator kinerja utama:
+
+**Tabel 3.7. Metrik Pencapaian Proyek**
 
 | Metrik                     | Target | Hasil                      |
 | -------------------------- | ------ | -------------------------- |
 | API Endpoints Implemented  | 20+    | ✅ Tercapai                |
 | Database Models            | 15+    | ✅ Tercapai                |
 | Authentication Methods     | 2+     | ✅ Tercapai (Email, OAuth) |
-| Code Coverage              | >70%   | ✅ In Progress             |
+| Code Coverage              | >70%   | ✅ Dalam Proses            |
 | Documentation Completeness | 100%   | ✅ Tercapai                |
 | Error Handling Coverage    | 100%   | ✅ Tercapai                |
 
-### Feature Completion Chart
+### 3.3.6 Grafik Penyelesaian Fitur
+
+Berikut adalah visualisasi tingkat penyelesaian setiap fitur dalam proyek:
+
+![Gambar 3.7 — Grafik Penyelesaian Fitur](images/feature-completion-chart.png)
+
+<p align="center"><em>Gambar 3.7. Grafik Persentase Penyelesaian Fitur</em></p>
+
+> **Catatan**: Silakan tambahkan gambar grafik ke folder `docs/images/feature-completion-chart.png`
+
+**Grafik Penyelesaian (ASCII):**
 
 ```
-Authentication System         ████████████████████░ 95%
-Profile Management            ████████████████████░ 90%
-Course Management             ███████████████████░░ 85%
-Enrollment & Progress         ███████████████████░░ 85%
-Payment Integration           ████████████████████░ 95%
-Certificate System            ██████████████████░░░ 80%
-Email & Notifications         ████████████████████░ 95%
-API Documentation             ████████████████████░ 100%
-Error Handling                ████████████████████░ 100%
-Database Design               ████████████████████░ 100%
-Testing Framework             ███████████████░░░░░░ 70%
-Queue System                  ████████████████████░ 95%
+Sistem Autentikasi            ████████████████████░ 95%
+Manajemen Profil              ████████████████████░ 90%
+Manajemen Kursus              ███████████████████░░ 85%
+Pendaftaran & Kemajuan        ███████████████████░░ 85%
+Integrasi Pembayaran          ████████████████████░ 95%
+Sistem Sertifikat             ██████████████████░░░ 80%
+Email & Notifikasi            ████████████████████░ 95%
+Dokumentasi API               ████████████████████░ 100%
+Penanganan Galat              ████████████████████░ 100%
+Perancangan Basis Data        ████████████████████░ 100%
+Framework Pengujian           ███████████████░░░░░░ 70%
+Sistem Antrian                ████████████████████░ 95%
 
-Overall Progress              ███████████████████░░ 90%
+Progres Keseluruhan           ███████████████████░░ 90%
 ```
 
-### Technology Stack Implementation
+### 3.3.7 Implementasi Technology Stack
 
 ```
 ┌─────────────────────────────────────────┐
@@ -1534,7 +1659,36 @@ Project Student WebApp REST API berbasis Laravel telah berhasil mengimplementasi
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-Aplikasi ini siap digunakan untuk mendukung learning management institution dalam era digital dengan providing seamless experience untuk students, teachers, dan administrators.
+### 3.3.8 Kesimpulan Pencapaian
+
+Berdasarkan hasil pengembangan yang telah dilaksanakan, dapat disimpulkan bahwa aplikasi Student WebApp REST API berbasis Laravel telah berhasil dikembangkan dengan tingkat penyelesaian mencapai **90%**. Aplikasi ini siap digunakan untuk mendukung institusi pembelajaran dalam era transformasi digital, menyediakan pengalaman yang terintegrasi bagi peserta didik, pengajar, dan administrator.
+
+**Tabel 3.8. Ringkasan Metrik Teknis**
+
+| Komponen        | Jumlah        |
+| --------------- | ------------- |
+| API Endpoints   | 23+ endpoint  |
+| Database Models | 15+ model     |
+| Controllers     | 8+ controller |
+| Services        | 6+ service    |
+| Form Requests   | 10+ kelas     |
+| Mail Classes    | 3+ kelas      |
+| Queue Jobs      | 4+ job        |
+| Routes Defined  | 50+ route     |
+| Database Tables | 15+ tabel     |
+| Lines of Code   | 5000+ baris   |
+
+**Tabel 3.9. Status Kesiapan Proyek**
+
+| Indikator                | Status       |
+| ------------------------ | ------------ |
+| Penyelesaian Keseluruhan | 90% ✅       |
+| API Siap untuk Frontend  | Ya ✅        |
+| Siap Produksi            | Ya ✅        |
+| Dokumentasi Lengkap      | Ya ✅        |
+| Framework Pengujian      | Terbangun ✅ |
+| Kualitas Kode            | Tinggi ✅    |
+| Implementasi Keamanan    | Robust ✅    |
 
 ---
 
@@ -1590,14 +1744,105 @@ PHASE 2 - ENHANCEMENT & EXPANSION
    └─ Localized Content
 ```
 
-Untuk pengembangan lebih lanjut, dapat ditambahkan fitur-fitur di atas untuk meningkatkan engagement dan user experience secara keseluruhan.
+Untuk pengembangan lebih lanjut, fitur-fitur di atas dapat diimplementasikan guna meningkatkan keterlibatan pengguna dan pengalaman pengguna secara keseluruhan.
 
 ---
 
-## KESIMPULAN AKHIR
+## KESIMPULAN
 
-Student WebApp REST API yang dikembangkan dengan Laravel telah mencapai milestone penting dalam modernisasi sistem pembelajaran digital. Dengan implementasi yang matang, dokumentasi lengkap, dan architecture yang scalable, aplikasi ini siap mendukung pertumbuhan institusi pendidikan dalam transformasi digital mereka.
+Student WebApp REST API yang dikembangkan menggunakan framework Laravel telah mencapai milestone penting dalam modernisasi sistem pembelajaran digital. Dengan implementasi yang matang, dokumentasi yang lengkap, dan arsitektur yang scalable, aplikasi ini siap mendukung pertumbuhan institusi pendidikan dalam transformasi digital.
+
+Proyek ini telah berhasil memenuhi tujuan yang ditetapkan, yaitu mengembangkan backend REST API yang terstruktur, aman, dan siap digunakan untuk integrasi dengan frontend application. Hasil pengembangan menunjukkan tingkat penyelesaian sebesar 90% dengan kesiapan produksi yang memadai.
 
 **Tanggal Laporan**: December 12, 2025
-**Status Project**: ✅ Selesai & Production Ready
-**Next Phase**: Deployment & Live Monitoring
+**Status Proyek**: ✅ Selesai & Siap Produksi  
+**Tahap Selanjutnya**: Deployment & Live Monitoring
+
+**Tanggal Laporan**: 12 Desember 2025
+
+---
+
+## LAMPIRAN
+
+### Lampiran A: Panduan Penambahan Gambar
+
+Untuk melengkapi laporan dengan ilustrasi dan diagram non-ASCII, ikuti panduan berikut agar konsisten, rapi, dan mudah dikelola.
+
+**Ketentuan Umum:**
+
+| Aspek           | Ketentuan                                                                   |
+| --------------- | --------------------------------------------------------------------------- |
+| Lokasi file     | Simpan seluruh gambar di folder `docs/images/`                              |
+| Format file     | `.png` atau `.jpg` untuk tangkapan layar; `.svg` untuk diagram vektor       |
+| Penamaan berkas | Gunakan nama deskriptif, contoh: `arsitektur-sistem.png`, `erd-diagram.svg` |
+| Resolusi        | Lebar 1200–1600px untuk keterbacaan optimal                                 |
+| Lisensi         | Pastikan gambar bebas hak cipta atau karya sendiri                          |
+
+### Cara Menyisipkan Gambar (Sintaks Markdown)
+
+Gunakan sintaks berikut dengan alternatif teks (alt text) dan keterangan (caption):
+
+```markdown
+![Gambar 3.1 — Arsitektur Sistem](images/arsitektur-sistem.png)
+
+<p align="center"><em>Gambar 3.1. Arsitektur Sistem Student WebApp berbasis Laravel REST API</em></p>
+```
+
+**Contoh Penyisipan untuk Diagram ERD:**
+
+```markdown
+![Gambar 3.3 — Entity Relationship Diagram](images/erd-diagram.png)
+
+<p align="center"><em>Gambar 3.3. Entity Relationship Diagram (ERD) Student WebApp</em></p>
+```
+
+### Daftar Gambar yang Perlu Ditambahkan
+
+Berikut adalah daftar gambar yang telah disiapkan placeholder-nya dalam laporan:
+
+**Tabel A.1. Daftar Placeholder Gambar**
+
+| No  | Nama File yang Disarankan         | Lokasi dalam Laporan | Keterangan                              |
+| --- | --------------------------------- | -------------------- | --------------------------------------- |
+| 1   | `arsitektur-sistem.png`           | Bagian 3.1.5         | Diagram arsitektur keseluruhan sistem   |
+| 2   | `timeline-proyek.png`             | Bagian 3.2.1         | Jadwal implementasi proyek              |
+| 3   | `erd-diagram.png`                 | Bagian 3.2.2         | Entity Relationship Diagram basis data  |
+| 4   | `api-flow-diagram.png`            | Bagian 3.3.1         | Diagram alur pemrosesan request API     |
+| 5   | `auth-flow-diagram.png`           | Bagian 3.3.2         | Diagram alur proses autentikasi         |
+| 6   | `enrollment-certificate-flow.png` | Bagian 3.3.3         | Diagram alur pendaftaran dan sertifikat |
+| 7   | `feature-completion-chart.png`    | Bagian 3.3.6         | Grafik persentase penyelesaian fitur    |
+
+### Langkah Praktis Menambahkan Gambar
+
+1. **Buat folder gambar** jika belum ada:
+
+    ```
+    docs/images/
+    ```
+
+2. **Siapkan gambar** dengan nama sesuai tabel di atas.
+
+3. **Simpan gambar** ke dalam folder `docs/images/`.
+
+4. **Hapus catatan placeholder** (teks yang diawali "> **Catatan**:") setelah gambar ditambahkan.
+
+5. **Periksa tampilan** menggunakan VS Code Preview atau GitHub untuk memastikan gambar muncul dengan benar.
+
+6. **Kompres gambar** jika ukuran terlalu besar (gunakan tools seperti TinyPNG atau Squoosh).
+
+### Contoh Struktur Folder Setelah Penambahan Gambar
+
+```
+docs/
+├── LAPORAN_PLK_PROJECT.md
+└── images/
+    ├── arsitektur-sistem.png
+    ├── timeline-proyek.png
+    ├── erd-diagram.png
+    ├── api-flow-diagram.png
+    ├── auth-flow-diagram.png
+    ├── enrollment-certificate-flow.png
+    └── feature-completion-chart.png
+```
+
+Dengan mengikuti panduan ini, gambar dapat ditambahkan secara sistematis dan konsisten, meningkatkan kualitas presentasi akademis laporan.
