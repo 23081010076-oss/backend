@@ -13,14 +13,30 @@ classDiagram
     namespace Auth_System {
         class USERS {
             +bigint id PK
-            +enum role
-            +string email
             +string name
+            +string email
+            +string password
+            +enum role
+            +enum gender
+            +date birth_date
+            +string phone
+            +text address
+            +string institution
+            +string major
+            +string education_level
             +json specialization
+            +text bio
+            +string profile_photo
+            +string google_id
+            +string cv_path
+            +timestamp email_verified_at
+            +timestamp created_at
+            +timestamp updated_at
         }
         class PASSWORD_RESET_TOKENS {
-            +string email
+            +string email PK
             +string token
+            +timestamp created_at
         }
     }
 
@@ -28,97 +44,227 @@ classDiagram
         class COURSES {
             +bigint id PK
             +string title
+            +string image
+            +string category
+            +text description
             +enum type
+            +string instructor
+            +enum level
+            +string duration
             +decimal price
+            +enum access_type
+            +string certificate_url
+            +text video_url
+            +string video_duration
+            +int total_videos
+            +timestamp created_at
+            +timestamp updated_at
         }
         class COURSE_CURRICULUMS {
             +bigint id PK
+            +bigint course_id FK
+            +string section
+            +int section_order
             +string title
+            +text description
             +int order
+            +string duration
+            +timestamp created_at
+            +timestamp updated_at
         }
         class ENROLLMENTS {
             +bigint id PK
+            +bigint user_id FK
+            +bigint course_id FK
             +int progress
-            +bool completed
+            +boolean completed
+            +string certificate_url
+            +timestamp created_at
+            +timestamp updated_at
         }
         class CURRICULUM_PROGRESS {
-            +bool completed
+            +bigint id PK
+            +bigint enrollment_id FK
+            +bigint curriculum_id FK
+            +boolean completed
             +timestamp completed_at
+            +timestamp created_at
+            +timestamp updated_at
         }
     }
 
     namespace Mentoring_System {
         class MENTORING_SESSIONS {
             +bigint id PK
+            +bigint mentor_id FK
+            +bigint member_id FK
+            +string session_id
+            +enum type
             +datetime schedule
+            +string meeting_link
+            +enum payment_method
             +enum status
+            +enum need_assessment_status
+            +timestamp created_at
+            +timestamp updated_at
         }
         class NEED_ASSESSMENTS {
+            +bigint id PK
+            +bigint mentoring_session_id FK
             +json form_data
+            +timestamp completed_at
+            +timestamp created_at
+            +timestamp updated_at
         }
         class COACHING_FILES {
+            +bigint id PK
+            +bigint mentoring_session_id FK
+            +string file_name
             +string file_path
+            +string file_type
+            +bigint uploaded_by FK
+            +timestamp created_at
+            +timestamp updated_at
         }
     }
 
     namespace Scholarship_Center {
         class SCHOLARSHIPS {
             +bigint id PK
+            +bigint user_id FK
+            +bigint organization_id FK
+            +string provider_id
             +string name
-            +date deadline
+            +text description
+            +text benefit
+            +string location
             +enum status
+            +date deadline
+            +timestamp created_at
+            +timestamp updated_at
         }
         class SCHOLARSHIP_APPLICATIONS {
             +bigint id PK
-            +enum status
+            +bigint user_id FK
+            +bigint scholarship_id FK
+            +string motivation_letter
             +string cv_path
+            +string transcript_path
+            +string recommendation_path
+            +enum status
+            +datetime submitted_at
+            +timestamp created_at
+            +timestamp updated_at
         }
     }
 
     namespace Finance {
         class TRANSACTIONS {
             +bigint id PK
+            +bigint user_id FK
+            +string transaction_code
+            +enum type
+            +string transactionable_type
+            +bigint transactionable_id
             +decimal amount
+            +enum payment_method
             +enum status
-            +string type
+            +text payment_details
+            +string payment_proof
+            +timestamp paid_at
+            +timestamp expired_at
+            +timestamp created_at
+            +timestamp updated_at
         }
         class SUBSCRIPTIONS {
             +bigint id PK
+            +bigint user_id FK
             +string plan
-            +enum status
+            +date start_date
             +date end_date
+            +enum package_type
+            +int duration
+            +enum duration_unit
+            +json courses_ids
+            +decimal price
+            +boolean auto_renew
+            +enum status
+            +timestamp created_at
+            +timestamp updated_at
         }
     }
 
     namespace Portfolio_Profile {
         class EXPERIENCES {
+            +bigint id PK
+            +bigint user_id FK
             +string title
+            +text description
+            +enum type
+            +string level
             +string company
+            +date start_date
+            +date end_date
+            +string certificate_url
+            +timestamp created_at
+            +timestamp updated_at
         }
         class ACHIEVEMENTS {
+            +bigint id PK
+            +bigint user_id FK
             +string title
+            +text description
+            +string organization
             +year year
+            +timestamp created_at
+            +timestamp updated_at
         }
         class ORGANIZATIONS {
+            +bigint id PK
+            +bigint user_id FK
             +string name
-            +string role
+            +string type
+            +text description
+            +string location
+            +string website
+            +string contact_email
+            +string phone
+            +int founded_year
+            +string logo_url
+            +timestamp created_at
+            +timestamp updated_at
         }
     }
 
     namespace Content_General {
         class ARTICLES {
             +bigint id PK
+            +bigint author_id FK
             +string title
+            +text content
+            +string category
+            +string author
+            +timestamp created_at
+            +timestamp updated_at
         }
         class REVIEWS {
             +bigint id PK
+            +bigint user_id FK
+            +string reviewable_type
+            +bigint reviewable_id
             +int rating
             +text comment
+            +timestamp created_at
+            +timestamp updated_at
         }
         class CORPORATE_CONTACTS {
             +bigint id PK
+            +bigint org_id FK
+            +string name
             +string email
             +text message
+            +timestamp created_at
+            +timestamp updated_at
         }
     }
 
