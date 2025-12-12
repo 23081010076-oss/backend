@@ -84,3 +84,31 @@ Mentor bertugas membimbing mahasiswa.
 - **Verifikasi**: Memverifikasi pembayaran manual dan konten (artikel/beasiswa).
 - **CMS**: Mengelola konten global seperti kategori course dan konfigurasi sistem.
 
+## III.5 Perancangan Database
+Sistem basis data dirancang untuk mendukung kebutuhan multi-role dan transaksi yang kompleks. Berikut adalah visualisasi Entity Relationship Diagram (ERD) dari sistem:
+
+```mermaid
+erDiagram
+    USERS ||--o{ TRANSACTIONS : "makes"
+    USERS ||--o{ ENROLLMENTS : "studies"
+    USERS ||--o{ MENTORING : "joins"
+    
+    COURSES ||--o{ ENROLLMENTS : "has"
+    COURSES ||--o{ CURRICULUMS : "contains"
+    
+    TRANSACTIONS {
+        string code
+        enum type
+        decimal amount
+        enum status
+    }
+```
+
+**Tabel Utama:**
+1.  **Users**: Menyimpan data pengguna (Student, Mentor, Corporate, Admin).
+2.  **Courses & Curriculums**: Menyimpan data kursus beserta silabus materinya.
+3.  **Transactions**: Menggunakan *Polymorphic Relations* untuk menangani berbagai jenis pembayaran (Course, Mentoring, Subscription) dalam satu tabel.
+4.  **Enrollments**: Mencatat progres belajar siswa pada setiap kursus.
+5.  **Mentoring Sessions**: Mengatur jadwal dan status pertemuan antara Mentor dan Student.
+
+
