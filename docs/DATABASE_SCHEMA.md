@@ -8,30 +8,180 @@ Berikut adalah visualisasi hubungan antar tabel utama dalam database.
 
 ```mermaid
 erDiagram
+    %% AUTH & USERS
+    USERS {
+        bigint id PK
+        string name
+        string email
+        string password
+        enum role "student, mentor, admin, corporate"
+        json specialization
+        string profile_photo
+    }
+    
+    PASSWORD_RESET_TOKENS {
+        string email PK
+        string token
+        timestamp created_at
+    }
+
+    %% E-LEARNING
+    COURSES {
+        bigint id PK
+        string title
+        string type "course, bootcamp"
+        decimal price
+        enum access_type "free, premium"
+        string video_url
+    }
+
+    COURSE_CURRICULUMS {
+        bigint id PK
+        bigint course_id FK
+        string section
+        string title
+        int order
+        string duration
+    }
+
+    ENROLLMENTS {
+        bigint id PK
+        bigint user_id FK
+        bigint course_id FK
+        int progress
+        boolean completed
+        string certificate_url
+    }
+
+    CURRICULUM_PROGRESS {
+        bigint id PK
+        bigint enrollment_id FK
+        bigint curriculum_id FK
+        boolean completed
+    }
+
+    %% MENTORING
+    MENTORING_SESSIONS {
+        bigint id PK
+        bigint mentor_id FK
+        bigint member_id FK
+        datetime schedule
+        string meeting_link
+        enum status "pending, completed, cancelled"
+    }
+
+    NEED_ASSESSMENTS {
+        bigint id PK
+        bigint mentoring_session_id FK
+        json form_data
+    }
+
+    COACHING_FILES {
+        bigint id PK
+        bigint mentoring_session_id FK
+        string file_path
+        string file_type
+    }
+
+    %% SCHOLARSHIPS
+    SCHOLARSHIPS {
+        bigint id PK
+        string name
+        text description
+        enum status "open, closed"
+        date deadline
+    }
+
+    SCHOLARSHIP_APPLICATIONS {
+        bigint id PK
+        bigint scholarship_id FK
+        bigint user_id FK
+        enum status "submitted, accepted, rejected"
+        string cv_path
+    }
+
+    %% TRANSACTIONS & SUBSCRIPTIONS
+    TRANSACTIONS {
+        bigint id PK
+        bigint user_id FK
+        string transaction_code
+        decimal amount
+        enum status "pending, paid, failed"
+        string transactionable_type
+        bigint transactionable_id
+    }
+
+    SUBSCRIPTIONS {
+        bigint id PK
+        bigint user_id FK
+        string plan "free, premium"
+        date start_date
+        date end_date
+        enum status "active, expired"
+    }
+
+    %% PORTFOLIO
+    EXPERIENCES {
+        bigint id PK
+        bigint user_id FK
+        string title
+        string company
+        enum type "work, internship"
+    }
+
+    ACHIEVEMENTS {
+        bigint id PK
+        bigint user_id FK
+        string title
+        year year
+    }
+
+    ORGANIZATIONS {
+        bigint id PK
+        bigint user_id FK
+        string name
+        string role
+    }
+
+    %% CONTENT
+    ARTICLES {
+        bigint id PK
+        bigint author_id FK
+        string title
+        string category
+    }
+
+    REVIEWS {
+        bigint id PK
+        bigint user_id FK
+        string reviewable_type
+        bigint reviewable_id
+        int rating
+        text comment
+    }
+
+    %% RELATIONS
+    USERS ||--o{ ENROLLMENTS : "student enrolls"
     USERS ||--o{ TRANSACTIONS : "makes"
-    USERS ||--o{ ENROLLMENTS : "enrolls in"
-    USERS ||--o{ MENTORING_SESSIONS : "participates in"
-    USERS ||--o{ SUBSCRIPTIONS : "has"
+    USERS ||--o{ SUBSCRIPTIONS : "subscribes"
+    USERS ||--o{ MENTORING_SESSIONS : "mentor/mentee"
+    USERS ||--o{ SCHOLARSHIP_APPLICATIONS : "applies"
     USERS ||--o{ EXPERIENCES : "has"
     USERS ||--o{ ACHIEVEMENTS : "has"
     USERS ||--o{ ORGANIZATIONS : "joins"
-    
-    COURSES ||--o{ ENROLLMENTS : "has"
-    COURSES ||--o{ COURSE_CURRICULUMS : "contains"
-    
-    COURSE_CURRICULUMS ||--o{ CURRICULUM_PROGRESS : "tracked in"
-    ENROLLMENTS ||--o{ CURRICULUM_PROGRESS : "tracks"
-    
-    MENTORING_SESSIONS ||--o{ NEED_ASSESSMENTS : "has"
-    MENTORING_SESSIONS ||--o{ COACHING_FILES : "has_files"
-    
-    SCHOLARSHIPS ||--o{ SCHOLARSHIP_APPLICATIONS : "receives"
-    USERS ||--o{ SCHOLARSHIP_APPLICATIONS : "applies for"
+    USERS ||--o{ ARTICLES : "writes"
+    USERS ||--o{ REVIEWS : "writes"
 
-    USERS {
-        id PK
-        enum role
-    }
+    COURSES ||--o{ COURSE_CURRICULUMS : "contains"
+    COURSES ||--o{ ENROLLMENTS : "has students"
+    
+    ENROLLMENTS ||--o{ CURRICULUM_PROGRESS : "tracks"
+    COURSE_CURRICULUMS ||--o{ CURRICULUM_PROGRESS : "completed in"
+
+    MENTORING_SESSIONS ||--o{ NEED_ASSESSMENTS : "has"
+    MENTORING_SESSIONS ||--o{ COACHING_FILES : "has files"
+
+    SCHOLARSHIPS ||--o{ SCHOLARSHIP_APPLICATIONS : "receives"
 ```
 
 ## Detail Struktur Tabel
