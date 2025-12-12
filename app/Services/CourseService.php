@@ -35,7 +35,8 @@ class CourseService
         
         // Cache selama 10 menit (600 detik)
         return Cache::remember($cacheKey, 600, function () use ($filters, $perPage) {
-            $query = Course::query();
+            $query = Course::withCount('enrollments') // Hitung jumlah enrollment untuk popularity
+                ->withAvg('reviews', 'rating'); // Hitung rata-rata rating
 
             // Filter berdasarkan tipe
             if (!empty($filters['type'])) {
@@ -65,6 +66,14 @@ class CourseService
                       ->orWhere('description', 'like', "%{$search}%");
                 });
             }
+
+            // Sorting berdasarkan parameter
+            $sort = $filters['sort'] ?? 'latest';
+            match ($sort) {
+                'popular' => $query->orderByDesc('enrollments_count'),
+                'rating'  => $query->orderByDesc('reviews_avg_rating'),
+                default   => $query->latest(),
+            };
 
             return $query->paginate($perPage);
         });

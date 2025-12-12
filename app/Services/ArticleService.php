@@ -42,7 +42,14 @@ class ArticleService
             });
         }
 
-        return $query->latest()->paginate($perPage);
+        // Sorting berdasarkan parameter
+        $sort = $filters['sort'] ?? 'latest';
+        match ($sort) {
+            'oldest'  => $query->oldest(),
+            default   => $query->latest(),
+        };
+
+        return $query->paginate($perPage);
     }
 
     /**

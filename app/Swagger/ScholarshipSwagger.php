@@ -6,7 +6,7 @@ namespace App\Swagger;
  * @OA\Get(
  * path="/api/scholarships",
  * summary="Get all scholarships",
- * description="Get list of all available scholarships with filtering options",
+ * description="Get list of all available scholarships with filtering and sorting options",
  * operationId="getScholarships",
  * tags={"Scholarships"},
  * @OA\Parameter(
@@ -23,20 +23,56 @@ namespace App\Swagger;
  * required=false,
  * @OA\Schema(type="string")
  * ),
+ * @OA\Parameter(
+ * name="study_field",
+ * in="query",
+ * description="Filter by study field",
+ * required=false,
+ * @OA\Schema(type="string", example="Computer Science")
+ * ),
+ * @OA\Parameter(
+ * name="search",
+ * in="query",
+ * description="Search by name or description",
+ * required=false,
+ * @OA\Schema(type="string")
+ * ),
+ * @OA\Parameter(
+ * name="sort",
+ * in="query",
+ * description="Sort by: popular (by applications count), deadline, or latest",
+ * required=false,
+ * @OA\Schema(type="string", enum={"popular", "deadline", "latest"}, default="latest")
+ * ),
  * @OA\Response(
  * response=200,
  * description="Scholarships retrieved successfully",
  * @OA\JsonContent(
+ * @OA\Property(property="success", type="boolean", example=true),
+ * @OA\Property(property="message", type="string", example="Daftar beasiswa berhasil diambil"),
+ * @OA\Property(property="data", type="object",
+ * @OA\Property(property="current_page", type="integer", example=1),
  * @OA\Property(property="data", type="array",
  * @OA\Items(
  * @OA\Property(property="id", type="integer", example=1),
- * @OA\Property(property="name", type="string", example="LPDP Scholarship Program"),
- * @OA\Property(property="description", type="string", example="Beasiswa penuh untuk program master..."),
- * @OA\Property(property="benefit", type="string", example="Biaya kuliah penuh, biaya hidup..."),
+ * @OA\Property(property="organization_id", type="integer", example=1),
+ * @OA\Property(property="name", type="string", example="Beasiswa LPDP untuk Magister dan Doktor"),
+ * @OA\Property(property="description", type="string", example="Program beasiswa penuh dari pemerintah Indonesia untuk studi S2 dan S3 dalam dan luar negeri"),
+ * @OA\Property(property="benefit", type="string", example="Biaya pendidikan penuh, Biaya hidup bulanan, Asuransi kesehatan, Biaya keberangkatan"),
  * @OA\Property(property="location", type="string", example="Indonesia dan Luar Negeri"),
+ * @OA\Property(property="study_field", type="string", example="Semua bidang studi"),
  * @OA\Property(property="status", type="string", example="open"),
- * @OA\Property(property="deadline", type="string", format="date", example="2024-03-31")
+ * @OA\Property(property="deadline", type="string", format="date", example="2024-06-30"),
+ * @OA\Property(property="applications_count", type="integer", example=5, description="Number of applications received"),
+ * @OA\Property(property="organization", type="object",
+ * @OA\Property(property="id", type="integer", example=1),
+ * @OA\Property(property="name", type="string", example="Lembaga Pengelola Dana Pendidikan"),
+ * @OA\Property(property="email", type="string", example="info@lpdp.kemenkeu.go.id")
  * )
+ * )
+ * ),
+ * @OA\Property(property="per_page", type="integer", example=15),
+ * @OA\Property(property="total", type="integer", example=50)
  * )
  * )
  * )

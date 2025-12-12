@@ -6,7 +6,7 @@ namespace App\Swagger;
  * @OA\Get(
  *     path="/api/courses",
  *     summary="Get all courses",
- *     description="Get list of all available courses with pagination",
+ *     description="Get list of all available courses with filtering and sorting options",
  *     operationId="getCourses",
  *     tags={"Courses"},
  *     @OA\Parameter(
@@ -24,6 +24,13 @@ namespace App\Swagger;
  *         @OA\Schema(type="string", enum={"course", "bootcamp"})
  *     ),
  *     @OA\Parameter(
+ *         name="category",
+ *         in="query",
+ *         description="Filter by category",
+ *         required=false,
+ *         @OA\Schema(type="string", example="Programming")
+ *     ),
+ *     @OA\Parameter(
  *         name="access_type",
  *         in="query",
  *         description="Filter by access type",
@@ -37,25 +44,42 @@ namespace App\Swagger;
  *         required=false,
  *         @OA\Schema(type="string")
  *     ),
+ *     @OA\Parameter(
+ *         name="sort",
+ *         in="query",
+ *         description="Sort by: popular (by enrollments count), rating, or latest",
+ *         required=false,
+ *         @OA\Schema(type="string", enum={"popular", "rating", "latest"}, default="latest")
+ *     ),
  *     @OA\Response(
  *         response=200,
  *         description="Courses retrieved successfully",
  *         @OA\JsonContent(
- *             @OA\Property(property="data", type="array",
- *                 @OA\Items(
- *                     @OA\Property(property="id", type="integer", example=1),
- *                     @OA\Property(property="title", type="string", example="Full Stack Web Development Bootcamp"),
- *                     @OA\Property(property="image", type="string", example="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800"),
- *                     @OA\Property(property="description", type="string", example="Comprehensive bootcamp covering..."),
- *                     @OA\Property(property="type", type="string", example="bootcamp"),
- *                     @OA\Property(property="level", type="string", example="beginner"),
- *                     @OA\Property(property="instructor", type="string", example="Dr. Ahmad Syafiq"),
- *                     @OA\Property(property="duration", type="string", example="12 weeks"),
- *                     @OA\Property(property="price", type="number", format="float", example=2500000),
- *                     @OA\Property(property="access_type", type="string", example="premium"),
- *                     @OA\Property(property="video_url", type="string", example="https://youtube.com/embed/intro"),
- *                     @OA\Property(property="total_videos", type="integer", example=45)
- *                 )
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Daftar kursus berhasil diambil"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="current_page", type="integer", example=1),
+ *                 @OA\Property(property="data", type="array",
+ *                     @OA\Items(
+ *                         @OA\Property(property="id", type="integer", example=1),
+ *                         @OA\Property(property="title", type="string", example="Full Stack Web Development Bootcamp"),
+ *                         @OA\Property(property="image", type="string", example="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800"),
+ *                         @OA\Property(property="description", type="string", example="Bootcamp intensif 12 minggu yang mencakup frontend (HTML, CSS, JavaScript, React) dan backend (Node.js, Express, MongoDB/PostgreSQL)"),
+ *                         @OA\Property(property="type", type="string", example="bootcamp"),
+ *                         @OA\Property(property="level", type="string", example="beginner"),
+ *                         @OA\Property(property="category", type="string", example="Programming"),
+ *                         @OA\Property(property="instructor", type="string", example="Dr. Ahmad Syafiq"),
+ *                         @OA\Property(property="duration", type="string", example="12 weeks"),
+ *                         @OA\Property(property="price", type="number", format="float", example=2500000),
+ *                         @OA\Property(property="access_type", type="string", example="premium"),
+ *                         @OA\Property(property="video_url", type="string", example="https://youtube.com/embed/intro"),
+ *                         @OA\Property(property="total_videos", type="integer", example=45),
+ *                         @OA\Property(property="enrollments_count", type="integer", example=8, description="Number of students enrolled"),
+ *                         @OA\Property(property="reviews_avg_rating", type="number", format="float", example=4.75, description="Average rating from reviews")
+ *                     )
+ *                 ),
+ *                 @OA\Property(property="per_page", type="integer", example=15),
+ *                 @OA\Property(property="total", type="integer", example=25)
  *             )
  *         )
  *     )

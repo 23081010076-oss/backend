@@ -32,7 +32,8 @@ class ScholarshipService
         $cacheKey = 'scholarships:' . md5(json_encode($filters) . $perPage . request('page', 1));
         
         return Cache::remember($cacheKey, 600, function () use ($filters, $perPage) {
-            $query = Scholarship::with(['organization']);
+            $query = Scholarship::with(['organization'])
+                ->withCount('applications'); // Hitung jumlah aplikasi untuk popularity
 
             // Filter berdasarkan status
             if (!empty($filters['status'])) {
@@ -57,6 +58,14 @@ class ScholarshipService
                       ->orWhere('description', 'like', "%{$search}%");
                 });
             }
+
+            // Sorting berdasarkan parameter
+            $sort = $filters['sort'] ?? 'latest';
+            match ($sort) {
+                'popular'  => $query->orderByDesc('applications_count'),
+                'deadline' => $query->orderBy('deadline', 'asc'),
+                default    => $query->latest(),
+            };
 
             return $query->paginate($perPage);
         });
