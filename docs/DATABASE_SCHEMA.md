@@ -10,11 +10,124 @@ Berikut adalah visualisasi hubungan antar tabel utama dalam database.
 classDiagram
     direction TD
     
-    %% RELATIONS
-    USERS "1" --> "*" TRANSACTIONS : makes
+    namespace Auth_System {
+        class USERS {
+            +bigint id PK
+            +enum role
+            +string email
+            +string name
+            +json specialization
+        }
+        class PASSWORD_RESET_TOKENS {
+            +string email
+            +string token
+        }
+    }
+
+    namespace Learning_Management {
+        class COURSES {
+            +bigint id PK
+            +string title
+            +enum type
+            +decimal price
+        }
+        class COURSE_CURRICULUMS {
+            +bigint id PK
+            +string title
+            +int order
+        }
+        class ENROLLMENTS {
+            +bigint id PK
+            +int progress
+            +bool completed
+        }
+        class CURRICULUM_PROGRESS {
+            +bool completed
+            +timestamp completed_at
+        }
+    }
+
+    namespace Mentoring_System {
+        class MENTORING_SESSIONS {
+            +bigint id PK
+            +datetime schedule
+            +enum status
+        }
+        class NEED_ASSESSMENTS {
+            +json form_data
+        }
+        class COACHING_FILES {
+            +string file_path
+        }
+    }
+
+    namespace Scholarship_Center {
+        class SCHOLARSHIPS {
+            +bigint id PK
+            +string name
+            +date deadline
+            +enum status
+        }
+        class SCHOLARSHIP_APPLICATIONS {
+            +bigint id PK
+            +enum status
+            +string cv_path
+        }
+    }
+
+    namespace Finance {
+        class TRANSACTIONS {
+            +bigint id PK
+            +decimal amount
+            +enum status
+            +string type
+        }
+        class SUBSCRIPTIONS {
+            +bigint id PK
+            +string plan
+            +enum status
+            +date end_date
+        }
+    }
+
+    namespace Portfolio_Profile {
+        class EXPERIENCES {
+            +string title
+            +string company
+        }
+        class ACHIEVEMENTS {
+            +string title
+            +year year
+        }
+        class ORGANIZATIONS {
+            +string name
+            +string role
+        }
+    }
+
+    namespace Content_General {
+        class ARTICLES {
+            +bigint id PK
+            +string title
+        }
+        class REVIEWS {
+            +bigint id PK
+            +int rating
+            +text comment
+        }
+        class CORPORATE_CONTACTS {
+            +bigint id PK
+            +string email
+            +text message
+        }
+    }
+
+    %% RELATIONSHIPS
+    %% User Core Relations
     USERS "1" --> "*" ENROLLMENTS : enrolls in
-    USERS "1" --> "*" MENTORING_SESSIONS : participates
+    USERS "1" --> "*" TRANSACTIONS : makes
     USERS "1" --> "*" SUBSCRIPTIONS : has
+    USERS "1" --> "*" MENTORING_SESSIONS : participates
     USERS "1" --> "*" SCHOLARSHIP_APPLICATIONS : applies
     USERS "1" --> "*" EXPERIENCES : has
     USERS "1" --> "*" ACHIEVEMENTS : has
@@ -22,125 +135,18 @@ classDiagram
     USERS "1" --> "*" ARTICLES : writes
     USERS "1" --> "*" REVIEWS : writes
 
-    COURSES "1" --> "*" COURSE_CURRICULUMS : contains
+    %% Module Internal Relations
+    COURSES "1" *-- "*" COURSE_CURRICULUMS : contains
     COURSES "1" --> "*" ENROLLMENTS : has students
-
-    ENROLLMENTS "1" --> "*" CURRICULUM_PROGRESS : tracks
+    ENROLLMENTS "1" *-- "*" CURRICULUM_PROGRESS : tracks
     COURSE_CURRICULUMS "1" --> "*" CURRICULUM_PROGRESS : completed in
 
-    MENTORING_SESSIONS "1" --> "*" NEED_ASSESSMENTS : has
-    MENTORING_SESSIONS "1" --> "*" COACHING_FILES : has files
+    MENTORING_SESSIONS "1" *-- "*" NEED_ASSESSMENTS : has
+    MENTORING_SESSIONS "1" *-- "*" COACHING_FILES : has files
 
     SCHOLARSHIPS "1" --> "*" SCHOLARSHIP_APPLICATIONS : receives
-
-    %% TABLES
-    class USERS {
-        +bigint id (PK)
-        +string name
-        +string email
-        +enum role
-        +json specialization
-    }
     
-    class COURSES {
-        +bigint id (PK)
-        +string title
-        +string type
-        +decimal price
-        +string video_url
-    }
-
-    class TRANSACTIONS {
-        +bigint id (PK)
-        +bigint user_id (FK)
-        +string Code
-        +decimal amount
-        +string type
-    }
-
-    class ENROLLMENTS {
-        +bigint id (PK)
-        +bigint user_id (FK)
-        +bigint course_id (FK)
-        +int progress
-        +bool completed
-    }
-
-    class MENTORING_SESSIONS {
-        +bigint id (PK)
-        +bigint mentor_id (FK)
-        +datetime schedule
-        +string link
-        +enum status
-    }
-
-    class SCHOLARSHIPS {
-        +bigint id (PK)
-        +string name
-        +date deadline
-        +enum status
-    }
-
-    class SUBSCRIPTIONS {
-        +bigint id (PK)
-        +string plan
-        +date end_date
-        +enum status
-    }
-    
-    class COURSE_CURRICULUMS {
-        +bigint id
-        +string title
-        +int order
-    }
-
-    class SCHOLARSHIP_APPLICATIONS {
-        +bigint id
-        +enum status
-    }
-    
-    class ARTICLES {
-        +bigint id
-        +string title
-    }
-    
-    class REVIEWS {
-        +bigint id
-        +int rating
-        +text comment
-    }
-    
-    class EXPERIENCES {
-        +string title
-        +string company
-    }
-    
-    class ACHIEVEMENTS {
-        +string title
-        +year year
-    }
-    
-    class ORGANIZATIONS {
-        +string name
-        +string role
-    }
-    
-    class COACHING_FILES {
-        +string file_path
-    }
-    
-    class NEED_ASSESSMENTS {
-        +json form_data
-    }
-    
-    class CURRICULUM_PROGRESS {
-        +bool completed
-    }
-    
-    class PASSWORD_RESET_TOKENS {
-        +string email
-        +string token
-    }
+    ORGANIZATIONS "1" --> "*" CORPORATE_CONTACTS : may have
 ```
 
 ## Detail Struktur Tabel
