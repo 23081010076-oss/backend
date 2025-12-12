@@ -12,15 +12,11 @@ namespace App\Swagger;
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
- *             required={"name","email","password","password_confirmation","role"},
+ *             required={"name","email","password","password_confirmation"},
  *             @OA\Property(property="name", type="string", example="John Doe"),
  *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
  *             @OA\Property(property="password", type="string", format="password", example="password123"),
- *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123"),
- *             @OA\Property(property="role", type="string", enum={"student", "mentor", "corporate"}, example="student"),
- *             @OA\Property(property="phone", type="string", example="08123456789"),
- *             @OA\Property(property="gender", type="string", enum={"male", "female", "other"}, example="male"),
- *             @OA\Property(property="birth_date", type="string", format="date", example="2000-01-15")
+ *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123")
  *         )
  *     ),
  *     @OA\Response(

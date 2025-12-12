@@ -20,9 +20,9 @@ use App\Http\Requests\Scholarship\ApplyScholarshipRequest;
  * ==========================================================================
  * SCHOLARSHIP CONTROLLER (Controller untuk Beasiswa)
  * ==========================================================================
- * 
+ *
  * FUNGSI: Mengelola beasiswa dan lamaran beasiswa.
- * 
+ *
  * STRUKTUR CLEAN CODE:
  * - Controller  : Hanya handle request/response (file ini)
  * - Service     : Business logic → app/Services/ScholarshipService.php
@@ -58,7 +58,7 @@ class ScholarshipController extends Controller
     public function index(Request $request): JsonResponse
     {
         $scholarships = $this->scholarshipService->getScholarships($request->all());
-
+        
         return $this->paginatedResponse($scholarships, 'Daftar beasiswa berhasil diambil');
     }
 
@@ -80,7 +80,7 @@ class ScholarshipController extends Controller
 
     /**
      * Tambah beasiswa baru
-     * 
+     *
      * Validasi di: app/Http/Requests/Scholarship/StoreScholarshipRequest.php
      */
     public function store(StoreScholarshipRequest $request): JsonResponse
@@ -98,7 +98,7 @@ class ScholarshipController extends Controller
 
     /**
      * Update beasiswa
-     * 
+     *
      * Validasi di: app/Http/Requests/Scholarship/UpdateScholarshipRequest.php
      */
     public function update(UpdateScholarshipRequest $request, int $id): JsonResponse
@@ -139,7 +139,7 @@ class ScholarshipController extends Controller
 
     /**
      * Melamar beasiswa
-     * 
+     *
      * Validasi di: app/Http/Requests/Scholarship/ApplyScholarshipRequest.php
      */
     public function apply(ApplyScholarshipRequest $request, int $id): JsonResponse

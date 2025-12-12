@@ -18,6 +18,8 @@ class Scholarship extends Model
         'location',
         'status',
         'deadline',
+        'is_recommended',
+        'image',
         'study_field',
         'funding_amount',
         'requirements',

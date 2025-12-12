@@ -18,9 +18,12 @@ return new class extends Migration
             $table->string('provider_id')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->text('image')->nullable();
             $table->text('benefit')->nullable();
             $table->string('location')->nullable();
             $table->enum('status', ['open', 'coming_soon', 'closed'])->default('open');
+            $table->boolean('is_recommended')->default(false);
+            $table->string('study_field')->nullable();
             $table->date('deadline')->nullable();
             $table->timestamps();
         });
