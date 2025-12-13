@@ -29,14 +29,11 @@ class UpdateMentoringSessionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'session_date' => 'sometimes|date|after:now',
-            'duration'     => 'sometimes|integer|min:30|max:180',
-            'topic'        => 'sometimes|string|max:255',
-            'notes'        => 'nullable|string',
-            'status'       => 'sometimes|in:pending,confirmed,completed,cancelled',
-            'meeting_url'  => 'nullable|url',
-            'session_type' => 'nullable|in:online,offline',
-            'location'     => 'nullable|string|max:255',
+            'schedule'       => 'sometimes|date|after:now',
+            'meeting_link'   => 'nullable|url',
+            'payment_method' => 'nullable|in:manual,bank_transfer',
+            'status'         => 'sometimes|in:pending,completed,refunded,scheduled,cancelled',
+            'type'           => 'sometimes|in:academic,life_plan',
         ];
     }
 
@@ -46,16 +43,12 @@ class UpdateMentoringSessionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'session_date.date'  => 'Format tanggal tidak valid',
-            'session_date.after' => 'Tanggal sesi harus di masa depan',
-            'duration.integer'   => 'Durasi harus berupa angka',
-            'duration.min'       => 'Durasi minimal 30 menit',
-            'duration.max'       => 'Durasi maksimal 180 menit (3 jam)',
-            'topic.max'          => 'Topik maksimal 255 karakter',
-            'status.in'          => 'Status harus pending, confirmed, completed, atau cancelled',
-            'meeting_url.url'    => 'Format URL meeting tidak valid',
-            'session_type.in'    => 'Jenis sesi harus online atau offline',
-            'location.max'       => 'Lokasi maksimal 255 karakter',
+            'schedule.date'       => 'Format tanggal tidak valid',
+            'schedule.after'      => 'Jadwal sesi harus di masa depan',
+            'meeting_link.url'    => 'Format URL meeting tidak valid',
+            'payment_method.in'   => 'Metode pembayaran tidak valid (manual atau bank_transfer)',
+            'status.in'           => 'Status harus pending, completed, refunded, scheduled, atau cancelled',
+            'type.in'             => 'Jenis sesi harus academic atau life_plan',
         ];
     }
 }

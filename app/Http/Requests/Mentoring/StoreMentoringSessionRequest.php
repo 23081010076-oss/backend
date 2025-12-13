@@ -41,7 +41,7 @@ class StoreMentoringSessionRequest extends FormRequest
             // FIELD OPSIONAL
             'schedule'       => 'nullable|date|after:now',
             'meeting_link'   => 'nullable|url',
-            'payment_method' => 'nullable|in:qris,bank,va,manual',
+            'payment_method' => 'nullable|in:manual,bank_transfer',
         ];
     }
 

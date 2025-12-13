@@ -40,6 +40,11 @@ class MentoringService
             $query->where('status', $filters['status']);
         }
 
+        // Filter berdasarkan tipe (academic/life_plan)
+        if (!empty($filters['type'])) {
+            $query->where('type', $filters['type']);
+        }
+
         return $query->orderBy('schedule', 'desc')->paginate($perPage);
     }
 

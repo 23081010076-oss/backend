@@ -35,16 +35,14 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 |
 */
 
-// ==========================================================================
+
 // WEBHOOK ROUTES (Public - untuk callback dari payment gateway)
-// ==========================================================================
+
 
 // Route::post('/midtrans/webhook', [MidtransWebhookController::class, 'handleNotification'])
 //    ->name('midtrans.webhook');
 
-// ==========================================================================
 // PUBLIC ROUTES (Tanpa Autentikasi)
-// ==========================================================================
 
 // Authentication
 Route::post('/register', [AuthController::class, 'register'])
@@ -77,15 +75,13 @@ Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index'
 Route::post('/corporate-contact', [CorporateContactController::class, 'store'])
     ->name('corporate-contact.store');
 
-// ==========================================================================
 // PROTECTED ROUTES (Butuh Autentikasi)
-// ==========================================================================
 
 Route::middleware('auth:api')->group(function () {
 
-    // ======================================================================
+    
     // AUTH & PROFILE MANAGEMENT
-    // ======================================================================
+    
     Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/me', [AuthController::class, 'me'])->name('me');
@@ -104,9 +100,9 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/activity-history', [AuthController::class, 'activityHistory'])->name('activity-history');
     });
 
-    // ======================================================================
+    
     // USER MANAGEMENT (Admin Only)
-    // ======================================================================
+    
     Route::middleware('role:admin')->prefix('admin/users')->name('admin.users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::post('/', [UserController::class, 'store'])->name('store');
@@ -120,9 +116,9 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/{id}/activate', [UserController::class, 'activate'])->name('activate');
     });
 
-    // ======================================================================
+    
     // PORTFOLIO: ACHIEVEMENTS, EXPERIENCES, ORGANIZATIONS
-    // ======================================================================
+    
     Route::apiResource('achievements', AchievementController::class);
     Route::match(['post', 'put'], '/achievements/{id}/certificate', [AchievementController::class, 'uploadCertificate'])
         ->middleware('throttle:uploads')
@@ -146,21 +142,21 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/organizations/{id}/logo', [OrganizationController::class, 'deleteLogo'])
         ->name('organizations.delete-logo');
 
-    // ======================================================================
+    
     // SUBSCRIPTIONS
-    // ======================================================================
+    
     Route::apiResource('subscriptions', SubscriptionController::class);
     Route::post('/subscriptions/{id}/upgrade', [SubscriptionController::class, 'upgrade'])
         ->name('subscriptions.upgrade');
 
-    // ======================================================================
+    
     // REVIEWS
-    // ======================================================================
+    
     Route::apiResource('reviews', ReviewController::class)->only(['store', 'show', 'update', 'destroy']);
 
-    // ======================================================================
+    
     // COURSES & ENROLLMENT
-    // ======================================================================
+    
     // Course CRUD (Admin Only)
     Route::middleware('role:admin')->group(function () {
         Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
@@ -191,15 +187,15 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/enrollments/{id}/progress', [EnrollmentController::class, 'updateProgress'])
         ->name('enrollments.update-progress');
     
-    // ✅ NEW: Curriculum Progress Tracking
+    // NEW: Curriculum Progress Tracking
     Route::get('/courses/{courseId}/progress', [App\Http\Controllers\Api\CurriculumProgressController::class, 'index'])
         ->name('curriculum.progress.index');
     Route::post('/curriculums/{curriculumId}/complete', [App\Http\Controllers\Api\CurriculumProgressController::class, 'markCompleted'])
         ->name('curriculum.progress.complete');
 
-    // ======================================================================
+    
     // SCHOLARSHIPS
-    // ======================================================================
+    
     // Scholarship CRUD (Admin/Corporate)
     Route::middleware('role:admin,corporate')->group(function () {
         Route::post('/scholarships', [ScholarshipController::class, 'store'])->name('scholarships.store');
@@ -214,9 +210,9 @@ Route::middleware('auth:api')->group(function () {
         ->middleware('role:admin,corporate')
         ->name('scholarship-applications.update-status');
 
-    // ======================================================================
+    
     // MENTORING SESSIONS
-    // ======================================================================
+    
     Route::apiResource('mentoring-sessions', MentoringSessionController::class);
     Route::get('/mentoring-sessions/{mentorId}/schedule', [MentoringSessionController::class, 'schedule'])
         ->name('mentoring-sessions.schedule');
@@ -256,9 +252,9 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/', [CoachingFileController::class, 'destroyAll'])->name('destroy-all');
     });
 
-    // ======================================================================
+    
     // ARTICLES (Admin/Corporate)
-    // ======================================================================
+    
     Route::middleware('role:admin,corporate')->group(function () {
         Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
         Route::put('/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
@@ -269,9 +265,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/articles/popular', [ArticleController::class, 'popular'])->name('articles.popular');
     Route::get('/articles/category/{category}', [ArticleController::class, 'byCategory'])->name('articles.by-category');
 
-    // ======================================================================
+    
     // CORPORATE CONTACT MANAGEMENT (Admin Only)
-    // ======================================================================
+    
     Route::middleware('role:admin')->prefix('corporate-contacts')->name('corporate-contacts.')->group(function () {
         Route::get('/', [CorporateContactController::class, 'index'])->name('index');
         Route::get('/statistics', [CorporateContactController::class, 'statistics'])->name('statistics');
@@ -281,9 +277,9 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/{id}', [CorporateContactController::class, 'destroy'])->name('destroy');
     });
 
-    // ======================================================================
+    
     // TRANSACTIONS
-    // ======================================================================
+    
     Route::prefix('transactions')->name('transactions.')->group(function () {
         Route::get('/', [TransactionController::class, 'index'])->name('index');
 
