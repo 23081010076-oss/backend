@@ -7,75 +7,25 @@
 
 ### **Kegiatan Utama:**
 
-#### **1. Authentication & Authorization System**
-- Implementasi Google OAuth authentication dengan setup guide, controller, dan comprehensive tests
-- Pengembangan authorization policies untuk semua resources
-- Integrasi Midtrans payment gateway untuk transaction handling
-
-#### **2. Core API Development**
-- Implementasi core API endpoints dengan authentication dan data models
-- Pengembangan extensive API controllers, services, jobs, requests, dan policies
-- Pembuatan service layer untuk managing: achievements, articles, courses, experiences, mentoring, scholarships, transactions, dan users
-- Implementasi API management untuk organizations, subscriptions, reviews, dan enrollments
-
-#### **3. File Management & Upload System**
-- Implementasi certificate upload dan deletion functionality untuk achievements dan experiences
-- Implementasi logo upload dan deletion endpoints untuk organizations
-- Update API routes dan Postman collection
-
-#### **4. Database & Migration**
-- Membuat sessions table migration dengan necessary fields dan indexes
-- Fix AchievementController dan update seeder
-- Clean migrations untuk konsistensi database
-
-#### **5. Course Management System**
-- Implementasi Course Curriculum Management
-- Menambahkan image field ke courses dengan image handling di CourseService
-- Menambahkan routes untuk mentoring sessions dan mentor schedules
-- Course category implementation
-
-#### **6. Code Quality & Documentation**
-- Multiple refactoring sessions untuk improved code structure, readability, dan maintainability
-- Update AuthSwagger dengan example data yang lebih jelas
-- Merge conflict resolution di api-docs.json
-- Pembuatan Postman API test collection untuk student application flow
+| **No** | **Kategori** | **Detail Kegiatan** |
+|--------|--------------|---------------------|
+| 1 | **Authentication & Authorization** | • Implementasi Google OAuth authentication dengan setup guide, controller, dan comprehensive tests<br>• Pengembangan authorization policies untuk semua resources<br>• Integrasi Midtrans payment gateway untuk transaction handling |
+| 2 | **Core API Development** | • Implementasi core API endpoints dengan authentication dan data models<br>• Pengembangan extensive API controllers, services, jobs, requests, dan policies<br>• Pembuatan service layer untuk managing: achievements, articles, courses, experiences, mentoring, scholarships, transactions, dan users<br>• Implementasi API management untuk organizations, subscriptions, reviews, dan enrollments |
+| 3 | **File Management & Upload** | • Implementasi certificate upload dan deletion functionality untuk achievements dan experiences<br>• Implementasi logo upload dan deletion endpoints untuk organizations<br>• Update API routes dan Postman collection |
+| 4 | **Database & Migration** | • Membuat sessions table migration dengan necessary fields dan indexes<br>• Fix AchievementController dan update seeder<br>• Clean migrations untuk konsistensi database |
+| 5 | **Course Management** | • Implementasi Course Curriculum Management<br>• Menambahkan image field ke courses dengan image handling di CourseService<br>• Menambahkan routes untuk mentoring sessions dan mentor schedules<br>• Course category implementation |
+| 6 | **Code Quality & Documentation** | • Multiple refactoring sessions untuk improved code structure, readability, dan maintainability<br>• Update AuthSwagger dengan example data yang lebih jelas<br>• Merge conflict resolution di api-docs.json<br>• Pembuatan Postman API test collection untuk student application flow |
 
 ### **📊 Hasil & Deliverables Minggu 1:**
 
-✅ **Authentication System**
-- Google OAuth fully functional dengan login/logout flow
-- Authorization policies untuk role-based access control
-- Midtrans payment gateway terintegrasi
-
-✅ **API Endpoints** (Total: 50+ endpoints)
-- User Management APIs
-- Course Management APIs
-- Achievement & Experience APIs
-- Organization Management APIs
-- Subscription & Review APIs
-- Enrollment APIs
-- Mentoring Session APIs
-- Transaction APIs dengan Midtrans
-
-✅ **File Upload System**
-- Certificate upload/delete untuk achievements
-- Certificate upload/delete untuk experiences
-- Logo upload/delete untuk organizations
-- File validation dan storage management
-
-✅ **Database**
-- Sessions table migration
-- Course curriculum tables
-- Image fields untuk courses
-- Seeder updates untuk semua modules
-
-✅ **Documentation & Testing**
-- Postman collection dengan 50+ API requests
-- AuthSwagger documentation
-- Code structure lebih maintainable (multiple refactoring)
-- Comprehensive tests untuk authentication
-
-✅ **Code Commits:** 25+ commits
+| **Kategori** | **Deliverables** | **Metrics** |
+|--------------|------------------|-------------|
+| **Authentication System** | • Google OAuth fully functional<br>• Authorization policies<br>• Midtrans payment gateway | Login/logout flow, Role-based access control |
+| **API Endpoints** | • User Management<br>• Course Management<br>• Achievement & Experience<br>• Organization Management<br>• Subscription & Review<br>• Enrollment<br>• Mentoring Session<br>• Transaction APIs | **50+ endpoints** |
+| **File Upload System** | • Certificate upload/delete (achievements)<br>• Certificate upload/delete (experiences)<br>• Logo upload/delete (organizations) | File validation & storage management |
+| **Database** | • Sessions table migration<br>• Course curriculum tables<br>• Image fields untuk courses<br>• Seeder updates | Semua modules |
+| **Documentation & Testing** | • Postman collection<br>• AuthSwagger documentation<br>• Code refactoring<br>• Comprehensive tests | **50+ API requests**, Multiple refactoring sessions |
+| **Code Commits** | Git commits untuk semua perubahan | **25+ commits** |
 
 ---
 
@@ -83,102 +33,29 @@
 
 ### **Kegiatan Utama:**
 
-#### **1. Course Enrollment & Progress Tracking**
-- Implementasi course enrollment system dengan validation
-- Progress tracking untuk curriculum completion
-- Certificate auto-generation upon course completion
-- Update enrollment progress handling di CurriculumProgressController
-
-#### **2. Review & Rating System**
-- Implementasi course review access validation
-- Menambahkan average rating dan total reviews ke Course model
-- Curriculum progress tracking endpoints
-- Enhanced Course dan Review functionality dengan summary dan user data
-
-#### **3. Automated Jobs & Background Processing**
-- Job untuk auto-expiring subscriptions
-- Job untuk auto-delete unpaid transactions
-- Certificate generation automation
-- Transaction item transformation di TransactionController
-
-#### **4. Payment & Transaction System**
-- Refactoring payment processing untuk robustness
-- Update transaction handling logic
-- Enhanced TransactionSeeder untuk link transactions ke courses dan subscriptions
-- TransactionResource untuk detailed transaction responses
-
-#### **5. Data Management & Seeding**
-- Update CourseSeeder dengan video URLs dan durations
-- Modify MentoringSessionSeeder payment methods
-- Update education level options di UpdateProfileRequest
-- Enhanced Scholarship model dan controller dengan new fields
-
-#### **6. Comprehensive Documentation**
-- Database schema documentation dengan ERD dan detailed table structures
-- Comprehensive API documentation untuk Student App
-- API response examples documentation
-- User flow documentation di README
-- Application architecture dan flows documentation
-- Scholarship Portal flow documentation
-- Laravel backend implementation report
-
-#### **7. Advanced Features**
-- Implementasi sorting dan filtering options untuk articles, courses, dan scholarships
-- Mentoring session management dengan dedicated requests, service, routes, dan API flow
-- Profile update functionality improvements
-- Performance optimization
+| **No** | **Kategori** | **Detail Kegiatan** |
+|--------|--------------|---------------------|
+| 1 | **Course Enrollment & Progress** | • Implementasi course enrollment system dengan validation<br>• Progress tracking untuk curriculum completion<br>• Certificate auto-generation upon course completion<br>• Update enrollment progress handling di CurriculumProgressController |
+| 2 | **Review & Rating System** | • Implementasi course review access validation<br>• Menambahkan average rating dan total reviews ke Course model<br>• Curriculum progress tracking endpoints<br>• Enhanced Course dan Review functionality dengan summary dan user data |
+| 3 | **Automated Jobs & Background** | • Job untuk auto-expiring subscriptions<br>• Job untuk auto-delete unpaid transactions<br>• Certificate generation automation<br>• Transaction item transformation di TransactionController |
+| 4 | **Payment & Transaction** | • Refactoring payment processing untuk robustness<br>• Update transaction handling logic<br>• Enhanced TransactionSeeder untuk link transactions ke courses dan subscriptions<br>• TransactionResource untuk detailed transaction responses |
+| 5 | **Data Management & Seeding** | • Update CourseSeeder dengan video URLs dan durations<br>• Modify MentoringSessionSeeder payment methods<br>• Update education level options di UpdateProfileRequest<br>• Enhanced Scholarship model dan controller dengan new fields |
+| 6 | **Comprehensive Documentation** | • Database schema documentation dengan ERD dan detailed table structures<br>• Comprehensive API documentation untuk Student App<br>• API response examples documentation<br>• User flow documentation di README<br>• Application architecture dan flows documentation<br>• Scholarship Portal flow documentation<br>• Laravel backend implementation report |
+| 7 | **Advanced Features** | • Implementasi sorting dan filtering options untuk articles, courses, dan scholarships<br>• Mentoring session management dengan dedicated requests, service, routes, dan API flow<br>• Profile update functionality improvements<br>• Performance optimization |
 
 ### **📊 Hasil & Deliverables Minggu 2:**
 
-✅ **Course Enrollment System**
-- Complete enrollment flow dengan validation
-- Progress tracking per curriculum item
-- Completion percentage calculation
-- Certificate auto-generation system
-
-✅ **Review & Rating Features**
-- Review submission dengan access control
-- Average rating calculation
-- Total reviews counter
-- Review listing dengan pagination
-
-✅ **Automated Jobs** (Laravel Queue)
-- `ExpireSubscriptionsJob` - Auto-expire subscriptions setelah periode berakhir
-- `DeleteUnpaidTransactionsJob` - Auto-delete unpaid transactions setelah timeout
-- `GenerateCertificateJob` - Auto-generate certificates saat course completion
-
-✅ **Payment System Enhancement**
-- Robust payment processing dengan error handling
-- Transaction status tracking
-- Payment method validation
-- Midtrans webhook handling
-
-✅ **Sorting & Filtering**
-- Articles: by date, popularity, category
-- Courses: by rating, price, difficulty, category
-- Scholarships: by deadline, amount, type
-
-✅ **Mentoring Session Management**
-- Session booking system
-- Schedule management
-- Payment integration
-- Session completion tracking
-
-✅ **Comprehensive Documentation**
-- **Database Schema**: ERD diagram + 20+ table descriptions
-- **API Documentation**: 100+ endpoint documentation
-- **API Response Examples**: Request/response untuk semua endpoints
-- **User Flows**: 10+ user flow diagrams
-- **Application Architecture**: System design documentation
-- **Technical Report**: Laravel backend implementation details
-
-✅ **Enhanced Features**
-- Profile management dengan education levels
-- Scholarship portal dengan advanced fields
-- Video URLs untuk course previews
-- Image handling untuk courses
-
-✅ **Code Commits:** 30+ commits
+| **Kategori** | **Deliverables** | **Metrics/Details** |
+|--------------|------------------|---------------------|
+| **Course Enrollment System** | • Complete enrollment flow dengan validation<br>• Progress tracking per curriculum item<br>• Completion percentage calculation<br>• Certificate auto-generation system | Full enrollment lifecycle |
+| **Review & Rating Features** | • Review submission dengan access control<br>• Average rating calculation<br>• Total reviews counter<br>• Review listing dengan pagination | User feedback system |
+| **Automated Jobs** | • `ExpireSubscriptionsJob`<br>• `DeleteUnpaidTransactionsJob`<br>• `GenerateCertificateJob` | Laravel Queue background processing |
+| **Payment System** | • Robust payment processing<br>• Transaction status tracking<br>• Payment method validation<br>• Midtrans webhook handling | Enhanced error handling |
+| **Sorting & Filtering** | • Articles: by date, popularity, category<br>• Courses: by rating, price, difficulty, category<br>• Scholarships: by deadline, amount, type | Multi-criteria filtering |
+| **Mentoring Session** | • Session booking system<br>• Schedule management<br>• Payment integration<br>• Session completion tracking | Complete mentoring flow |
+| **Documentation** | • Database Schema (ERD + 20+ tables)<br>• API Documentation (100+ endpoints)<br>• API Response Examples (50+ examples)<br>• User Flows (10+ diagrams)<br>• Application Architecture<br>• Technical Report | **Comprehensive documentation** |
+| **Enhanced Features** | • Profile management (education levels)<br>• Scholarship portal (advanced fields)<br>• Video URLs (course previews)<br>• Image handling (courses) | UX improvements |
+| **Code Commits** | Git commits untuk semua perubahan | **30+ commits** |
 
 ---
 
