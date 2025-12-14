@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Cache;
  * ==========================================================================
  * SCHOLARSHIP SERVICE (Service untuk Beasiswa)
  * ==========================================================================
- * 
+ *
  * FUNGSI: Menangani logika bisnis untuk beasiswa dan lamaran.
- * 
+ *
  * KENAPA PAKAI SERVICE?
  * - Logika upload file dokumen terpusat
  * - Validasi bisnis ada di sini
@@ -30,7 +30,7 @@ class ScholarshipService
     {
         // Generate cache key berdasarkan filter
         $cacheKey = 'scholarships:' . md5(json_encode($filters) . $perPage . request('page', 1));
-        
+
         return Cache::remember($cacheKey, 600, function () use ($filters, $perPage) {
             $query = Scholarship::with(['organization'])
                 ->withCount('applications'); // Hitung jumlah aplikasi untuk popularity
@@ -38,6 +38,11 @@ class ScholarshipService
             // Filter berdasarkan status
             if (!empty($filters['status'])) {
                 $query->where('status', $filters['status']);
+            }
+
+             // Filter recommended
+            if (!empty($filters['is_recommended'])) {
+                $query->where('is_recommended', $filters['is_recommended'] === 'true' || $filters['is_recommended'] === '1');
             }
 
             // Filter berdasarkan lokasi
@@ -77,10 +82,10 @@ class ScholarshipService
     public function createScholarship(array $data): Scholarship
     {
         $scholarship = Scholarship::create($data);
-        
+
         // Clear cache setelah create
         $this->clearCache();
-        
+
         return $scholarship->load('organization');
     }
 
@@ -90,10 +95,10 @@ class ScholarshipService
     public function updateScholarship(Scholarship $scholarship, array $data): Scholarship
     {
         $scholarship->update($data);
-        
+
         // Clear cache setelah update
         $this->clearCache();
-        
+
         return $scholarship->fresh()->load('organization');
     }
 
@@ -103,16 +108,16 @@ class ScholarshipService
     public function deleteScholarship(Scholarship $scholarship): bool
     {
         $result = $scholarship->delete();
-        
+
         // Clear cache setelah delete
         $this->clearCache();
-        
+
         return $result;
     }
 
     /**
      * Lamar beasiswa
-     * 
+     *
      * @throws \Exception jika validasi gagal
      */
     public function applyScholarship(Scholarship $scholarship, User $user, array $files = []): ScholarshipApplication
@@ -172,7 +177,7 @@ class ScholarshipService
     public function updateApplicationStatus(ScholarshipApplication $application, string $status): ScholarshipApplication
     {
         $application->update(['status' => $status]);
-        
+
         return $application->fresh();
     }
 
