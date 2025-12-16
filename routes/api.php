@@ -67,6 +67,8 @@ Route::get('/scholarships', [ScholarshipController::class, 'index'])->name('scho
 Route::get('/scholarships/{id}', [ScholarshipController::class, 'show'])->name('scholarships.show');
 
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
+Route::get('/articles/popular', [ArticleController::class, 'popular'])->name('articles.popular');
+Route::get('/articles/category/{category}', [ArticleController::class, 'byCategory'])->name('articles.by-category');
 Route::get('/articles/{id}', [ArticleController::class, 'show'])->name('articles.show');
 
 Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
@@ -260,10 +262,6 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
         Route::delete('/articles/{id}', [ArticleController::class, 'destroy'])->name('articles.destroy');
     });
-
-    // Article additional routes (authenticated)
-    Route::get('/articles/popular', [ArticleController::class, 'popular'])->name('articles.popular');
-    Route::get('/articles/category/{category}', [ArticleController::class, 'byCategory'])->name('articles.by-category');
 
     
     // CORPORATE CONTACT MANAGEMENT (Admin Only)

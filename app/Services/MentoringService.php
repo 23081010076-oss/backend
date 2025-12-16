@@ -28,8 +28,10 @@ class MentoringService
     {
         $query = MentoringSession::with(['member', 'mentor']);
 
-        // Filter berdasarkan role user
-        if ($user->role === 'mentor') {
+        // Admin bisa lihat semua, mentor/student hanya sesi mereka
+        if ($user->role === 'admin') {
+            // Admin sees all sessions
+        } elseif ($user->role === 'mentor') {
             $query->where('mentor_id', $user->id);
         } else {
             $query->where('member_id', $user->id);

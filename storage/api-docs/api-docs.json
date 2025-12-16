@@ -269,18 +269,24 @@
                     "Articles"
                 ],
                 "summary": "Get popular articles",
-                "description": "Get list of most popular articles",
+                "description": "Get list of most popular articles (Public)",
                 "operationId": "getPopularArticles",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Jumlah artikel",
+                        "schema": {
+                            "type": "integer",
+                            "default": 5
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Popular articles retrieved successfully"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/articles/category/{category}": {
@@ -289,7 +295,7 @@
                     "Articles"
                 ],
                 "summary": "Get articles by category",
-                "description": "Get list of articles filtered by category",
+                "description": "Get list of articles filtered by category (Public)",
                 "operationId": "getArticlesByCategory",
                 "parameters": [
                     {
@@ -312,12 +318,7 @@
                     "200": {
                         "description": "Articles retrieved successfully"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/register": {
@@ -3379,20 +3380,19 @@
                 ]
             }
         },
-        "/api/mentoring-sessions": {
+        "/api/my-mentoring-sessions": {
             "get": {
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Get All Mentoring Sessions",
-                "description": "Get all mentoring sessions for authenticated user",
-                "operationId": "getAllMentoringSessions",
+                "summary": "Lihat sesi mentoring saya",
+                "description": "Student/Mentor dapat melihat semua sesi mentoring mereka (baik sebagai student maupun mentor)",
+                "operationId": "getMyMentoringSessions",
                 "parameters": [
                     {
                         "name": "status",
                         "in": "query",
                         "description": "Filter by status",
-                        "required": false,
                         "schema": {
                             "type": "string",
                             "enum": [
@@ -3407,14 +3407,18 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Mentoring sessions retrieved successfully",
+                        "description": "Daftar sesi mentoring berhasil diambil",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Daftar sesi mentoring saya berhasil diambil"
                                         },
                                         "data": {
                                             "type": "array",
@@ -3429,7 +3433,70 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentoring-sessions": {
+            "get": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Lihat semua sesi mentoring",
+                "description": "Mentor/Admin dapat melihat semua sesi mentoring",
+                "operationId": "getAllMentoringSessions",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "scheduled",
+                                "ongoing",
+                                "completed",
+                                "cancelled"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar sesi mentoring",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MentoringSession"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -3442,11 +3509,10 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Create Mentoring Session",
-                "description": "Create a new mentoring session booking",
+                "summary": "Booking sesi mentoring baru",
+                "description": "Student membuat booking sesi mentoring dengan mentor. Status awal: pending",
                 "operationId": "createMentoringSession",
                 "requestBody": {
-                    "description": "Mentoring session data",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -3455,22 +3521,16 @@
                                     "mentor_id",
                                     "type",
                                     "payment_method",
-                                    "schedule",
-                                    "status"
+                                    "schedule"
                                 ],
                                 "properties": {
                                     "mentor_id": {
-                                        "description": "ID of the mentor",
+                                        "description": "ID mentor yang dipilih",
                                         "type": "integer",
                                         "example": 7
                                     },
-                                    "member_id": {
-                                        "description": "ID of the member (optional, defaults to authenticated user)",
-                                        "type": "integer",
-                                        "example": 4
-                                    },
                                     "type": {
-                                        "description": "Type of mentoring session",
+                                        "description": "Jenis mentoring: academic=bimbingan akademik, life_plan=perencanaan karir",
                                         "type": "string",
                                         "enum": [
                                             "academic",
@@ -3479,7 +3539,6 @@
                                         "example": "academic"
                                     },
                                     "payment_method": {
-                                        "description": "Payment method",
                                         "type": "string",
                                         "enum": [
                                             "qris",
@@ -3487,26 +3546,18 @@
                                             "credit_card",
                                             "e_wallet"
                                         ],
-                                        "example": "qris"
+                                        "example": "bank_transfer"
                                     },
                                     "schedule": {
-                                        "description": "Scheduled date and time",
+                                        "description": "Jadwal yang diinginkan",
                                         "type": "string",
                                         "format": "date-time",
                                         "example": "2025-12-20 10:00:00"
                                     },
-                                    "status": {
-                                        "description": "Initial status (always pending)",
-                                        "type": "string",
-                                        "enum": [
-                                            "pending"
-                                        ],
-                                        "example": "pending"
-                                    },
                                     "note": {
-                                        "description": "Additional notes",
+                                        "description": "Catatan/topik yang ingin dibahas",
                                         "type": "string",
-                                        "example": "Saya ingin konsultasi skripsi"
+                                        "example": "Saya butuh bimbingan untuk skripsi tentang machine learning"
                                     }
                                 },
                                 "type": "object"
@@ -3516,18 +3567,18 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Mentoring session created successfully",
+                        "description": "Booking berhasil dibuat, menunggu konfirmasi mentor",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
-                                        "message": {
+                                        "pesan": {
                                             "type": "string",
-                                            "example": "Mentoring session created successfully"
+                                            "example": "Sesi mentoring berhasil dibuat"
                                         },
                                         "data": {
                                             "$ref": "#/components/schemas/MentoringSession"
@@ -3539,27 +3590,7 @@
                         }
                     },
                     "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The given data was invalid."
-                                        },
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -3574,14 +3605,14 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Get Single Mentoring Session",
-                "description": "Get details of a specific mentoring session",
+                "summary": "Lihat detail sesi mentoring",
+                "description": "Lihat detail lengkap satu sesi mentoring termasuk meeting link",
                 "operationId": "getSingleMentoringSession",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Mentoring session ID",
+                        "description": "ID Sesi Mentoring",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -3590,12 +3621,12 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Mentoring session details retrieved",
+                        "description": "Detail sesi berhasil diambil",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
@@ -3609,24 +3640,7 @@
                         }
                     },
                     "404": {
-                        "description": "Mentoring session not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Mentoring session not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Sesi tidak ditemukan"
                     }
                 },
                 "security": [
@@ -3639,8 +3653,8 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Update Mentoring Session",
-                "description": "Update an existing mentoring session",
+                "summary": "Update detail sesi",
+                "description": "Update jadwal, meeting link, atau catatan sesi",
                 "operationId": "updateMentoringSession",
                 "parameters": [
                     {
@@ -3664,11 +3678,11 @@
                                     },
                                     "meeting_link": {
                                         "type": "string",
-                                        "example": "https://zoom.us/j/123456789"
+                                        "example": "https://meet.google.com/abc-defg-hij"
                                     },
                                     "note": {
                                         "type": "string",
-                                        "example": "Updated notes"
+                                        "example": "Reschedule karena ada keperluan"
                                     }
                                 },
                                 "type": "object"
@@ -3678,10 +3692,10 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Session updated successfully"
+                        "description": "Sesi berhasil diupdate"
                     },
                     "404": {
-                        "description": "Session not found"
+                        "description": "Sesi tidak ditemukan"
                     }
                 },
                 "security": [
@@ -3694,14 +3708,13 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Delete Mentoring Session",
-                "description": "Delete a mentoring session",
+                "summary": "Hapus sesi mentoring",
+                "description": "Hapus atau batalkan sesi mentoring",
                 "operationId": "deleteMentoringSession",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Mentoring session ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -3710,253 +3723,13 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Session deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Mentoring session deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Sesi berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Tidak punya akses"
                     },
                     "404": {
-                        "description": "Session not found"
-                    },
-                    "403": {
-                        "description": "Not authorized to delete this session"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/mentoring-sessions/{id}/schedule": {
-            "post": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "Schedule Mentoring Session",
-                "description": "Endpoint for Mentor to set schedule and meeting link",
-                "operationId": "scheduleMentoringSession",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Mentoring session ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Schedule and meeting link data",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "schedule",
-                                    "meeting_link"
-                                ],
-                                "properties": {
-                                    "schedule": {
-                                        "description": "Format: YYYY-MM-DD HH:MM:SS",
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-12-15 14:00:00"
-                                    },
-                                    "meeting_link": {
-                                        "description": "Zoom/Google Meet link",
-                                        "type": "string",
-                                        "example": "https://zoom.us/j/123456789"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Schedule updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Mentoring session scheduled successfully"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/MentoringSession"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Unauthorized - User is not mentor or not owner of session",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Only mentors can schedule sessions"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Mentoring session not found"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/mentoring-sessions/{id}/status": {
-            "put": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "Update Session Status",
-                "description": "Update mentoring session status (Mentor only)",
-                "operationId": "updateSessionStatus",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Mentoring session ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Status update data",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "status"
-                                ],
-                                "properties": {
-                                    "status": {
-                                        "description": "New status for the session",
-                                        "type": "string",
-                                        "enum": [
-                                            "pending",
-                                            "scheduled",
-                                            "ongoing",
-                                            "completed",
-                                            "cancelled"
-                                        ],
-                                        "example": "completed"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Status updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Session status updated successfully"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/MentoringSession"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Only mentors can update status"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/my-mentoring-sessions": {
-            "get": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "Get My Mentoring Sessions",
-                "description": "Get all mentoring sessions for the authenticated user (as mentor or member)",
-                "operationId": "getMyMentoringSessions",
-                "responses": {
-                    "200": {
-                        "description": "My mentoring sessions retrieved",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/MentoringSession"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Sesi tidak ditemukan"
                     }
                 },
                 "security": [
@@ -3971,8 +3744,8 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Submit Mentoring Feedback",
-                "description": "Submit feedback for a completed mentoring session",
+                "summary": "Beri feedback setelah sesi selesai",
+                "description": "Student memberikan rating dan feedback setelah sesi mentoring selesai (status: completed)",
                 "operationId": "submitMentoringFeedback",
                 "parameters": [
                     {
@@ -3994,14 +3767,16 @@
                                 ],
                                 "properties": {
                                     "rating": {
+                                        "description": "Rating 1-5 bintang",
                                         "type": "integer",
                                         "maximum": 5,
                                         "minimum": 1,
                                         "example": 5
                                     },
                                     "comment": {
+                                        "description": "Komentar feedback",
                                         "type": "string",
-                                        "example": "Very helpful session!"
+                                        "example": "Mentornya sangat membantu dan sabar menjelaskan!"
                                     }
                                 },
                                 "type": "object"
@@ -4011,30 +3786,13 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Feedback submitted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Feedback berhasil disimpan"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Feedback berhasil dikirim"
                     },
-                    "403": {
-                        "description": "Session must be completed to give feedback"
+                    "400": {
+                        "description": "Sesi belum selesai (harus status: completed)"
                     },
                     "404": {
-                        "description": "Session not found"
+                        "description": "Sesi tidak ditemukan"
                     }
                 },
                 "security": [
@@ -4044,33 +3802,53 @@
                 ]
             }
         },
-        "/api/mentors/{id}/schedule": {
+        "/api/mentoring-sessions/{mentorId}/schedule": {
             "get": {
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Get Mentor Schedule",
-                "description": "Get available schedule of a specific mentor",
+                "summary": "Lihat jadwal mentor",
+                "description": "Lihat jadwal sesi yang sudah terbooking untuk mentor tertentu (untuk menghindari bentrok)",
                 "operationId": "getMentorSchedule",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "mentorId",
                         "in": "path",
-                        "description": "Mentor User ID",
+                        "description": "ID User Mentor",
                         "required": true,
                         "schema": {
                             "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "from_date",
+                        "in": "query",
+                        "description": "Filter dari tanggal",
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-01"
+                        }
+                    },
+                    {
+                        "name": "to_date",
+                        "in": "query",
+                        "description": "Filter sampai tanggal",
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-31"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Mentor schedule retrieved",
+                        "description": "Jadwal mentor berhasil diambil",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
@@ -4087,7 +3865,73 @@
                         }
                     },
                     "404": {
-                        "description": "Mentor not found"
+                        "description": "Mentor tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentoring-sessions/{id}/status": {
+            "put": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Update status sesi (Mentor only)",
+                "description": "Mentor mengubah status sesi mentoring. Contoh: pending ke scheduled (konfirmasi), scheduled ke completed (selesai)",
+                "operationId": "updateSessionStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "description": "Status baru",
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "scheduled",
+                                            "ongoing",
+                                            "completed",
+                                            "cancelled",
+                                            "refunded"
+                                        ],
+                                        "example": "scheduled"
+                                    },
+                                    "meeting_link": {
+                                        "description": "Link meeting (wajib jika status=scheduled)",
+                                        "type": "string",
+                                        "example": "https://zoom.us/j/123456789"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status berhasil diupdate"
+                    },
+                    "403": {
+                        "description": "Hanya mentor yang bisa update status"
                     }
                 },
                 "security": [
@@ -8619,20 +8463,24 @@
             },
             "MentoringSession": {
                 "title": "Mentoring Session Schema",
+                "description": "Struktur data sesi mentoring",
                 "properties": {
                     "id": {
                         "type": "integer",
                         "example": 1
                     },
                     "mentor_id": {
+                        "description": "ID User yang jadi mentor",
                         "type": "integer",
                         "example": 7
                     },
                     "member_id": {
+                        "description": "ID User yang jadi student",
                         "type": "integer",
                         "example": 4
                     },
                     "type": {
+                        "description": "Jenis mentoring",
                         "type": "string",
                         "enum": [
                             "academic",
@@ -8651,6 +8499,7 @@
                         "example": "qris"
                     },
                     "schedule": {
+                        "description": "Jadwal sesi",
                         "type": "string",
                         "format": "date-time",
                         "example": "2025-12-20 10:00:00"
@@ -8662,13 +8511,33 @@
                             "scheduled",
                             "ongoing",
                             "completed",
-                            "cancelled"
+                            "cancelled",
+                            "refunded"
                         ],
                         "example": "pending"
                     },
                     "meeting_link": {
+                        "description": "Link Zoom/GMeet",
                         "type": "string",
                         "example": "https://zoom.us/j/123456789",
+                        "nullable": true
+                    },
+                    "note": {
+                        "type": "string",
+                        "example": "Saya butuh bimbingan skripsi",
+                        "nullable": true
+                    },
+                    "rating": {
+                        "description": "Rating dari student",
+                        "type": "integer",
+                        "maximum": 5,
+                        "minimum": 1,
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "feedback": {
+                        "type": "string",
+                        "example": "Mentornya sangat membantu!",
                         "nullable": true
                     },
                     "created_at": {

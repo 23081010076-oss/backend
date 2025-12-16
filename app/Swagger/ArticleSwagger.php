@@ -135,10 +135,10 @@ namespace App\Swagger;
  * @OA\Get(
  *     path="/api/articles/popular",
  *     summary="Get popular articles",
- *     description="Get list of most popular articles",
+ *     description="Get list of most popular articles (Public)",
  *     operationId="getPopularArticles",
  *     tags={"Articles"},
- *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="limit", in="query", description="Jumlah artikel", @OA\Schema(type="integer", default=5)),
  *     @OA\Response(
  *         response=200,
  *         description="Popular articles retrieved successfully"
@@ -148,10 +148,9 @@ namespace App\Swagger;
  * @OA\Get(
  *     path="/api/articles/category/{category}",
  *     summary="Get articles by category",
- *     description="Get list of articles filtered by category",
+ *     description="Get list of articles filtered by category (Public)",
  *     operationId="getArticlesByCategory",
  *     tags={"Articles"},
- *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="category",
  *         in="path",
