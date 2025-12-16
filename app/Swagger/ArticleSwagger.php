@@ -131,5 +131,38 @@ namespace App\Swagger;
  *         description="Article deleted successfully"
  *     )
  * )
+ *
+ * @OA\Get(
+ *     path="/api/articles/popular",
+ *     summary="Get popular articles",
+ *     description="Get list of most popular articles",
+ *     operationId="getPopularArticles",
+ *     tags={"Articles"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Popular articles retrieved successfully"
+ *     )
+ * )
+ *
+ * @OA\Get(
+ *     path="/api/articles/category/{category}",
+ *     summary="Get articles by category",
+ *     description="Get list of articles filtered by category",
+ *     operationId="getArticlesByCategory",
+ *     tags={"Articles"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="category",
+ *         in="path",
+ *         description="Article category",
+ *         required=true,
+ *         @OA\Schema(type="string", enum={"education", "career", "scholarship", "testimonial"})
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Articles retrieved successfully"
+ *     )
+ * )
  */
 class ArticleSwagger {}

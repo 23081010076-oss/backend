@@ -267,5 +267,89 @@ namespace App\Swagger;
  *         description="Not authorized to delete this session"
  *     )
  * )
+ *
+ * @OA\Put(
+ *     path="/api/mentoring-sessions/{id}",
+ *     summary="Update Mentoring Session",
+ *     description="Update an existing mentoring session",
+ *     operationId="updateMentoringSession",
+ *     tags={"Mentoring"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="schedule", type="string", format="date-time", example="2025-12-25 14:00:00"),
+ *             @OA\Property(property="meeting_link", type="string", example="https://zoom.us/j/123456789"),
+ *             @OA\Property(property="note", type="string", example="Updated notes")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Session updated successfully"),
+ *     @OA\Response(response=404, description="Session not found")
+ * )
+ *
+ * @OA\Post(
+ *     path="/api/mentoring-sessions/{id}/feedback",
+ *     summary="Submit Mentoring Feedback",
+ *     description="Submit feedback for a completed mentoring session",
+ *     operationId="submitMentoringFeedback",
+ *     tags={"Mentoring"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"rating"},
+ *             @OA\Property(property="rating", type="integer", minimum=1, maximum=5, example=5),
+ *             @OA\Property(property="comment", type="string", example="Very helpful session!")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Feedback submitted successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Feedback berhasil disimpan")
+ *         )
+ *     ),
+ *     @OA\Response(response=403, description="Session must be completed to give feedback"),
+ *     @OA\Response(response=404, description="Session not found")
+ * )
+ *
+ * @OA\Get(
+ *     path="/api/mentors/{id}/schedule",
+ *     summary="Get Mentor Schedule",
+ *     description="Get available schedule of a specific mentor",
+ *     operationId="getMentorSchedule",
+ *     tags={"Mentoring"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         description="Mentor User ID",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Mentor schedule retrieved",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="data", type="array",
+ *                 @OA\Items(ref="#/components/schemas/MentoringSession")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(response=404, description="Mentor not found")
+ * )
  */
 class MentoringSwagger {}

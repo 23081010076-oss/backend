@@ -242,5 +242,152 @@ namespace App\Swagger;
  *         description="Organization created"
  *     )
  * )
+ *
+ * @OA\Get(
+ *     path="/api/organizations/{id}",
+ *     summary="Get organization detail",
+ *     description="Get specific organization detail",
+ *     operationId="getOrganizationById",
+ *     tags={"Organizations"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\Response(response=200, description="Organization retrieved")
+ * )
+ *
+ * @OA\Put(
+ *     path="/api/organizations/{id}",
+ *     summary="Update organization",
+ *     description="Update existing organization",
+ *     operationId="updateOrganization",
+ *     tags={"Organizations"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="name", type="string"),
+ *             @OA\Property(property="role", type="string"),
+ *             @OA\Property(property="description", type="string")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Organization updated")
+ * )
+ *
+ * @OA\Delete(
+ *     path="/api/organizations/{id}",
+ *     summary="Delete organization",
+ *     description="Delete an organization",
+ *     operationId="deleteOrganization",
+ *     tags={"Organizations"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\Response(response=200, description="Organization deleted")
+ * )
+ *
+ * @OA\Post(
+ *     path="/api/achievements/{id}/certificate",
+ *     summary="Upload achievement certificate",
+ *     description="Upload certificate for an achievement",
+ *     operationId="uploadAchievementCertificate",
+ *     tags={"Achievements"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 required={"certificate"},
+ *                 @OA\Property(property="certificate", type="string", format="binary")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Certificate uploaded successfully")
+ * )
+ *
+ * @OA\Delete(
+ *     path="/api/achievements/{id}/certificate",
+ *     summary="Delete achievement certificate",
+ *     description="Delete certificate from an achievement",
+ *     operationId="deleteAchievementCertificate",
+ *     tags={"Achievements"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\Response(response=200, description="Certificate deleted successfully")
+ * )
+ *
+ * @OA\Post(
+ *     path="/api/experiences/{id}/certificate",
+ *     summary="Upload experience certificate",
+ *     description="Upload certificate for an experience",
+ *     operationId="uploadExperienceCertificate",
+ *     tags={"Experiences"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 required={"certificate"},
+ *                 @OA\Property(property="certificate", type="string", format="binary")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Certificate uploaded successfully")
+ * )
+ *
+ * @OA\Delete(
+ *     path="/api/experiences/{id}/certificate",
+ *     summary="Delete experience certificate",
+ *     description="Delete certificate from an experience",
+ *     operationId="deleteExperienceCertificate",
+ *     tags={"Experiences"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\Response(response=200, description="Certificate deleted successfully")
+ * )
+ *
+ * @OA\Post(
+ *     path="/api/organizations/{id}/logo",
+ *     summary="Upload organization logo",
+ *     description="Upload logo for an organization",
+ *     operationId="uploadOrganizationLogo",
+ *     tags={"Organizations"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 required={"logo"},
+ *                 @OA\Property(property="logo", type="string", format="binary")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Logo uploaded successfully")
+ * )
+ *
+ * @OA\Delete(
+ *     path="/api/organizations/{id}/logo",
+ *     summary="Delete organization logo",
+ *     description="Delete logo from an organization",
+ *     operationId="deleteOrganizationLogo",
+ *     tags={"Organizations"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\Response(response=200, description="Logo deleted successfully")
+ * )
+ *
+ * @OA\Get(
+ *     path="/api/achievements/{id}",
+ *     summary="Get achievement detail",
+ *     description="Get specific achievement detail",
+ *     operationId="getAchievementById",
+ *     tags={"Achievements"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\Response(response=200, description="Achievement retrieved")
+ * )
  */
 class PortfolioSwagger {}

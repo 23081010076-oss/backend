@@ -67,9 +67,14 @@ class ReviewController extends Controller
         }
 
         $reviews = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // Transform items with ReviewResource
+        $reviews->getCollection()->transform(function ($review) {
+            return new ReviewResource($review);
+        });
         
         return $this->paginatedResponse(
-            ReviewResource::collection($reviews)->response()->getData(true),
+            $reviews,
             'Reviews retrieved successfully'
         );
     }

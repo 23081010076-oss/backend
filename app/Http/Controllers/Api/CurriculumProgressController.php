@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\CurriculumProgress;
 use App\Models\CourseCurriculum;
+use App\Models\Enrollment;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
- * ✅ NEW: Controller for tracking curriculum progress
+ * ✅ Controller for tracking curriculum progress
  * 
  * Allows users to mark curriculum items as completed
  * and track their overall course progress
@@ -25,7 +26,16 @@ class CurriculumProgressController extends Controller
      */
     public function index(Request $request, int $courseId): JsonResponse
     {
-        $progress = CurriculumProgress::where('user_id', $request->user()->id)
+        // Get user's enrollment for this course
+        $enrollment = Enrollment::where('user_id', $request->user()->id)
+            ->where('course_id', $courseId)
+            ->first();
+
+        if (!$enrollment) {
+            return $this->errorResponse('Anda belum terdaftar di kursus ini', 403);
+        }
+
+        $progress = CurriculumProgress::where('enrollment_id', $enrollment->id)
             ->whereHas('curriculum', function ($query) use ($courseId) {
                 $query->where('course_id', $courseId);
             })
@@ -57,12 +67,18 @@ class CurriculumProgressController extends Controller
 
         $curriculum = CourseCurriculum::findOrFail($curriculumId);
 
-        // Check if user has access to this course
-        // You can add enrollment/subscription check here
+        // Get user's enrollment for this course
+        $enrollment = Enrollment::where('user_id', $request->user()->id)
+            ->where('course_id', $curriculum->course_id)
+            ->first();
+
+        if (!$enrollment) {
+            return $this->errorResponse('Anda belum terdaftar di kursus ini', 403);
+        }
 
         $progress = CurriculumProgress::updateOrCreate(
             [
-                'user_id' => $request->user()->id,
+                'enrollment_id' => $enrollment->id,
                 'curriculum_id' => $curriculumId,
             ],
             [
@@ -72,27 +88,31 @@ class CurriculumProgressController extends Controller
         );
 
         // Update overall enrollment progress
-        $this->updateEnrollmentProgress($request->user()->id, $curriculum->course_id);
+        $this->updateEnrollmentProgress($enrollment);
 
-        return $this->successResponse($progress, 'Progress updated successfully');
+        return $this->successResponse([
+            'sukses' => true,
+            'pesan' => 'Materi berhasil ditandai selesai',
+            'data' => [
+                'curriculum_progress' => $progress,
+                'enrollment' => [
+                    'progress' => $enrollment->progress,
+                    'completed' => $enrollment->completed,
+                ]
+            ]
+        ], 'Progress updated successfully');
     }
 
     /**
      * Update overall enrollment progress percentage
      * ✅ FIX: Auto-generate certificate when course 100% completed
      */
-    private function updateEnrollmentProgress(int $userId, int $courseId): void
+    private function updateEnrollmentProgress(Enrollment $enrollment): void
     {
-        $enrollment = \App\Models\Enrollment::where('user_id', $userId)
-            ->where('course_id', $courseId)
-            ->first();
-
-        if (!$enrollment) {
-            return;
-        }
+        $courseId = $enrollment->course_id;
 
         $totalItems = CourseCurriculum::where('course_id', $courseId)->count();
-        $completedItems = CurriculumProgress::where('user_id', $userId)
+        $completedItems = CurriculumProgress::where('enrollment_id', $enrollment->id)
             ->whereHas('curriculum', function ($query) use ($courseId) {
                 $query->where('course_id', $courseId);
             })
@@ -118,7 +138,7 @@ class CurriculumProgressController extends Controller
                     
                     \Illuminate\Support\Facades\Log::info('Certificate auto-generated on course completion', [
                         'enrollment_id' => $enrollment->id,
-                        'user_id' => $userId,
+                        'user_id' => $enrollment->user_id,
                         'course_id' => $courseId,
                         'certificate_url' => $certificateUrl,
                     ]);
