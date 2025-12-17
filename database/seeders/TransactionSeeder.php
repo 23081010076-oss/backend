@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Transaction;
+use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Subscription;
 use App\Models\MentoringSession;
@@ -28,23 +29,23 @@ class TransactionSeeder extends Seeder
 
         $transactions = [];
 
-        // Course enrollment transactions (linked to courses, not enrollments - matches new flow)
+        // Course enrollment transactions - PAID transactions link to Enrollment
         if ($enrollments->isNotEmpty()) {
             foreach ($enrollments->take(5) as $index => $enrollment) {
                 $transactions[] = [
                     'user_id' => $enrollment->user_id,
                     'transaction_code' => 'TRX-COURSE-' . now()->format('Ymd') . '-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
                     'type' => 'course_enrollment',
-                    'transactionable_id' => $enrollment->course_id, // Link to Course, not Enrollment
-                    'transactionable_type' => 'App\Models\Course',
-                    'amount' => rand(500000, 2500000),
+                    'transactionable_id' => $enrollment->id, // Link to Enrollment (paid)
+                    'transactionable_type' => 'App\Models\Enrollment',
+                    'amount' => $enrollment->course->price ?? rand(500000, 2500000),
                     'payment_method' => ['manual', 'bank_transfer'][array_rand(['manual', 'bank_transfer'])],
                     'status' => 'paid',
-                    'payment_proof' => 'payment_proofs/sample-proof-' . ($index + 1) . '.jpg',
+                    'payment_proof' => 'payment-proofs/sample-proof-' . ($index + 1) . '.jpg',
                     'payment_details' => json_encode([
                         'bank_name' => 'BCA',
                         'account_number' => '1234567890',
-                        'account_holder' => 'PT Karir Impian',
+                        'account_holder' => 'PT Edukasi Masa Depan',
                     ]),
                     'paid_at' => now()->subDays(rand(1, 30)),
                     'expired_at' => now()->addHours(24),
@@ -64,11 +65,11 @@ class TransactionSeeder extends Seeder
                     'amount' => $subscription->price,
                     'payment_method' => ['manual', 'bank_transfer'][array_rand(['manual', 'bank_transfer'])],
                     'status' => 'paid',
-                    'payment_proof' => 'payment_proofs/sample-subscription-' . ($index + 1) . '.jpg',
+                    'payment_proof' => 'payment-proofs/sample-subscription-' . ($index + 1) . '.jpg',
                     'payment_details' => json_encode([
                         'bank_name' => 'BCA',
                         'account_number' => '1234567890',
-                        'account_holder' => 'PT Karir Impian',
+                        'account_holder' => 'PT Edukasi Masa Depan',
                     ]),
                     'paid_at' => $subscription->start_date,
                     'expired_at' => now()->addHours(24),
@@ -90,11 +91,11 @@ class TransactionSeeder extends Seeder
                     'amount' => $amount,
                     'payment_method' => ['manual', 'bank_transfer'][array_rand(['manual', 'bank_transfer'])],
                     'status' => $session->status === 'completed' ? 'paid' : 'pending',
-                    'payment_proof' => $session->status === 'completed' ? 'payment_proofs/mentoring-' . ($index + 1) . '.jpg' : null,
+                    'payment_proof' => $session->status === 'completed' ? 'payment-proofs/mentoring-' . ($index + 1) . '.jpg' : null,
                     'payment_details' => json_encode([
                         'bank_name' => 'BCA',
                         'account_number' => '1234567890',
-                        'account_holder' => 'PT Karir Impian',
+                        'account_holder' => 'PT Edukasi Masa Depan',
                     ]),
                     'paid_at' => $session->status === 'completed' ? $session->schedule : null,
                     'expired_at' => now()->addHours(24),
@@ -102,36 +103,42 @@ class TransactionSeeder extends Seeder
             }
         }
 
-        // Add some pending and failed transactions
-        $transactions[] = [
-            'user_id' => $students->first()->id,
-            'transaction_code' => 'TRX-PENDING-' . now()->format('Ymd') . '-0001',
-            'type' => 'course_enrollment',
-            'transactionable_id' => $enrollments->first()->id ?? 1,
-            'transactionable_type' => 'App\Models\Enrollment',
-            'amount' => 750000,
-            'payment_method' => 'manual',
-            'status' => 'pending',
-            'payment_proof' => 'payment-proofs/proof-' . uniqid() . '.jpg',
-            'payment_details' => null,
-            'paid_at' => null,
-            'expired_at' => now()->addHours(24),
-        ];
+        // Add pending transaction (links to Course since not yet paid)
+        $courses = Course::all();
+        if ($courses->isNotEmpty()) {
+            $transactions[] = [
+                'user_id' => $students->first()->id,
+                'transaction_code' => 'TRX-PENDING-' . now()->format('Ymd') . '-0001',
+                'type' => 'course_enrollment',
+                'transactionable_id' => $courses->random()->id, // Link to Course (pending)
+                'transactionable_type' => 'App\Models\Course',
+                'amount' => 750000,
+                'payment_method' => 'bank_transfer',
+                'status' => 'pending',
+                'payment_proof' => null,
+                'payment_details' => null,
+                'paid_at' => null,
+                'expired_at' => now()->addHours(24),
+            ];
+        }
 
-        $transactions[] = [
-            'user_id' => $students->last()->id,
-            'transaction_code' => 'TRX-FAILED-' . now()->format('Ymd') . '-0001',
-            'type' => 'subscription',
-            'transactionable_id' => $subscriptions->first()->id ?? 1,
-            'transactionable_type' => 'App\Models\Subscription',
-            'amount' => 999000,
-            'payment_method' => 'credit_card',
-            'status' => 'failed',
-            'payment_proof' => null,
-            'payment_details' => json_encode(['error' => 'Insufficient funds']),
-            'paid_at' => null,
-            'expired_at' => now()->subHours(1),
-        ];
+        // Add failed subscription transaction
+        if ($subscriptions->isNotEmpty()) {
+            $transactions[] = [
+                'user_id' => $students->last()->id,
+                'transaction_code' => 'TRX-FAILED-' . now()->format('Ymd') . '-0001',
+                'type' => 'subscription',
+                'transactionable_id' => $subscriptions->first()->id,
+                'transactionable_type' => 'App\Models\Subscription',
+                'amount' => 999000,
+                'payment_method' => 'bank_transfer',
+                'status' => 'failed',
+                'payment_proof' => null,
+                'payment_details' => json_encode(['error' => 'Insufficient funds']),
+                'paid_at' => null,
+                'expired_at' => now()->subHours(1),
+            ];
+        }
 
         foreach ($transactions as $transactionData) {
             Transaction::create($transactionData);

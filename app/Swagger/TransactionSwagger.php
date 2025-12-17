@@ -170,7 +170,7 @@ namespace App\Swagger;
  * @OA\Get(
  *     path="/api/transactions",
  *     summary="Get my transactions",
- *     description="Retrieve all transactions for the authenticated user",
+ *     description="Retrieve all transactions for the authenticated user. Returns item_name and item_details based on transaction type and status.",
  *     operationId="getMyTransactions",
  *     tags={"Transactions"},
  *     security={{"bearerAuth":{}}},
@@ -190,21 +190,52 @@ namespace App\Swagger;
  *         response=200,
  *         description="Transactions retrieved successfully",
  *         @OA\JsonContent(
- *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="pesan", type="string", example="Daftar transaksi berhasil diambil"),
  *             @OA\Property(
  *                 property="data",
  *                 type="array",
  *                 @OA\Items(
- *                     @OA\Property(property="id", type="integer", example=10),
- *                     @OA\Property(property="transaction_code", type="string", example="TRX-20251203-001"),
- *                     @OA\Property(property="type", type="string", example="subscription"),
- *                     @OA\Property(property="amount", type="number", example=500000),
- *                     @OA\Property(property="payment_method", type="string", example="qris"),
+ *                     @OA\Property(property="id", type="integer", example=16),
+ *                     @OA\Property(property="transaction_code", type="string", example="TRX202512174488C7"),
+ *                     @OA\Property(property="type", type="string", example="course_enrollment"),
+ *                     @OA\Property(property="type_label", type="string", example="Pendaftaran Kursus"),
+ *                     @OA\Property(property="amount", type="string", example="900000.00"),
+ *                     @OA\Property(property="payment_method", type="string", example="bank_transfer"),
  *                     @OA\Property(property="status", type="string", example="paid"),
- *                     @OA\Property(property="created_at", type="string", format="datetime"),
- *                     @OA\Property(property="transactionable_type", type="string", example="App\\Models\\Subscription"),
- *                     @OA\Property(property="transactionable_id", type="integer", example=1)
+ *                     @OA\Property(property="status_label", type="string", example="Lunas"),
+ *                     @OA\Property(property="payment_proof", type="string", nullable=true, example="http://127.0.0.1:8000/storage/payment-proofs/proof.jpg"),
+ *                     @OA\Property(property="payment_details", type="object", nullable=true),
+ *                     @OA\Property(property="paid_at", type="string", format="datetime", nullable=true, example="2025-12-17T12:28:16.000000Z"),
+ *                     @OA\Property(property="expired_at", type="string", format="datetime", example="2025-12-18T12:27:32.000000Z"),
+ *                     @OA\Property(property="created_at", type="string", format="datetime", example="2025-12-17T12:27:32.000000Z"),
+ *                     @OA\Property(property="updated_at", type="string", format="datetime", example="2025-12-17T12:28:16.000000Z"),
+ *                     @OA\Property(property="user", type="object",
+ *                         @OA\Property(property="id", type="integer", example=3),
+ *                         @OA\Property(property="name", type="string", example="Test Admin"),
+ *                         @OA\Property(property="email", type="string", example="test.admin@learningplatform.com")
+ *                     ),
+ *                     @OA\Property(property="item_name", type="string", example="Database Design and SQL", description="Name of the purchased item"),
+ *                     @OA\Property(property="item_details", type="object", description="Details vary by transaction type. For paid course: enrollment_id, course_id, title, image, instructor, level, duration, progress, completed. For pending course: id, title, image, instructor, level, duration. For subscription: id, plan, package_type, duration, start_date, end_date, status. For mentoring: id, session_id, type, schedule, meeting_link, status, mentor.",
+ *                         @OA\Property(property="enrollment_id", type="integer", example=10, description="Only for paid course transactions"),
+ *                         @OA\Property(property="course_id", type="integer", example=7),
+ *                         @OA\Property(property="title", type="string", example="Database Design and SQL"),
+ *                         @OA\Property(property="image", type="string", example="https://images.unsplash.com/photo-example?w=800"),
+ *                         @OA\Property(property="instructor", type="string", example="Agus Prasetyo, S.T"),
+ *                         @OA\Property(property="level", type="string", example="intermediate"),
+ *                         @OA\Property(property="duration", type="string", example="6 weeks"),
+ *                         @OA\Property(property="progress", type="integer", example=0, description="Only for paid course transactions"),
+ *                         @OA\Property(property="completed", type="boolean", example=false, description="Only for paid course transactions")
+ *                     )
  *                 )
+ *             ),
+ *             @OA\Property(property="meta", type="object",
+ *                 @OA\Property(property="total", type="integer", example=2),
+ *                 @OA\Property(property="per_halaman", type="integer", example=20),
+ *                 @OA\Property(property="halaman_sekarang", type="integer", example=1),
+ *                 @OA\Property(property="halaman_terakhir", type="integer", example=1),
+ *                 @OA\Property(property="dari", type="integer", example=1),
+ *                 @OA\Property(property="sampai", type="integer", example=2)
  *             )
  *         )
  *     )
@@ -213,7 +244,7 @@ namespace App\Swagger;
  * @OA\Get(
  *     path="/api/transactions/{id}",
  *     summary="Get transaction details",
- *     description="Retrieve details of a single transaction",
+ *     description="Retrieve details of a single transaction with item information",
  *     operationId="getTransactionById",
  *     tags={"Transactions"},
  *     security={{"bearerAuth":{}}},
@@ -227,17 +258,30 @@ namespace App\Swagger;
  *         response=200,
  *         description="Transaction details retrieved successfully",
  *         @OA\JsonContent(
- *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="pesan", type="string", example="Detail transaksi berhasil diambil"),
  *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="id", type="integer", example=10),
- *                 @OA\Property(property="transaction_code", type="string", example="TRX-20251203-001"),
- *                 @OA\Property(property="type", type="string", example="subscription"),
- *                 @OA\Property(property="amount", type="number", example=500000),
- *                 @OA\Property(property="payment_method", type="string", example="manual"),
+ *                 @OA\Property(property="id", type="integer", example=16),
+ *                 @OA\Property(property="transaction_code", type="string", example="TRX202512174488C7"),
+ *                 @OA\Property(property="type", type="string", example="course_enrollment"),
+ *                 @OA\Property(property="type_label", type="string", example="Pendaftaran Kursus"),
+ *                 @OA\Property(property="amount", type="string", example="900000.00"),
+ *                 @OA\Property(property="payment_method", type="string", example="bank_transfer"),
  *                 @OA\Property(property="status", type="string", example="paid"),
- *                 @OA\Property(property="expired_at", type="string", format="datetime"),
+ *                 @OA\Property(property="status_label", type="string", example="Lunas"),
+ *                 @OA\Property(property="payment_proof", type="string", nullable=true),
+ *                 @OA\Property(property="payment_details", type="object", nullable=true),
  *                 @OA\Property(property="paid_at", type="string", format="datetime", nullable=true),
- *                 @OA\Property(property="transactionable", type="object")
+ *                 @OA\Property(property="expired_at", type="string", format="datetime"),
+ *                 @OA\Property(property="created_at", type="string", format="datetime"),
+ *                 @OA\Property(property="updated_at", type="string", format="datetime"),
+ *                 @OA\Property(property="user", type="object",
+ *                     @OA\Property(property="id", type="integer", example=3),
+ *                     @OA\Property(property="name", type="string", example="Test User"),
+ *                     @OA\Property(property="email", type="string", example="user@example.com")
+ *                 ),
+ *                 @OA\Property(property="item_name", type="string", example="Database Design and SQL"),
+ *                 @OA\Property(property="item_details", type="object")
  *             )
  *         )
  *     )
@@ -246,7 +290,7 @@ namespace App\Swagger;
  * @OA\Post(
  *     path="/api/transactions/courses/{courseId}",
  *     summary="Create course transaction",
- *     description="Create payment transaction for course enrollment",
+ *     description="Create payment transaction for course enrollment. Returns transaction details and payment instructions.",
  *     operationId="createCourseTransaction",
  *     tags={"Transactions"},
  *     security={{"bearerAuth":{}}},
@@ -254,28 +298,58 @@ namespace App\Swagger;
  *         name="courseId",
  *         in="path",
  *         required=true,
+ *         description="ID of the course to enroll in",
  *         @OA\Schema(type="integer")
  *     ),
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
  *             required={"payment_method"},
- *             @OA\Property(property="payment_method", type="string", enum={"manual", "bank_transfer"}, example="manual")
+ *             @OA\Property(property="payment_method", type="string", enum={"manual", "bank_transfer"}, example="bank_transfer", description="Payment method to use")
  *         )
  *     ),
  *     @OA\Response(
  *         response=201,
  *         description="Course transaction created successfully",
  *         @OA\JsonContent(
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Transaction created successfully"),
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="pesan", type="string", example="Transaksi berhasil dibuat"),
  *             @OA\Property(property="data", type="object",
  *                 @OA\Property(property="transaction", type="object",
- *                     @OA\Property(property="id", type="integer", example=15),
- *                     @OA\Property(property="transaction_code", type="string", example="TRX-20251203-002"),
- *                     @OA\Property(property="amount", type="number", example=2500000)
+ *                     @OA\Property(property="id", type="integer", example=17),
+ *                     @OA\Property(property="transaction_code", type="string", example="TRX20251217ABC123"),
+ *                     @OA\Property(property="type", type="string", example="course_enrollment"),
+ *                     @OA\Property(property="type_label", type="string", example="Pendaftaran Kursus"),
+ *                     @OA\Property(property="amount", type="string", example="900000.00"),
+ *                     @OA\Property(property="payment_method", type="string", example="bank_transfer"),
+ *                     @OA\Property(property="status", type="string", example="pending"),
+ *                     @OA\Property(property="status_label", type="string", example="Menunggu Pembayaran"),
+ *                     @OA\Property(property="expired_at", type="string", format="datetime"),
+ *                     @OA\Property(property="item_name", type="string", example="Database Design and SQL"),
+ *                     @OA\Property(property="item_details", type="object",
+ *                         @OA\Property(property="id", type="integer", example=7),
+ *                         @OA\Property(property="title", type="string", example="Database Design and SQL"),
+ *                         @OA\Property(property="image", type="string", example="https://example.com/image.jpg"),
+ *                         @OA\Property(property="instructor", type="string", example="John Doe"),
+ *                         @OA\Property(property="level", type="string", example="intermediate"),
+ *                         @OA\Property(property="duration", type="string", example="6 weeks")
+ *                     )
+ *                 ),
+ *                 @OA\Property(property="instructions", type="object",
+ *                     @OA\Property(property="bank_name", type="string", example="BCA"),
+ *                     @OA\Property(property="account_number", type="string", example="1234567890"),
+ *                     @OA\Property(property="account_holder", type="string", example="PT Edukasi Masa Depan"),
+ *                     @OA\Property(property="instructions", type="array", @OA\Items(type="string"), example={"Transfer sesuai nominal yang tertera.", "Simpan bukti transfer.", "Upload bukti transfer melalui menu Riwayat Transaksi.", "Tunggu verifikasi admin (maksimal 1x24 jam)."})
  *                 )
  *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation error or already enrolled",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=false),
+ *             @OA\Property(property="pesan", type="string", example="Anda sudah terdaftar di kursus ini")
  *         )
  *     )
  * )

@@ -39,18 +39,34 @@ class TransactionResource extends JsonResource
                 ];
             }),
 
-            // Transactionable information (polymorphic)
-            'transactionable_type' => $this->transactionable_type,
-            'transactionable' => $this->when($this->relationLoaded('transactionable') && $this->transactionable, function () {
-                return $this->formatTransactionable();
-            }),
+            // Item name and details (flattened from transactionable)
+            'item_name' => $this->getItemName(),
+            'item_details' => $this->getItemDetails(),
         ];
     }
 
     /**
-     * Format transactionable data based on type
+     * Get the item name based on transactionable type
      */
-    private function formatTransactionable(): ?array
+    private function getItemName(): ?string
+    {
+        if (!$this->transactionable) {
+            return null;
+        }
+
+        return match($this->transactionable_type) {
+            'App\Models\Course' => $this->transactionable->title,
+            'App\Models\Enrollment' => $this->transactionable->course?->title,
+            'App\Models\Subscription' => ucfirst($this->transactionable->plan) . ' Subscription',
+            'App\Models\MentoringSession' => 'Mentoring: ' . ucfirst(str_replace('_', ' ', $this->transactionable->type)),
+            default => null,
+        };
+    }
+
+    /**
+     * Get the item details based on transactionable type
+     */
+    private function getItemDetails(): ?array
     {
         if (!$this->transactionable) {
             return null;
@@ -58,45 +74,68 @@ class TransactionResource extends JsonResource
 
         return match($this->transactionable_type) {
             'App\Models\Course' => [
-                'course' => [
-                    'id' => $this->transactionable->id,
-                    'title' => $this->transactionable->title,
-                    'thumbnail' => $this->transactionable->image ? asset('storage/' . $this->transactionable->image) : null,
-                    'instructor' => $this->transactionable->instructor,
-                    'level' => $this->transactionable->level,
-                    'duration' => $this->transactionable->duration,
-                    'price' => $this->transactionable->price,
-                ]
+                'id' => $this->transactionable->id,
+                'title' => $this->transactionable->title,
+                'image' => $this->transactionable->image 
+                    ? (str_starts_with($this->transactionable->image, 'http') 
+                        ? $this->transactionable->image 
+                        : asset('storage/' . $this->transactionable->image))
+                    : null,
+                'instructor' => $this->transactionable->instructor,
+                'level' => $this->transactionable->level,
+                'duration' => $this->transactionable->duration,
             ],
+            'App\Models\Enrollment' => $this->formatEnrollmentDetails(),
             'App\Models\Subscription' => [
-                'subscription' => [
-                    'id' => $this->transactionable->id,
-                    'plan' => $this->transactionable->plan,
-                    'package_type' => $this->transactionable->package_type,
-                    'duration' => $this->transactionable->duration . ' ' . $this->transactionable->duration_unit,
-                    'start_date' => $this->transactionable->start_date,
-                    'end_date' => $this->transactionable->end_date,
-                    'status' => $this->transactionable->status,
-                ]
+                'id' => $this->transactionable->id,
+                'plan' => $this->transactionable->plan,
+                'package_type' => $this->transactionable->package_type,
+                'duration' => $this->transactionable->duration . ' ' . $this->transactionable->duration_unit,
+                'start_date' => $this->transactionable->start_date,
+                'end_date' => $this->transactionable->end_date,
+                'status' => $this->transactionable->status,
             ],
             'App\Models\MentoringSession' => [
-                'mentoring_session' => [
-                    'id' => $this->transactionable->id,
-                    'session_id' => $this->transactionable->session_id,
-                    'type' => $this->transactionable->type,
-                    'schedule' => $this->transactionable->schedule,
-                    'meeting_link' => $this->transactionable->meeting_link,
-                    'status' => $this->transactionable->status,
-                    'mentor' => $this->when($this->transactionable->relationLoaded('mentor'), function () {
-                        return [
-                            'id' => $this->transactionable->mentor->id,
-                            'name' => $this->transactionable->mentor->name,
-                        ];
-                    }),
-                ]
+                'id' => $this->transactionable->id,
+                'session_id' => $this->transactionable->session_id,
+                'type' => $this->transactionable->type,
+                'schedule' => $this->transactionable->schedule,
+                'meeting_link' => $this->transactionable->meeting_link,
+                'status' => $this->transactionable->status,
+                'mentor' => $this->transactionable->relationLoaded('mentor') && $this->transactionable->mentor
+                    ? [
+                        'id' => $this->transactionable->mentor->id,
+                        'name' => $this->transactionable->mentor->name,
+                    ]
+                    : null,
             ],
             default => null,
         };
+    }
+
+    /**
+     * Format enrollment details with course information
+     */
+    private function formatEnrollmentDetails(): array
+    {
+        $enrollment = $this->transactionable;
+        $course = $enrollment->course;
+
+        return [
+            'enrollment_id' => $enrollment->id,
+            'course_id' => $course?->id,
+            'title' => $course?->title,
+            'image' => $course?->image 
+                ? (str_starts_with($course->image, 'http') 
+                    ? $course->image 
+                    : asset('storage/' . $course->image))
+                : null,
+            'instructor' => $course?->instructor,
+            'level' => $course?->level,
+            'duration' => $course?->duration,
+            'progress' => $enrollment->progress,
+            'completed' => $enrollment->completed,
+        ];
     }
 
     /**
