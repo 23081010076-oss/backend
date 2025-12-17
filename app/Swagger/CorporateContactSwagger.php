@@ -146,5 +146,53 @@ namespace App\Swagger;
  *         description="Corporate contact deleted"
  *     )
  * )
+ *
+ * @OA\Get(
+ *     path="/api/corporate-contacts/statistics",
+ *     summary="Get corporate contact statistics (Admin)",
+ *     description="Get statistics of corporate contacts - Admin only",
+ *     operationId="getCorporateContactStatistics",
+ *     tags={"Corporate Contact"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Statistics retrieved successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="total", type="integer", example=50),
+ *                 @OA\Property(property="by_status", type="object",
+ *                     @OA\Property(property="pending", type="integer", example=20),
+ *                     @OA\Property(property="contacted", type="integer", example=15),
+ *                     @OA\Property(property="in_progress", type="integer", example=10),
+ *                     @OA\Property(property="closed", type="integer", example=5)
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(response=403, description="Forbidden - Admin only")
+ * )
+ *
+ * @OA\Put(
+ *     path="/api/corporate-contacts/{id}",
+ *     summary="Update corporate contact (Admin)",
+ *     description="Update corporate contact details - Admin only",
+ *     operationId="updateCorporateContact",
+ *     tags={"Corporate Contact"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", enum={"pending", "contacted", "in_progress", "closed"}),
+ *             @OA\Property(property="notes", type="string", example="Follow up notes")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Corporate contact updated")
+ * )
  */
 class CorporateContactSwagger {}

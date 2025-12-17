@@ -175,14 +175,45 @@ namespace App\Swagger;
  *     @OA\Response(response=200, description="Urutan kurikulum berhasil diupdate")
  * )
  *
+ * @OA\Get(
+ *     path="/api/courses/{courseId}/progress",
+ *     summary="Get curriculum progress",
+ *     description="Get progress tracking for all curriculums in a course for the authenticated user",
+ *     operationId="getCurriculumProgress",
+ *     tags={"Curriculum"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(name="courseId", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Progress berhasil diambil",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="course_id", type="integer", example=1),
+ *                 @OA\Property(property="total_materials", type="integer", example=10),
+ *                 @OA\Property(property="completed_materials", type="integer", example=5),
+ *                 @OA\Property(property="progress_percentage", type="integer", example=50),
+ *                 @OA\Property(property="curriculum_progress", type="array",
+ *                     @OA\Items(type="object",
+ *                         @OA\Property(property="curriculum_id", type="integer", example=1),
+ *                         @OA\Property(property="title", type="string", example="Pengenalan Web Development"),
+ *                         @OA\Property(property="completed", type="boolean", example=true),
+ *                         @OA\Property(property="completed_at", type="string", format="datetime", nullable=true)
+ *                     )
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(response=404, description="Course tidak ditemukan")
+ * )
+ *
  * @OA\Post(
- *     path="/api/enrollments/{enrollmentId}/curriculums/{curriculumId}/complete",
+ *     path="/api/curriculums/{curriculumId}/complete",
  *     summary="Tandai materi selesai",
  *     description="Menandai materi sebagai selesai dipelajari. Progress akan otomatis dihitung berdasarkan jumlah materi yang selesai.",
  *     operationId="markCurriculumComplete",
- *     tags={"Curriculum", "Enrollment"},
+ *     tags={"Curriculum"},
  *     security={{"bearerAuth":{}}},
- *     @OA\Parameter(name="enrollmentId", in="path", required=true, @OA\Schema(type="integer")),
  *     @OA\Parameter(name="curriculumId", in="path", required=true, @OA\Schema(type="integer")),
  *     @OA\Response(
  *         response=200,
@@ -206,8 +237,8 @@ namespace App\Swagger;
  *             )
  *         )
  *     ),
- *     @OA\Response(response=403, description="Tidak memiliki akses ke enrollment ini"),
- *     @OA\Response(response=404, description="Materi tidak ditemukan dalam kursus ini")
+ *     @OA\Response(response=403, description="Tidak memiliki akses"),
+ *     @OA\Response(response=404, description="Materi tidak ditemukan")
  * )
  */
 class CurriculumSwagger {}

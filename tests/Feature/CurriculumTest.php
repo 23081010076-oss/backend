@@ -106,7 +106,7 @@ class CurriculumTest extends TestCase
         ]);
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $this->studentToken)
-            ->postJson("/api/enrollments/{$enrollment->id}/curriculums/{$curriculum->id}/complete");
+            ->postJson("/api/curriculums/{$curriculum->id}/complete", ['completed' => true]);
 
         $response->assertStatus(200)
             ->assertJson(['sukses' => true]);
@@ -129,7 +129,7 @@ class CurriculumTest extends TestCase
         ]);
 
         $this->withHeader('Authorization', 'Bearer ' . $this->studentToken)
-            ->postJson("/api/enrollments/{$enrollment->id}/curriculums/{$c1->id}/complete");
+            ->postJson("/api/curriculums/{$c1->id}/complete", ['completed' => true]);
 
         $enrollment->refresh();
         $this->assertEquals(50, $enrollment->calculated_progress);
@@ -151,7 +151,7 @@ class CurriculumTest extends TestCase
         ]);
 
         $this->withHeader('Authorization', 'Bearer ' . $this->studentToken)
-            ->postJson("/api/enrollments/{$enrollment->id}/curriculums/{$curriculum->id}/complete");
+            ->postJson("/api/curriculums/{$curriculum->id}/complete", ['completed' => true]);
 
         $enrollment->refresh();
         $this->assertEquals(100, $enrollment->calculated_progress);

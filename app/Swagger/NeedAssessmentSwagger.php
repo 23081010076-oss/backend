@@ -5,14 +5,14 @@ namespace App\Swagger;
 
 /**
  * @OA\Get(
- *     path="/api/mentoring-sessions/{sessionId}/need-assessments",
+ *     path="/api/mentoring-sessions/{mentoringSessionId}/need-assessments",
  *     summary="Get need assessment",
  *     description="Get need assessment for a mentoring session",
  *     operationId="getNeedAssessment",
  *     tags={"Need Assessments"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
- *         name="sessionId",
+ *         name="mentoringSessionId",
  *         in="path",
  *         description="Mentoring Session ID",
  *         required=true,
@@ -60,14 +60,14 @@ namespace App\Swagger;
  * )
  *
  * @OA\Post(
- *     path="/api/mentoring-sessions/{sessionId}/need-assessments",
+ *     path="/api/mentoring-sessions/{mentoringSessionId}/need-assessments",
  *     summary="Submit need assessment",
  *     description="Create need assessment for a mentoring session (Student only)",
  *     operationId="createNeedAssessment",
  *     tags={"Need Assessments"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
- *         name="sessionId",
+ *         name="mentoringSessionId",
  *         in="path",
  *         description="Mentoring Session ID",
  *         required=true,
@@ -134,14 +134,14 @@ namespace App\Swagger;
  * )
  *
  * @OA\Put(
- *     path="/api/mentoring-sessions/{sessionId}/need-assessments",
+ *     path="/api/mentoring-sessions/{mentoringSessionId}/need-assessments",
  *     summary="Update need assessment",
  *     description="Update existing need assessment (Student only)",
  *     operationId="updateNeedAssessment",
  *     tags={"Need Assessments"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
- *         name="sessionId",
+ *         name="mentoringSessionId",
  *         in="path",
  *         description="Mentoring Session ID",
  *         required=true,
@@ -190,14 +190,14 @@ namespace App\Swagger;
  * )
  *
  * @OA\Put(
- *     path="/api/mentoring-sessions/{sessionId}/need-assessments/mark-completed",
+ *     path="/api/mentoring-sessions/{mentoringSessionId}/need-assessments/mark-completed",
  *     summary="Mark assessment as completed",
  *     description="Mark need assessment as completed (Mentor only)",
  *     operationId="markNeedAssessmentCompleted",
  *     tags={"Need Assessments"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
- *         name="sessionId",
+ *         name="mentoringSessionId",
  *         in="path",
  *         description="Mentoring Session ID",
  *         required=true,
@@ -234,14 +234,14 @@ namespace App\Swagger;
  * )
  *
  * @OA\Delete(
- *     path="/api/mentoring-sessions/{sessionId}/need-assessments",
+ *     path="/api/mentoring-sessions/{mentoringSessionId}/need-assessments",
  *     summary="Delete need assessment",
  *     description="Delete need assessment",
  *     operationId="deleteNeedAssessment",
  *     tags={"Need Assessments"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
- *         name="sessionId",
+ *         name="mentoringSessionId",
  *         in="path",
  *         description="Mentoring Session ID",
  *         required=true,

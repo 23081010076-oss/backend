@@ -263,6 +263,64 @@
                 ]
             }
         },
+        "/api/articles/popular": {
+            "get": {
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Get popular articles",
+                "description": "Get list of most popular articles (Public)",
+                "operationId": "getPopularArticles",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Jumlah artikel",
+                        "schema": {
+                            "type": "integer",
+                            "default": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Popular articles retrieved successfully"
+                    }
+                }
+            }
+        },
+        "/api/articles/category/{category}": {
+            "get": {
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Get articles by category",
+                "description": "Get list of articles filtered by category (Public)",
+                "operationId": "getArticlesByCategory",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "Article category",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "education",
+                                "career",
+                                "scholarship",
+                                "testimonial"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Articles retrieved successfully"
+                    }
+                }
+            }
+        },
         "/api/register": {
             "post": {
                 "tags": [
@@ -280,8 +338,7 @@
                                     "name",
                                     "email",
                                     "password",
-                                    "password_confirmation",
-                                    "role"
+                                    "password_confirmation"
                                 ],
                                 "properties": {
                                     "name": {
@@ -302,33 +359,6 @@
                                         "type": "string",
                                         "format": "password",
                                         "example": "password123"
-                                    },
-                                    "role": {
-                                        "type": "string",
-                                        "enum": [
-                                            "student",
-                                            "mentor",
-                                            "corporate"
-                                        ],
-                                        "example": "student"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "08123456789"
-                                    },
-                                    "gender": {
-                                        "type": "string",
-                                        "enum": [
-                                            "male",
-                                            "female",
-                                            "other"
-                                        ],
-                                        "example": "male"
-                                    },
-                                    "birth_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2000-01-15"
                                     }
                                 },
                                 "type": "object"
@@ -666,6 +696,16 @@
                                                 "major": {
                                                     "type": "string",
                                                     "example": "Teknik Informatika"
+                                                },
+                                                "specialization": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "example": [
+                                                        "Web Development",
+                                                        "Data Science"
+                                                    ]
                                                 }
                                             },
                                             "type": "object"
@@ -741,6 +781,16 @@
                                     "bio": {
                                         "type": "string",
                                         "example": "Software Developer"
+                                    },
+                                    "specialization": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "Web Development",
+                                            "Data Science"
+                                        ]
                                     }
                                 },
                                 "type": "object"
@@ -809,7 +859,7 @@
                 ]
             }
         },
-        "/mentoring-sessions/{sessionId}/coaching-files": {
+        "/api/mentoring-sessions/{mentoringSessionId}/coaching-files": {
             "get": {
                 "tags": [
                     "Coaching Files"
@@ -819,7 +869,7 @@
                 "operationId": "getCoachingFiles",
                 "parameters": [
                     {
-                        "name": "sessionId",
+                        "name": "mentoringSessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -835,6 +885,10 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "data": {
                                             "type": "array",
                                             "items": {
@@ -869,7 +923,7 @@
                 "operationId": "uploadCoachingFile",
                 "parameters": [
                     {
-                        "name": "sessionId",
+                        "name": "mentoringSessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -894,7 +948,7 @@
                                         "format": "binary"
                                     },
                                     "file_name": {
-                                        "description": "String (required)",
+                                        "description": "Display name for the file",
                                         "type": "string",
                                         "example": "Materi Pertemuan 1"
                                     }
@@ -911,6 +965,10 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "File uploaded successfully"
@@ -924,6 +982,9 @@
                             }
                         }
                     },
+                    "403": {
+                        "description": "Only mentors can upload files"
+                    },
                     "422": {
                         "description": "Validation Error"
                     }
@@ -933,9 +994,175 @@
                         "bearerAuth": []
                     }
                 ]
+            },
+            "delete": {
+                "tags": [
+                    "Coaching Files"
+                ],
+                "summary": "Delete All Coaching Files",
+                "description": "Delete all coaching files for a mentoring session (Mentor Only)",
+                "operationId": "deleteAllCoachingFiles",
+                "parameters": [
+                    {
+                        "name": "mentoringSessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "All files deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "All coaching files deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Only mentors can delete files"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
-        "/mentoring-sessions/{sessionId}/coaching-files/{fileId}/download": {
+        "/api/mentoring-sessions/{mentoringSessionId}/coaching-files/{fileId}": {
+            "get": {
+                "tags": [
+                    "Coaching Files"
+                ],
+                "summary": "Get Single Coaching File",
+                "description": "Get details of a specific coaching file",
+                "operationId": "getCoachingFileById",
+                "parameters": [
+                    {
+                        "name": "mentoringSessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "fileId",
+                        "in": "path",
+                        "description": "Coaching File ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coaching file details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/CoachingFile"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "File not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Coaching Files"
+                ],
+                "summary": "Delete Coaching File",
+                "description": "Delete a coaching file (Mentor Only)",
+                "operationId": "deleteCoachingFile",
+                "parameters": [
+                    {
+                        "name": "mentoringSessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "fileId",
+                        "in": "path",
+                        "description": "Coaching File ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "File deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Only mentors can delete files"
+                    },
+                    "404": {
+                        "description": "File not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentoring-sessions/{mentoringSessionId}/coaching-files/{fileId}/download": {
             "get": {
                 "tags": [
                     "Coaching Files"
@@ -945,7 +1172,7 @@
                 "operationId": "downloadCoachingFile",
                 "parameters": [
                     {
-                        "name": "sessionId",
+                        "name": "mentoringSessionId",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -970,61 +1197,6 @@
                                 "schema": {
                                     "type": "string",
                                     "format": "binary"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "File not found"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/mentoring-sessions/{sessionId}/coaching-files/{fileId}": {
-            "delete": {
-                "tags": [
-                    "Coaching Files"
-                ],
-                "summary": "Delete Coaching File",
-                "description": "Delete a coaching file (Mentor Only)",
-                "operationId": "deleteCoachingFile",
-                "parameters": [
-                    {
-                        "name": "sessionId",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "fileId",
-                        "in": "path",
-                        "description": "Coaching File ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "File deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "File deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
                                 }
                             }
                         }
@@ -1234,6 +1406,58 @@
                     }
                 ]
             },
+            "put": {
+                "tags": [
+                    "Corporate Contact"
+                ],
+                "summary": "Update corporate contact (Admin)",
+                "description": "Update corporate contact details - Admin only",
+                "operationId": "updateCorporateContact",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "contacted",
+                                            "in_progress",
+                                            "closed"
+                                        ]
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Follow up notes"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Corporate contact updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "delete": {
                 "tags": [
                     "Corporate Contact"
@@ -1324,13 +1548,79 @@
                 ]
             }
         },
+        "/api/corporate-contacts/statistics": {
+            "get": {
+                "tags": [
+                    "Corporate Contact"
+                ],
+                "summary": "Get corporate contact statistics (Admin)",
+                "description": "Get statistics of corporate contacts - Admin only",
+                "operationId": "getCorporateContactStatistics",
+                "responses": {
+                    "200": {
+                        "description": "Statistics retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "by_status": {
+                                                    "properties": {
+                                                        "pending": {
+                                                            "type": "integer",
+                                                            "example": 20
+                                                        },
+                                                        "contacted": {
+                                                            "type": "integer",
+                                                            "example": 15
+                                                        },
+                                                        "in_progress": {
+                                                            "type": "integer",
+                                                            "example": 10
+                                                        },
+                                                        "closed": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/courses": {
             "get": {
                 "tags": [
                     "Courses"
                 ],
                 "summary": "Get all courses",
-                "description": "Get list of all available courses with pagination",
+                "description": "Get list of all available courses with filtering and sorting options",
                 "operationId": "getCourses",
                 "parameters": [
                     {
@@ -1361,6 +1651,16 @@
                         }
                     },
                     {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Filter by category",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Programming"
+                        }
+                    },
+                    {
                         "name": "access_type",
                         "in": "query",
                         "description": "Filter by access type",
@@ -1382,6 +1682,21 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort by: popular (by enrollments count), rating, or latest",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "latest",
+                            "enum": [
+                                "popular",
+                                "rating",
+                                "latest"
+                            ]
+                        }
                     }
                 ],
                 "responses": {
@@ -1391,62 +1706,102 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Daftar kursus berhasil diambil"
+                                        },
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "title": {
-                                                        "type": "string",
-                                                        "example": "Full Stack Web Development Bootcamp"
-                                                    },
-                                                    "image": {
-                                                        "type": "string",
-                                                        "example": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800"
-                                                    },
-                                                    "description": {
-                                                        "type": "string",
-                                                        "example": "Comprehensive bootcamp covering..."
-                                                    },
-                                                    "type": {
-                                                        "type": "string",
-                                                        "example": "bootcamp"
-                                                    },
-                                                    "level": {
-                                                        "type": "string",
-                                                        "example": "beginner"
-                                                    },
-                                                    "instructor": {
-                                                        "type": "string",
-                                                        "example": "Dr. Ahmad Syafiq"
-                                                    },
-                                                    "duration": {
-                                                        "type": "string",
-                                                        "example": "12 weeks"
-                                                    },
-                                                    "price": {
-                                                        "type": "number",
-                                                        "format": "float",
-                                                        "example": 2500000
-                                                    },
-                                                    "access_type": {
-                                                        "type": "string",
-                                                        "example": "premium"
-                                                    },
-                                                    "video_url": {
-                                                        "type": "string",
-                                                        "example": "https://youtube.com/embed/intro"
-                                                    },
-                                                    "total_videos": {
-                                                        "type": "integer",
-                                                        "example": 45
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Full Stack Web Development Bootcamp"
+                                                            },
+                                                            "image": {
+                                                                "type": "string",
+                                                                "example": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Bootcamp intensif 12 minggu yang mencakup frontend (HTML, CSS, JavaScript, React) dan backend (Node.js, Express, MongoDB/PostgreSQL)"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "bootcamp"
+                                                            },
+                                                            "level": {
+                                                                "type": "string",
+                                                                "example": "beginner"
+                                                            },
+                                                            "category": {
+                                                                "type": "string",
+                                                                "example": "Programming"
+                                                            },
+                                                            "instructor": {
+                                                                "type": "string",
+                                                                "example": "Dr. Ahmad Syafiq"
+                                                            },
+                                                            "duration": {
+                                                                "type": "string",
+                                                                "example": "12 weeks"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 2500000
+                                                            },
+                                                            "access_type": {
+                                                                "type": "string",
+                                                                "example": "premium"
+                                                            },
+                                                            "video_url": {
+                                                                "type": "string",
+                                                                "example": "https://youtube.com/embed/intro"
+                                                            },
+                                                            "total_videos": {
+                                                                "type": "integer",
+                                                                "example": 45
+                                                            },
+                                                            "enrollments_count": {
+                                                                "description": "Number of students enrolled",
+                                                                "type": "integer",
+                                                                "example": 8
+                                                            },
+                                                            "reviews_avg_rating": {
+                                                                "description": "Average rating from reviews",
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 4.75
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     }
                                                 },
-                                                "type": "object"
-                                            }
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -2221,24 +2576,107 @@
                 ]
             }
         },
-        "/api/enrollments/{enrollmentId}/curriculums/{curriculumId}/complete": {
-            "post": {
+        "/api/courses/{courseId}/progress": {
+            "get": {
                 "tags": [
-                    "Curriculum",
-                    "Enrollment"
+                    "Curriculum"
                 ],
-                "summary": "Tandai materi selesai",
-                "description": "Menandai materi sebagai selesai dipelajari. Progress akan otomatis dihitung berdasarkan jumlah materi yang selesai.",
-                "operationId": "markCurriculumComplete",
+                "summary": "Get curriculum progress",
+                "description": "Get progress tracking for all curriculums in a course for the authenticated user",
+                "operationId": "getCurriculumProgress",
                 "parameters": [
                     {
-                        "name": "enrollmentId",
+                        "name": "courseId",
                         "in": "path",
                         "required": true,
                         "schema": {
                             "type": "integer"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Progress berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "total_materials": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "completed_materials": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "progress_percentage": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "curriculum_progress": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "curriculum_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Pengenalan Web Development"
+                                                            },
+                                                            "completed": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            },
+                                                            "completed_at": {
+                                                                "type": "string",
+                                                                "format": "datetime",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
+                    "404": {
+                        "description": "Course tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/curriculums/{curriculumId}/complete": {
+            "post": {
+                "tags": [
+                    "Curriculum"
+                ],
+                "summary": "Tandai materi selesai",
+                "description": "Menandai materi sebagai selesai dipelajari. Progress akan otomatis dihitung berdasarkan jumlah materi yang selesai.",
+                "operationId": "markCurriculumComplete",
+                "parameters": [
                     {
                         "name": "curriculumId",
                         "in": "path",
@@ -2317,10 +2755,10 @@
                         }
                     },
                     "403": {
-                        "description": "Tidak memiliki akses ke enrollment ini"
+                        "description": "Tidak memiliki akses"
                     },
                     "404": {
-                        "description": "Materi tidak ditemukan dalam kursus ini"
+                        "description": "Materi tidak ditemukan"
                     }
                 },
                 "security": [
@@ -2333,14 +2771,14 @@
         "/api/my-courses": {
             "get": {
                 "tags": [
-                    "Enrollments"
+                    "Enrollment"
                 ],
-                "summary": "Get logged-in user's courses",
-                "description": "Menampilkan daftar kursus yang sedang diikuti oleh user yang login",
+                "summary": "Lihat kursus saya",
+                "description": "Menampilkan daftar kursus yang sedang diikuti oleh user yang login beserta progress belajar",
                 "operationId": "getMyCourses",
                 "responses": {
                     "200": {
-                        "description": "List kursus berhasil diambil",
+                        "description": "Berhasil mengambil daftar kursus user",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2358,47 +2796,47 @@
                                             "items": {
                                                 "properties": {
                                                     "id": {
+                                                        "description": "ID Enrollment",
                                                         "type": "integer",
                                                         "example": 1
                                                     },
                                                     "course_id": {
                                                         "type": "integer",
-                                                        "example": 1
+                                                        "example": 5
                                                     },
                                                     "progress": {
+                                                        "description": "Progress belajar (0-100%)",
                                                         "type": "integer",
                                                         "example": 45
-                                                    },
-                                                    "calculated_progress": {
-                                                        "description": "Auto-calculated dari curriculum",
-                                                        "type": "integer",
-                                                        "example": 45
-                                                    },
-                                                    "completed_materials": {
-                                                        "type": "integer",
-                                                        "example": 3
-                                                    },
-                                                    "total_materials": {
-                                                        "type": "integer",
-                                                        "example": 7
                                                     },
                                                     "completed": {
+                                                        "description": "Apakah sudah selesai",
                                                         "type": "boolean",
                                                         "example": false
                                                     },
                                                     "certificate_url": {
                                                         "type": "string",
-                                                        "example": "https://example.com/certificates/student1-intro-programming.pdf"
+                                                        "example": "https://example.com/cert.pdf",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "description": "Tanggal daftar",
+                                                        "type": "string",
+                                                        "format": "date-time"
                                                     },
                                                     "course": {
                                                         "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
                                                             "title": {
                                                                 "type": "string",
-                                                                "example": "Full Stack Web Development Bootcamp"
+                                                                "example": "Full Stack Web Development"
                                                             },
-                                                            "instructor": {
+                                                            "thumbnail": {
                                                                 "type": "string",
-                                                                "example": "Dr. Ahmad Syafiq"
+                                                                "example": "https://example.com/thumb.jpg"
                                                             }
                                                         },
                                                         "type": "object"
@@ -2412,6 +2850,9 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Token tidak valid"
                     }
                 },
                 "security": [
@@ -2421,74 +2862,62 @@
                 ]
             }
         },
-        "/api/enrollments": {
-            "get": {
-                "tags": [
-                    "Enrollments"
-                ],
-                "summary": "Get all enrollments (Admin)",
-                "description": "Melihat seluruh data enrollment (untuk Admin)",
-                "operationId": "getIndexEnrollments",
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/courses/{id}/enroll": {
+        "/api/courses/{courseId}/enroll": {
             "post": {
                 "tags": [
-                    "Enrollments"
+                    "Enrollment"
                 ],
-                "summary": "Enroll to a course",
-                "description": "Mendaftar ke kursus berdasarkan ID Kursus di URL",
+                "summary": "Daftar ke kursus",
+                "description": "Mendaftarkan user yang login ke kursus tertentu. Tidak perlu request body, hanya perlu ID kursus di URL.",
                 "operationId": "enrollCourse",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "courseId",
                         "in": "path",
                         "description": "ID Kursus yang ingin didaftarkan",
                         "required": true,
                         "schema": {
                             "type": "integer",
-                            "example": 1
+                            "example": 5
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Berhasil mendaftar",
+                        "description": "Berhasil mendaftar ke kursus",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
-                                        "message": {
+                                        "pesan": {
                                             "type": "string",
                                             "example": "Berhasil mendaftar ke kursus"
                                         },
                                         "data": {
                                             "properties": {
-                                                "user_id": {
+                                                "id": {
                                                     "type": "integer",
                                                     "example": 1
                                                 },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
                                                 "course_id": {
                                                     "type": "integer",
-                                                    "example": 1
+                                                    "example": 5
                                                 },
                                                 "progress": {
                                                     "type": "integer",
                                                     "example": 0
+                                                },
+                                                "completed": {
+                                                    "type": "boolean",
+                                                    "example": false
                                                 }
                                             },
                                             "type": "object"
@@ -2499,11 +2928,11 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "User sudah terdaftar di kursus ini"
-                    },
                     "404": {
                         "description": "Kursus tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "User sudah terdaftar di kursus ini"
                     }
                 },
                 "security": [
@@ -2513,27 +2942,27 @@
                 ]
             }
         },
-        "/api/enrollments/{id}/progress": {
+        "/api/enrollments/{enrollmentId}/progress": {
             "put": {
                 "tags": [
-                    "Enrollments"
+                    "Enrollment"
                 ],
-                "summary": "Update course progress",
-                "description": "Update progress belajar user pada enrollment tertentu",
+                "summary": "Update progress belajar",
+                "description": "Update progress belajar user. Progress otomatis terupdate saat menandai materi selesai, tapi endpoint ini untuk manual override.",
                 "operationId": "updateProgress",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "enrollmentId",
                         "in": "path",
-                        "description": "ID Enrollment (Bukan ID Course)",
+                        "description": "ID Enrollment (bukan ID Course!)",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "requestBody": {
-                    "description": "Data progress baru",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -2562,16 +2991,20 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
-                                        "message": {
+                                        "pesan": {
                                             "type": "string",
                                             "example": "Progress berhasil diupdate"
                                         },
                                         "data": {
                                             "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
                                                 "progress": {
                                                     "type": "integer",
                                                     "example": 75
@@ -2588,6 +3021,12 @@
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "description": "Tidak punya akses ke enrollment ini"
+                    },
+                    "404": {
+                        "description": "Enrollment tidak ditemukan"
                     }
                 },
                 "security": [
@@ -2597,47 +3036,97 @@
                 ]
             }
         },
-        "/api/mentoring-sessions": {
+        "/api/enrollments": {
             "get": {
                 "tags": [
-                    "Mentoring"
+                    "Enrollment"
                 ],
-                "summary": "Get All Mentoring Sessions",
-                "description": "Get all mentoring sessions for authenticated user",
-                "operationId": "getAllMentoringSessions",
+                "summary": "Lihat semua enrollment (Admin)",
+                "description": "Admin dapat melihat seluruh data enrollment dari semua user",
+                "operationId": "indexEnrollments",
                 "parameters": [
                     {
-                        "name": "status",
+                        "name": "page",
                         "in": "query",
-                        "description": "Filter by status",
-                        "required": false,
+                        "description": "Halaman",
                         "schema": {
-                            "type": "string",
-                            "enum": [
-                                "pending",
-                                "scheduled",
-                                "ongoing",
-                                "completed",
-                                "cancelled"
-                            ]
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah per halaman",
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Mentoring sessions retrieved successfully",
+                        "description": "Berhasil mengambil daftar enrollment",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/MentoringSession"
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "course_id": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "progress": {
+                                                        "type": "integer",
+                                                        "example": 45
+                                                    },
+                                                    "completed": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Andi Pratama"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "course": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Web Development"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
                                             }
                                         }
                                     },
@@ -2646,8 +3135,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthenticated"
+                    "403": {
+                        "description": "Forbidden - Admin only"
                     }
                 },
                 "security": [
@@ -2658,73 +3147,30 @@
             },
             "post": {
                 "tags": [
-                    "Mentoring"
+                    "Enrollment"
                 ],
-                "summary": "Create Mentoring Session",
-                "description": "Create a new mentoring session booking",
-                "operationId": "createMentoringSession",
+                "summary": "Buat enrollment manual (Admin)",
+                "description": "Admin dapat mendaftarkan user ke kursus secara manual",
+                "operationId": "storeEnrollment",
                 "requestBody": {
-                    "description": "Mentoring session data",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "mentor_id",
-                                    "type",
-                                    "payment_method",
-                                    "schedule",
-                                    "status"
+                                    "user_id",
+                                    "course_id"
                                 ],
                                 "properties": {
-                                    "mentor_id": {
-                                        "description": "ID of the mentor",
+                                    "user_id": {
+                                        "description": "ID User yang akan didaftarkan",
                                         "type": "integer",
-                                        "example": 7
+                                        "example": 3
                                     },
-                                    "member_id": {
-                                        "description": "ID of the member (optional, defaults to authenticated user)",
+                                    "course_id": {
+                                        "description": "ID Kursus tujuan",
                                         "type": "integer",
-                                        "example": 4
-                                    },
-                                    "type": {
-                                        "description": "Type of mentoring session",
-                                        "type": "string",
-                                        "enum": [
-                                            "academic",
-                                            "life_plan"
-                                        ],
-                                        "example": "academic"
-                                    },
-                                    "payment_method": {
-                                        "description": "Payment method",
-                                        "type": "string",
-                                        "enum": [
-                                            "qris",
-                                            "bank_transfer",
-                                            "credit_card",
-                                            "e_wallet"
-                                        ],
-                                        "example": "qris"
-                                    },
-                                    "schedule": {
-                                        "description": "Scheduled date and time",
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-12-20 10:00:00"
-                                    },
-                                    "status": {
-                                        "description": "Initial status (always pending)",
-                                        "type": "string",
-                                        "enum": [
-                                            "pending"
-                                        ],
-                                        "example": "pending"
-                                    },
-                                    "note": {
-                                        "description": "Additional notes",
-                                        "type": "string",
-                                        "example": "Saya ingin konsultasi skripsi"
+                                        "example": 5
                                     }
                                 },
                                 "type": "object"
@@ -2734,50 +3180,13 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Mentoring session created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Mentoring session created successfully"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/MentoringSession"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Enrollment berhasil dibuat"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
                     },
                     "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The given data was invalid."
-                                        },
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "User sudah terdaftar di kursus ini"
                     }
                 },
                 "security": [
@@ -2787,38 +3196,75 @@
                 ]
             }
         },
-        "/api/mentoring-sessions/{id}": {
+        "/api/enrollments/{id}": {
             "get": {
                 "tags": [
-                    "Mentoring"
+                    "Enrollment"
                 ],
-                "summary": "Get Single Mentoring Session",
-                "description": "Get details of a specific mentoring session",
-                "operationId": "getSingleMentoringSession",
+                "summary": "Lihat detail enrollment",
+                "description": "Lihat detail satu enrollment termasuk data user dan course",
+                "operationId": "showEnrollment",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Mentoring session ID",
+                        "description": "ID Enrollment",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Mentoring session details retrieved",
+                        "description": "Berhasil mengambil detail enrollment",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
                                         "data": {
-                                            "$ref": "#/components/schemas/MentoringSession"
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "progress": {
+                                                    "type": "integer",
+                                                    "example": 45
+                                                },
+                                                "completed": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "certificate_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "user": {
+                                                    "type": "object"
+                                                },
+                                                "course": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -2827,24 +3273,68 @@
                         }
                     },
                     "404": {
-                        "description": "Mentoring session not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Mentoring session not found"
-                                        }
+                        "description": "Enrollment tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Enrollment"
+                ],
+                "summary": "Update enrollment (Admin)",
+                "description": "Admin dapat mengupdate data enrollment seperti progress dan status completed",
+                "operationId": "updateEnrollment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Enrollment",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "progress": {
+                                        "type": "integer",
+                                        "maximum": 100,
+                                        "minimum": 0,
+                                        "example": 50
                                     },
-                                    "type": "object"
-                                }
+                                    "completed": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "certificate_url": {
+                                        "type": "string",
+                                        "example": "https://example.com/cert.pdf"
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Enrollment berhasil diupdate"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    },
+                    "404": {
+                        "description": "Enrollment tidak ditemukan"
                     }
                 },
                 "security": [
@@ -2855,232 +3345,32 @@
             },
             "delete": {
                 "tags": [
-                    "Mentoring"
+                    "Enrollment"
                 ],
-                "summary": "Delete Mentoring Session",
-                "description": "Delete a mentoring session",
-                "operationId": "deleteMentoringSession",
+                "summary": "Hapus enrollment (Admin)",
+                "description": "Admin dapat menghapus enrollment (batalkan pendaftaran user dari kursus)",
+                "operationId": "deleteEnrollment",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Mentoring session ID",
+                        "description": "ID Enrollment yang akan dihapus",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Session deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Mentoring session deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Enrollment berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
                     },
                     "404": {
-                        "description": "Session not found"
-                    },
-                    "403": {
-                        "description": "Not authorized to delete this session"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/mentoring-sessions/{id}/schedule": {
-            "post": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "Schedule Mentoring Session",
-                "description": "Endpoint for Mentor to set schedule and meeting link",
-                "operationId": "scheduleMentoringSession",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Mentoring session ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Schedule and meeting link data",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "schedule",
-                                    "meeting_link"
-                                ],
-                                "properties": {
-                                    "schedule": {
-                                        "description": "Format: YYYY-MM-DD HH:MM:SS",
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-12-15 14:00:00"
-                                    },
-                                    "meeting_link": {
-                                        "description": "Zoom/Google Meet link",
-                                        "type": "string",
-                                        "example": "https://zoom.us/j/123456789"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Schedule updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Mentoring session scheduled successfully"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/MentoringSession"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Unauthorized - User is not mentor or not owner of session",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Only mentors can schedule sessions"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Mentoring session not found"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/mentoring-sessions/{id}/status": {
-            "put": {
-                "tags": [
-                    "Mentoring"
-                ],
-                "summary": "Update Session Status",
-                "description": "Update mentoring session status (Mentor only)",
-                "operationId": "updateSessionStatus",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Mentoring session ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Status update data",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "status"
-                                ],
-                                "properties": {
-                                    "status": {
-                                        "description": "New status for the session",
-                                        "type": "string",
-                                        "enum": [
-                                            "pending",
-                                            "scheduled",
-                                            "ongoing",
-                                            "completed",
-                                            "cancelled"
-                                        ],
-                                        "example": "completed"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Status updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Session status updated successfully"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/MentoringSession"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Only mentors can update status"
+                        "description": "Enrollment tidak ditemukan"
                     }
                 },
                 "security": [
@@ -3095,17 +3385,104 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Get My Mentoring Sessions",
-                "description": "Get all mentoring sessions for the authenticated user (as mentor or member)",
+                "summary": "Lihat sesi mentoring saya",
+                "description": "Student/Mentor dapat melihat semua sesi mentoring mereka (baik sebagai student maupun mentor)",
                 "operationId": "getMyMentoringSessions",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "scheduled",
+                                "ongoing",
+                                "completed",
+                                "cancelled"
+                            ]
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "My mentoring sessions retrieved",
+                        "description": "Daftar sesi mentoring berhasil diambil",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Daftar sesi mentoring saya berhasil diambil"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MentoringSession"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentoring-sessions": {
+            "get": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Lihat semua sesi mentoring",
+                "description": "Mentor/Admin dapat melihat semua sesi mentoring",
+                "operationId": "getAllMentoringSessions",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "scheduled",
+                                "ongoing",
+                                "completed",
+                                "cancelled"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar sesi mentoring",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
@@ -3127,9 +3504,444 @@
                         "bearerAuth": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Booking sesi mentoring baru",
+                "description": "Student membuat booking sesi mentoring dengan mentor. Status awal: pending",
+                "operationId": "createMentoringSession",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "mentor_id",
+                                    "type",
+                                    "payment_method",
+                                    "schedule"
+                                ],
+                                "properties": {
+                                    "mentor_id": {
+                                        "description": "ID mentor yang dipilih",
+                                        "type": "integer",
+                                        "example": 7
+                                    },
+                                    "type": {
+                                        "description": "Jenis mentoring: academic=bimbingan akademik, life_plan=perencanaan karir",
+                                        "type": "string",
+                                        "enum": [
+                                            "academic",
+                                            "life_plan"
+                                        ],
+                                        "example": "academic"
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "qris",
+                                            "bank_transfer",
+                                            "credit_card",
+                                            "e_wallet"
+                                        ],
+                                        "example": "bank_transfer"
+                                    },
+                                    "schedule": {
+                                        "description": "Jadwal yang diinginkan",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-12-20 10:00:00"
+                                    },
+                                    "note": {
+                                        "description": "Catatan/topik yang ingin dibahas",
+                                        "type": "string",
+                                        "example": "Saya butuh bimbingan untuk skripsi tentang machine learning"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Booking berhasil dibuat, menunggu konfirmasi mentor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Sesi mentoring berhasil dibuat"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/MentoringSession"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/mentoring-sessions/{sessionId}/need-assessments": {
+        "/api/mentoring-sessions/{id}": {
+            "get": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Lihat detail sesi mentoring",
+                "description": "Lihat detail lengkap satu sesi mentoring termasuk meeting link",
+                "operationId": "getSingleMentoringSession",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Sesi Mentoring",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail sesi berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/MentoringSession"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sesi tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Update detail sesi",
+                "description": "Update jadwal, meeting link, atau catatan sesi",
+                "operationId": "updateMentoringSession",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "schedule": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-12-25 14:00:00"
+                                    },
+                                    "meeting_link": {
+                                        "type": "string",
+                                        "example": "https://meet.google.com/abc-defg-hij"
+                                    },
+                                    "note": {
+                                        "type": "string",
+                                        "example": "Reschedule karena ada keperluan"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sesi berhasil diupdate"
+                    },
+                    "404": {
+                        "description": "Sesi tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Hapus sesi mentoring",
+                "description": "Hapus atau batalkan sesi mentoring",
+                "operationId": "deleteMentoringSession",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sesi berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Tidak punya akses"
+                    },
+                    "404": {
+                        "description": "Sesi tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentoring-sessions/{id}/feedback": {
+            "post": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Beri feedback setelah sesi selesai",
+                "description": "Student memberikan rating dan feedback setelah sesi mentoring selesai (status: completed)",
+                "operationId": "submitMentoringFeedback",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "rating"
+                                ],
+                                "properties": {
+                                    "rating": {
+                                        "description": "Rating 1-5 bintang",
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1,
+                                        "example": 5
+                                    },
+                                    "comment": {
+                                        "description": "Komentar feedback",
+                                        "type": "string",
+                                        "example": "Mentornya sangat membantu dan sabar menjelaskan!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Feedback berhasil dikirim"
+                    },
+                    "400": {
+                        "description": "Sesi belum selesai (harus status: completed)"
+                    },
+                    "404": {
+                        "description": "Sesi tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentoring-sessions/{mentorId}/schedule": {
+            "get": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Lihat jadwal mentor",
+                "description": "Lihat jadwal sesi yang sudah terbooking untuk mentor tertentu (untuk menghindari bentrok)",
+                "operationId": "getMentorSchedule",
+                "parameters": [
+                    {
+                        "name": "mentorId",
+                        "in": "path",
+                        "description": "ID User Mentor",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "from_date",
+                        "in": "query",
+                        "description": "Filter dari tanggal",
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-01"
+                        }
+                    },
+                    {
+                        "name": "to_date",
+                        "in": "query",
+                        "description": "Filter sampai tanggal",
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-31"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Jadwal mentor berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MentoringSession"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mentor tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentoring-sessions/{id}/status": {
+            "put": {
+                "tags": [
+                    "Mentoring"
+                ],
+                "summary": "Update status sesi (Mentor only)",
+                "description": "Mentor mengubah status sesi mentoring. Contoh: pending ke scheduled (konfirmasi), scheduled ke completed (selesai)",
+                "operationId": "updateSessionStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "description": "Status baru",
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "scheduled",
+                                            "ongoing",
+                                            "completed",
+                                            "cancelled",
+                                            "refunded"
+                                        ],
+                                        "example": "scheduled"
+                                    },
+                                    "meeting_link": {
+                                        "description": "Link meeting (wajib jika status=scheduled)",
+                                        "type": "string",
+                                        "example": "https://zoom.us/j/123456789"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status berhasil diupdate"
+                    },
+                    "403": {
+                        "description": "Hanya mentor yang bisa update status"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentoring-sessions/{mentoringSessionId}/need-assessments": {
             "get": {
                 "tags": [
                     "Need Assessments"
@@ -3139,7 +3951,7 @@
                 "operationId": "getNeedAssessment",
                 "parameters": [
                     {
-                        "name": "sessionId",
+                        "name": "mentoringSessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -3277,7 +4089,7 @@
                 "operationId": "updateNeedAssessment",
                 "parameters": [
                     {
-                        "name": "sessionId",
+                        "name": "mentoringSessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -3406,7 +4218,7 @@
                 "operationId": "createNeedAssessment",
                 "parameters": [
                     {
-                        "name": "sessionId",
+                        "name": "mentoringSessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -3592,7 +4404,7 @@
                 "operationId": "deleteNeedAssessment",
                 "parameters": [
                     {
-                        "name": "sessionId",
+                        "name": "mentoringSessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -3670,7 +4482,7 @@
                 ]
             }
         },
-        "/api/mentoring-sessions/{sessionId}/need-assessments/mark-completed": {
+        "/api/mentoring-sessions/{mentoringSessionId}/need-assessments/mark-completed": {
             "put": {
                 "tags": [
                     "Need Assessments"
@@ -3680,7 +4492,7 @@
                 "operationId": "markNeedAssessmentCompleted",
                 "parameters": [
                     {
-                        "name": "sessionId",
+                        "name": "mentoringSessionId",
                         "in": "path",
                         "description": "Mentoring Session ID",
                         "required": true,
@@ -4106,6 +4918,34 @@
             }
         },
         "/api/achievements/{id}": {
+            "get": {
+                "tags": [
+                    "Achievements"
+                ],
+                "summary": "Get achievement detail",
+                "description": "Get specific achievement detail",
+                "operationId": "getAchievementById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Achievement retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "put": {
                 "tags": [
                     "Achievements"
@@ -4262,6 +5102,343 @@
                 "responses": {
                     "201": {
                         "description": "Organization created"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/organizations/{id}": {
+            "get": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Get organization detail",
+                "description": "Get specific organization detail",
+                "operationId": "getOrganizationById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Organization retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Update organization",
+                "description": "Update existing organization",
+                "operationId": "updateOrganization",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "role": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Organization updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Delete organization",
+                "description": "Delete an organization",
+                "operationId": "deleteOrganization",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Organization deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/achievements/{id}/certificate": {
+            "post": {
+                "tags": [
+                    "Achievements"
+                ],
+                "summary": "Upload achievement certificate",
+                "description": "Upload certificate for an achievement",
+                "operationId": "uploadAchievementCertificate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "certificate"
+                                ],
+                                "properties": {
+                                    "certificate": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Certificate uploaded successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Achievements"
+                ],
+                "summary": "Delete achievement certificate",
+                "description": "Delete certificate from an achievement",
+                "operationId": "deleteAchievementCertificate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Certificate deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/experiences/{id}/certificate": {
+            "post": {
+                "tags": [
+                    "Experiences"
+                ],
+                "summary": "Upload experience certificate",
+                "description": "Upload certificate for an experience",
+                "operationId": "uploadExperienceCertificate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "certificate"
+                                ],
+                                "properties": {
+                                    "certificate": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Certificate uploaded successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Experiences"
+                ],
+                "summary": "Delete experience certificate",
+                "description": "Delete certificate from an experience",
+                "operationId": "deleteExperienceCertificate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Certificate deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/organizations/{id}/logo": {
+            "post": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Upload organization logo",
+                "description": "Upload logo for an organization",
+                "operationId": "uploadOrganizationLogo",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "logo"
+                                ],
+                                "properties": {
+                                    "logo": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Logo uploaded successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Delete organization logo",
+                "description": "Delete logo from an organization",
+                "operationId": "deleteOrganizationLogo",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logo deleted successfully"
                     }
                 },
                 "security": [
@@ -5102,7 +6279,7 @@
                     "Scholarships"
                 ],
                 "summary": "Get all scholarships",
-                "description": "Get list of all available scholarships with filtering options",
+                "description": "Get list of all available scholarships with filtering and sorting options",
                 "operationId": "getScholarships",
                 "parameters": [
                     {
@@ -5127,6 +6304,40 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "study_field",
+                        "in": "query",
+                        "description": "Filter by study field",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Computer Science"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by name or description",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort by: popular (by applications count), deadline, or latest",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "latest",
+                            "enum": [
+                                "popular",
+                                "deadline",
+                                "latest"
+                            ]
+                        }
                     }
                 ],
                 "responses": {
@@ -5136,42 +6347,97 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Daftar beasiswa berhasil diambil"
+                                        },
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "LPDP Scholarship Program"
-                                                    },
-                                                    "description": {
-                                                        "type": "string",
-                                                        "example": "Beasiswa penuh untuk program master..."
-                                                    },
-                                                    "benefit": {
-                                                        "type": "string",
-                                                        "example": "Biaya kuliah penuh, biaya hidup..."
-                                                    },
-                                                    "location": {
-                                                        "type": "string",
-                                                        "example": "Indonesia dan Luar Negeri"
-                                                    },
-                                                    "status": {
-                                                        "type": "string",
-                                                        "example": "open"
-                                                    },
-                                                    "deadline": {
-                                                        "type": "string",
-                                                        "format": "date",
-                                                        "example": "2024-03-31"
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "organization_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Beasiswa LPDP untuk Magister dan Doktor"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Program beasiswa penuh dari pemerintah Indonesia untuk studi S2 dan S3 dalam dan luar negeri"
+                                                            },
+                                                            "benefit": {
+                                                                "type": "string",
+                                                                "example": "Biaya pendidikan penuh, Biaya hidup bulanan, Asuransi kesehatan, Biaya keberangkatan"
+                                                            },
+                                                            "location": {
+                                                                "type": "string",
+                                                                "example": "Indonesia dan Luar Negeri"
+                                                            },
+                                                            "study_field": {
+                                                                "type": "string",
+                                                                "example": "Semua bidang studi"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "open"
+                                                            },
+                                                            "deadline": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2024-06-30"
+                                                            },
+                                                            "applications_count": {
+                                                                "description": "Number of applications received",
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "organization": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "Lembaga Pengelola Dana Pendidikan"
+                                                                    },
+                                                                    "email": {
+                                                                        "type": "string",
+                                                                        "example": "info@lpdp.kemenkeu.go.id"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     }
                                                 },
-                                                "type": "object"
-                                            }
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -5888,12 +7154,10 @@
                                     "payment_method": {
                                         "type": "string",
                                         "enum": [
-                                            "qris",
-                                            "bank_transfer",
-                                            "credit_card",
-                                            "e_wallet"
+                                            "manual",
+                                            "bank_transfer"
                                         ],
-                                        "example": "qris"
+                                        "example": "manual"
                                     }
                                 },
                                 "type": "object"
@@ -5920,12 +7184,6 @@
                                             "properties": {
                                                 "transaction": {
                                                     "type": "object"
-                                                },
-                                                "snap_token": {
-                                                    "type": "string"
-                                                },
-                                                "redirect_url": {
-                                                    "type": "string"
                                                 }
                                             },
                                             "type": "object"
@@ -6100,23 +7358,11 @@
                                                 },
                                                 "payment_method": {
                                                     "type": "string",
-                                                    "example": "qris"
+                                                    "example": "manual"
                                                 },
                                                 "status": {
                                                     "type": "string",
                                                     "example": "paid"
-                                                },
-                                                "midtrans_order_id": {
-                                                    "type": "string",
-                                                    "example": "ORDER-123456"
-                                                },
-                                                "snap_token": {
-                                                    "type": "string",
-                                                    "nullable": true
-                                                },
-                                                "payment_url": {
-                                                    "type": "string",
-                                                    "nullable": true
                                                 },
                                                 "expired_at": {
                                                     "type": "string",
@@ -6177,12 +7423,10 @@
                                     "payment_method": {
                                         "type": "string",
                                         "enum": [
-                                            "qris",
-                                            "bank_transfer",
-                                            "credit_card",
-                                            "e_wallet"
+                                            "manual",
+                                            "bank_transfer"
                                         ],
-                                        "example": "qris"
+                                        "example": "manual"
                                     }
                                 },
                                 "type": "object"
@@ -6223,14 +7467,6 @@
                                                         }
                                                     },
                                                     "type": "object"
-                                                },
-                                                "snap_token": {
-                                                    "type": "string",
-                                                    "example": "abc123def456"
-                                                },
-                                                "redirect_url": {
-                                                    "type": "string",
-                                                    "example": "https://app.midtrans.com/snap/v2/vtweb/abc123"
                                                 }
                                             },
                                             "type": "object"
@@ -6304,12 +7540,10 @@
                                     "payment_method": {
                                         "type": "string",
                                         "enum": [
-                                            "qris",
-                                            "bank_transfer",
-                                            "credit_card",
-                                            "e_wallet"
+                                            "manual",
+                                            "bank_transfer"
                                         ],
-                                        "example": "qris"
+                                        "example": "manual"
                                     },
                                     "courses_ids": {
                                         "type": "array",
@@ -6369,12 +7603,10 @@
                                     "payment_method": {
                                         "type": "string",
                                         "enum": [
-                                            "qris",
-                                            "bank_transfer",
-                                            "credit_card",
-                                            "e_wallet"
+                                            "manual",
+                                            "bank_transfer"
                                         ],
-                                        "example": "qris"
+                                        "example": "manual"
                                     }
                                 },
                                 "type": "object"
@@ -6969,69 +8201,134 @@
                 ]
             }
         },
-        "/api/midtrans/webhook": {
-            "post": {
+        "/api/admin/users/statistics": {
+            "get": {
                 "tags": [
-                    "Webhooks"
+                    "Users"
                 ],
-                "summary": "Midtrans Webhook Notification",
-                "description": "Handle payment notification from Midtrans payment gateway",
-                "operationId": "midtransWebhook",
+                "summary": "Get user statistics (Admin)",
+                "description": "Get user statistics and analytics - Admin only",
+                "operationId": "adminGetUserStatistics",
+                "responses": {
+                    "200": {
+                        "description": "Statistics retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "total_users": {
+                                                    "type": "integer",
+                                                    "example": 150
+                                                },
+                                                "by_role": {
+                                                    "properties": {
+                                                        "student": {
+                                                            "type": "integer",
+                                                            "example": 100
+                                                        },
+                                                        "mentor": {
+                                                            "type": "integer",
+                                                            "example": 30
+                                                        },
+                                                        "admin": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "corporate": {
+                                                            "type": "integer",
+                                                            "example": 15
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "new_this_month": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/mentors": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get all mentors (Admin)",
+                "description": "Get list of all mentor users - Admin only",
+                "operationId": "adminGetMentors",
+                "responses": {
+                    "200": {
+                        "description": "Mentors retrieved successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/{id}/status": {
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update user status (Admin)",
+                "description": "Update user status - Admin only",
+                "operationId": "adminUpdateUserStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "order_id",
-                                    "transaction_status",
-                                    "status_code",
-                                    "gross_amount",
-                                    "signature_key",
-                                    "payment_type",
-                                    "transaction_time",
-                                    "fraud_status"
+                                    "status"
                                 ],
                                 "properties": {
-                                    "order_id": {
-                                        "description": "Order ID generated by your system",
+                                    "status": {
                                         "type": "string",
-                                        "example": "TRX20251202ABC123"
-                                    },
-                                    "transaction_status": {
-                                        "description": "Status of the transaction",
-                                        "type": "string",
-                                        "example": "settlement"
-                                    },
-                                    "status_code": {
-                                        "description": "Midtrans status code",
-                                        "type": "string",
-                                        "example": "200"
-                                    },
-                                    "gross_amount": {
-                                        "description": "Total transaction amount",
-                                        "type": "string",
-                                        "example": "500000"
-                                    },
-                                    "signature_key": {
-                                        "description": "Security signature for validation",
-                                        "type": "string",
-                                        "example": "abc123def456..."
-                                    },
-                                    "payment_type": {
-                                        "description": "Payment method used by user",
-                                        "type": "string",
-                                        "example": "qris"
-                                    },
-                                    "transaction_time": {
-                                        "description": "Payment transaction time",
-                                        "type": "string",
-                                        "example": "2025-12-02 18:00:00"
-                                    },
-                                    "fraud_status": {
-                                        "description": "Fraud detection status",
-                                        "type": "string",
-                                        "example": "accept"
+                                        "enum": [
+                                            "active",
+                                            "inactive",
+                                            "suspended"
+                                        ],
+                                        "example": "active"
                                     }
                                 },
                                 "type": "object"
@@ -7041,29 +8338,98 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Webhook processed successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "success"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Payment notification processed"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
+                        "description": "Status updated successfully"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/{id}/suspend": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Suspend user (Admin)",
+                "description": "Suspend a user account - Admin only",
+                "operationId": "adminSuspendUser",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Violation of terms of service"
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
-                    },
-                    "400": {
-                        "description": "Invalid signature or request"
                     }
-                }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User suspended successfully"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/{id}/activate": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Activate user (Admin)",
+                "description": "Activate a suspended user account - Admin only",
+                "operationId": "adminActivateUser",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User activated successfully"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     },
@@ -7097,20 +8463,24 @@
             },
             "MentoringSession": {
                 "title": "Mentoring Session Schema",
+                "description": "Struktur data sesi mentoring",
                 "properties": {
                     "id": {
                         "type": "integer",
                         "example": 1
                     },
                     "mentor_id": {
+                        "description": "ID User yang jadi mentor",
                         "type": "integer",
                         "example": 7
                     },
                     "member_id": {
+                        "description": "ID User yang jadi student",
                         "type": "integer",
                         "example": 4
                     },
                     "type": {
+                        "description": "Jenis mentoring",
                         "type": "string",
                         "enum": [
                             "academic",
@@ -7129,6 +8499,7 @@
                         "example": "qris"
                     },
                     "schedule": {
+                        "description": "Jadwal sesi",
                         "type": "string",
                         "format": "date-time",
                         "example": "2025-12-20 10:00:00"
@@ -7140,13 +8511,33 @@
                             "scheduled",
                             "ongoing",
                             "completed",
-                            "cancelled"
+                            "cancelled",
+                            "refunded"
                         ],
                         "example": "pending"
                     },
                     "meeting_link": {
+                        "description": "Link Zoom/GMeet",
                         "type": "string",
                         "example": "https://zoom.us/j/123456789",
+                        "nullable": true
+                    },
+                    "note": {
+                        "type": "string",
+                        "example": "Saya butuh bimbingan skripsi",
+                        "nullable": true
+                    },
+                    "rating": {
+                        "description": "Rating dari student",
+                        "type": "integer",
+                        "maximum": 5,
+                        "minimum": 1,
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "feedback": {
+                        "type": "string",
+                        "example": "Mentornya sangat membantu!",
                         "nullable": true
                     },
                     "created_at": {
@@ -7182,10 +8573,6 @@
         {
             "name": "Courses",
             "description": "Course management endpoints"
-        },
-        {
-            "name": "Enrollments",
-            "description": "Course enrollment endpoints"
         },
         {
             "name": "Scholarships",
@@ -7250,10 +8637,6 @@
         {
             "name": "Enrollment",
             "description": "Enrollment"
-        },
-        {
-            "name": "Webhooks",
-            "description": "Webhooks"
         }
     ]
 }
