@@ -85,6 +85,7 @@ class TransactionResource extends JsonResource
 
         return match($this->transactionable_type) {
             'App\Models\Course' => $this->transactionable->title ?? null,
+            'App\Models\Enrollment' => $this->transactionable->course->title ?? null,
             'App\Models\Subscription' => $this->transactionable->plan . ' - ' . $this->transactionable->package_type ?? null,
             'App\Models\MentoringSession' => 'Mentoring ' . ($this->transactionable->type === 'academic' ? 'Akademik' : 'Life Plan') ?? null,
             default => null,
@@ -108,6 +109,17 @@ class TransactionResource extends JsonResource
                 'instructor' => $this->transactionable->instructor,
                 'level' => $this->transactionable->level,
                 'duration' => $this->transactionable->duration,
+            ],
+            'App\Models\Enrollment' => [
+                'enrollment_id' => $this->transactionable->id,
+                'course_id' => $this->transactionable->course->id ?? null,
+                'title' => $this->transactionable->course->title ?? null,
+                'image' => $this->transactionable->course->image ?? null,
+                'instructor' => $this->transactionable->course->instructor ?? null,
+                'level' => $this->transactionable->course->level ?? null,
+                'duration' => $this->transactionable->course->duration ?? null,
+                'progress' => $this->transactionable->progress,
+                'completed' => $this->transactionable->completed,
             ],
             'App\Models\Subscription' => [
                 'id' => $this->transactionable->id,

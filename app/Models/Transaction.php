@@ -37,10 +37,12 @@ class Transaction extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Polymorphic relationship
+    // Polymorphic relationship with conditional eager loading
     public function transactionable()
     {
-        return $this->morphTo();
+        return $this->morphTo()->morphWith([
+            Enrollment::class => ['course'],
+        ]);
     }
 
     // Helper methods

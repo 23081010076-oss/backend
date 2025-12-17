@@ -119,7 +119,10 @@ class TransactionController extends Controller
             );
 
             return $this->createdResponse(
-                new TransactionResource($result),
+                [
+                    'transaction'  => new TransactionResource($result['transaction']),
+                    'instructions' => $result['instructions'],
+                ],
                 'Transaksi berhasil dibuat'
             );
         } catch (\Exception $e) {
@@ -153,7 +156,11 @@ class TransactionController extends Controller
             );
 
             return $this->createdResponse(
-                new TransactionResource($result),
+                [
+                    'transaction'   => new TransactionResource($result['transaction']),
+                    'subscription'  => $result['subscription'],
+                    'instructions'  => $result['instructions'],
+                ],
                 'Transaksi langganan berhasil dibuat'
             );
         } catch (\Exception $e) {
@@ -192,7 +199,10 @@ class TransactionController extends Controller
             );
 
             return $this->createdResponse(
-                new TransactionResource($result),
+                [
+                    'transaction'  => new TransactionResource($result['transaction']),
+                    'instructions' => $result['instructions'],
+                ],
                 'Transaksi mentoring berhasil dibuat'
             );
         } catch (\Exception $e) {
