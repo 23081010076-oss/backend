@@ -1,0 +1,88 @@
+﻿2025-12-13 feat: Implement mentoring session management with dedicated requests, service, routes, and API flow documentation.
+2025-12-12 feat: Implement sorting and filtering options for articles, courses, and scholarships
+2025-12-12 feat: Enhance Scholarship model and controller with new fields and update seeder data
+2025-12-12 docs: Add comprehensive API documentation for the Student App.
+2025-12-12 feat: add comprehensive API response examples documentation for the Student App
+2025-12-12 feat: Add initial database schema documentation including ERD and detailed table structures.
+2025-12-12 docs: Add initial comprehensive database schema documentation including ERD and detailed table structures.
+2025-12-12 docs: add initial database schema documentation including ERD and detailed table structures.
+2025-12-12 docs: Add initial database schema documentation with ERD and detailed table descriptions.
+2025-12-12 feat: add initial database schema documentation including ERD and detailed table structures
+2025-12-12 docs: Add comprehensive database schema documentation including ERD and detailed table structures.
+2025-12-12 docs: Add initial database schema documentation and project implementation report.
+2025-12-12 docs: Add comprehensive user flow documentation and a detailed report on Laravel backend implementation.
+2025-12-12 feat: Revise project documentation structure and enhance clarity in Student WebApp report
+2025-12-12 Implement feature X to enhance user experience and fix bug Y in module Z
+2025-12-12 Implement feature X to enhance user experience and optimize performance
+2025-12-12 feat: Update education level options in UpdateProfileRequest; modify payment methods in session migration and seeder
+2025-12-11 feat: Auto-generate certificate upon course completion; update enrollment progress handling in CurriculumProgressController; transform transaction items in TransactionController response
+2025-12-11 feat: Implement course review access validation; add average rating and total reviews to Course model; create curriculum progress tracking endpoints; add jobs for auto-expiring subscriptions and unpaid transactions
+2025-12-11 feat: Update CourseSeeder with video URLs and durations; modify MentoringSessionSeeder payment methods; enhance TransactionSeeder to link transactions to courses and subscriptions; add TransactionResource for detailed transaction responses
+2025-12-11 Enhance Course and Review functionality by adding summary and user data to responses
+2025-12-10 Refactor payment processing and update transaction handling
+2025-12-08 Merge branch 'development' of https://github.com/23081010076-oss/backend into development
+2025-12-08 0
+2025-12-08 Remove application architecture and user flows section
+2025-12-08 Update README with Scholarship Portal and remove TOC
+2025-12-08 Merge branch 'development' of https://github.com/23081010076-oss/backend into development
+2025-12-08 feat: Add Scholarship Portal flow documentation and refine session completion message.
+2025-12-08 Revise README for application architecture and flows
+2025-12-08 docs: Expand application flows documentation by adding new sections for portfolio, course management, articles, and corporate services, and enhancing details of existing flows.
+2025-12-08 Document user flows in README
+2025-12-08 feat: Implement course enrollment, progress tracking, and certificate generation features, and update application documentation.
+2025-12-06 feat: Add image field to courses and implement image handling in CourseService
+2025-12-06 feat: Implement Course Curriculum Management
+2025-12-05 feat: add new routes for mentoring sessions and mentor schedules
+2025-12-05 Fix merge conflict in api-docs.json
+2025-12-05 Fix AchievementController, add course category, update seeder, clean migrations
+2025-12-05 Refactor code structure for improved readability and maintainability
+2025-12-03 fix: update example email and password in AuthSwagger for clarity
+2025-12-03 Refactor code structure for improved readability and maintainability
+2025-12-03 Refactor code structure for improved readability and maintainability
+2025-12-03 feat: create migration for sessions table with necessary fields and indexes
+2025-12-03 feat: add certificate upload and deletion functionality for achievements and experiences, including API routes and Postman collection updates
+2025-12-03 feat: add logo upload and deletion endpoints for organizations, including Postman collection updates
+2025-12-03 fix: update example email and password in AuthSwagger for clarity
+2025-12-03 Refactor code structure for improved readability and maintainability
+2025-12-03 Refactor code structure for improved readability and maintainability
+2025-12-03 WIP on development: b2bb240 Refactor code structure for improved readability and maintainability
+2025-12-03 index on development: b2bb240 Refactor code structure for improved readability and maintainability
+2025-12-03 untracked files on development: b2bb240 Refactor code structure for improved readability and maintainability
+2025-12-03 Refactor code structure for improved readability and maintainability
+2025-12-02 Add comprehensive documentation for Midtrans signature generation, webhook testing, and queue troubleshooting
+2025-12-02 fix: update education level in Postman collection to match API requirements
+2025-12-02 feat: add Postman collection for student app flow API testing
+2025-12-02 feat: Implement extensive API controllers, services, jobs, requests, policies, and tests for core application functionalities.
+2025-12-02 feat: Implement core API endpoints, services, authentication, and data models with comprehensive testing.
+2025-12-02 feat: Add services for managing achievements, articles, courses, experiences, mentoring, scholarships, transactions, and users
+2025-12-02 feat: add API for managing organizations, subscriptions, reviews, and enrollments, including Midtrans payment gateway and authorization.
+2025-12-01 feat: Add Google authentication feature with setup guide, controller, and tests.
+2025-12-01 siuu
+2025-12-01 feat: add Postman API test collection for student application flow and November 2025 logbook.
+2025-12-01 feat: Introduce API controllers and database seeders for achievements, enrollments, mentoring sessions, organizations, reviews, subscriptions, experiences, and scholarships, add a Postman collection, and remove temporary test output files.
+2025-11-29 feat: Implement Midtrans payment gateway for course enrollment and subscription transactions, including webhook processing and dedicated services.
+2025-11-28 feat: Add complete Postman collection for Learning Platform API.
+2025-11-27 feat: Add Google OAuth authentication, switch API testing to Postman, and document new transaction, coaching file, and Google login endpoints.
+2025-11-27 SIUUUU
+2025-11-26 SIUUUUUUUU
+2025-11-24 siuuuuuuuu
+2025-11-24 siuuuuuuuuuuuu
+2025-11-24 siuuuu
+2025-11-24 progres
+2025-11-24 progress
+2025-11-19 fix: resolve merge
+2025-11-19 Merge branch 'main' of https://github.com/23081010076-oss/backend
+2025-11-19 5
+2025-11-19 4
+2025-11-19 3
+2025-11-19 Merge pull request #2 from 23081010076-oss/feat/add-achievement-article-course-seeders
+2025-11-18 Refactor ArticleController to use 'author' relationship; update DatabaseSeeder to include multiple seeders; add AchievementSeeder, ArticleSeeder, CourseSeeder, ExperienceSeeder, OrganizationSeeder, ScholarshipSeeder, and UserSeeder with sample data for testing.
+2025-11-17 Refactor migration: comment out user_id constraint removal for organizations table
+2025-11-17 Remove all API testing files
+2025-11-17 Fix migration errors: correct subscription columns and remove duplicate migrations
+2025-11-17 Add comprehensive API testing suite with documentation and scripts
+2025-11-17 Consolidate all documentation into single comprehensive guide
+2025-11-17 Add .env.example to .gitignore
+2025-11-17 2
+2025-11-17 Refactor code structure for improved readability and maintainability
+2025-11-14 first commit

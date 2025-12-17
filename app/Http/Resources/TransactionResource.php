@@ -39,9 +39,64 @@ class TransactionResource extends JsonResource
                 ];
             }),
 
-            // Transactionable information (Course, Subscription, MentoringSession)
-            'item_name' => $this->getItemName(),
-            'item_details' => $this->getItemDetails(),
+            // Transactionable information (polymorphic)
+            'transactionable_type' => $this->transactionable_type,
+            'transactionable' => $this->when($this->relationLoaded('transactionable') && $this->transactionable, function () {
+                return $this->formatTransactionable();
+            }),
+        ];
+    }
+
+    /**
+     * Format transactionable data based on type
+     */
+    private function formatTransactionable(): ?array
+    {
+        if (!$this->transactionable) {
+            return null;
+        }
+
+        return match($this->transactionable_type) {
+            'App\Models\Course' => [
+                'course' => [
+                    'id' => $this->transactionable->id,
+                    'title' => $this->transactionable->title,
+                    'thumbnail' => $this->transactionable->image ? asset('storage/' . $this->transactionable->image) : null,
+                    'instructor' => $this->transactionable->instructor,
+                    'level' => $this->transactionable->level,
+                    'duration' => $this->transactionable->duration,
+                    'price' => $this->transactionable->price,
+                ]
+            ],
+            'App\Models\Subscription' => [
+                'subscription' => [
+                    'id' => $this->transactionable->id,
+                    'plan' => $this->transactionable->plan,
+                    'package_type' => $this->transactionable->package_type,
+                    'duration' => $this->transactionable->duration . ' ' . $this->transactionable->duration_unit,
+                    'start_date' => $this->transactionable->start_date,
+                    'end_date' => $this->transactionable->end_date,
+                    'status' => $this->transactionable->status,
+                ]
+            ],
+            'App\Models\MentoringSession' => [
+                'mentoring_session' => [
+                    'id' => $this->transactionable->id,
+                    'session_id' => $this->transactionable->session_id,
+                    'type' => $this->transactionable->type,
+                    'schedule' => $this->transactionable->schedule,
+                    'meeting_link' => $this->transactionable->meeting_link,
+                    'status' => $this->transactionable->status,
+                    'mentor' => $this->when($this->transactionable->relationLoaded('mentor'), function () {
+                        return [
+                            'id' => $this->transactionable->mentor->id,
+                            'name' => $this->transactionable->mentor->name,
+                        ];
+                    }),
+                ]
+            ],
+            default => null,
+        };
         ];
     }
 
@@ -71,62 +126,6 @@ class TransactionResource extends JsonResource
             'expired' => 'Kadaluarsa',
             'refunded' => 'Dikembalikan',
             default => $this->status,
-        };
-    }
-
-    /**
-     * Get item name based on transactionable type
-     */
-    private function getItemName(): ?string
-    {
-        if (!$this->relationLoaded('transactionable') || !$this->transactionable) {
-            return null;
-        }
-
-        return match($this->transactionable_type) {
-            'App\Models\Course' => $this->transactionable->title ?? null,
-            'App\Models\Subscription' => $this->transactionable->plan . ' - ' . $this->transactionable->package_type ?? null,
-            'App\Models\MentoringSession' => 'Mentoring ' . ($this->transactionable->type === 'academic' ? 'Akademik' : 'Life Plan') ?? null,
-            default => null,
-        };
-    }
-
-    /**
-     * Get detailed item information based on transactionable type
-     */
-    private function getItemDetails(): ?array
-    {
-        if (!$this->relationLoaded('transactionable') || !$this->transactionable) {
-            return null;
-        }
-
-        return match($this->transactionable_type) {
-            'App\Models\Course' => [
-                'id' => $this->transactionable->id,
-                'title' => $this->transactionable->title,
-                'image' => $this->transactionable->image,
-                'instructor' => $this->transactionable->instructor,
-                'level' => $this->transactionable->level,
-                'duration' => $this->transactionable->duration,
-            ],
-            'App\Models\Subscription' => [
-                'id' => $this->transactionable->id,
-                'plan' => $this->transactionable->plan,
-                'package_type' => $this->transactionable->package_type,
-                'duration' => $this->transactionable->duration . ' ' . $this->transactionable->duration_unit,
-                'start_date' => $this->transactionable->start_date,
-                'end_date' => $this->transactionable->end_date,
-                'status' => $this->transactionable->status,
-            ],
-            'App\Models\MentoringSession' => [
-                'id' => $this->transactionable->id,
-                'session_id' => $this->transactionable->session_id,
-                'type' => $this->transactionable->type,
-                'schedule' => $this->transactionable->schedule,
-                'meeting_link' => $this->transactionable->meeting_link,
-                'status' => $this->transactionable->status,
-            ],
-            default => null,
         };
     }
 }

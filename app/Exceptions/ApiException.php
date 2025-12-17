@@ -8,37 +8,37 @@ use Illuminate\Http\JsonResponse;
 /**
  * Class ApiException
  * 
- * Custom exception for API-related errors.
- * Provides consistent error formatting and HTTP status codes.
+ * Exception khusus untuk error terkait API.
+ * Menyediakan format error yang konsisten dan HTTP status code.
  * 
  * @package App\Exceptions
  */
 class ApiException extends Exception
 {
     /**
-     * HTTP status code
+     * Kode status HTTP
      *
      * @var int
      */
     protected $statusCode;
 
     /**
-     * Additional error details
+     * Detail error tambahan
      *
      * @var mixed
      */
     protected $errors;
 
     /**
-     * Create a new ApiException instance
+     * Membuat instance ApiException baru
      *
-     * @param string $message Error message
-     * @param int $statusCode HTTP status code
-     * @param mixed $errors Additional error details
-     * @param \Throwable|null $previous Previous exception
+     * @param string $message Pesan error
+     * @param int $statusCode Kode status HTTP
+     * @param mixed $errors Detail error tambahan
+     * @param \Throwable|null $previous Exception sebelumnya
      */
     public function __construct(
-        string $message = 'An error occurred',
+        string $message = 'Terjadi kesalahan',
         int $statusCode = 400,
         $errors = null,
         ?\Throwable $previous = null
@@ -49,7 +49,7 @@ class ApiException extends Exception
     }
 
     /**
-     * Get the HTTP status code
+     * Ambil kode status HTTP
      *
      * @return int
      */
@@ -59,7 +59,7 @@ class ApiException extends Exception
     }
 
     /**
-     * Get additional error details
+     * Ambil detail error tambahan
      *
      * @return mixed
      */
@@ -69,7 +69,7 @@ class ApiException extends Exception
     }
 
     /**
-     * Render the exception as an HTTP response
+     * Render exception sebagai HTTP response
      *
      * @return JsonResponse
      */
@@ -88,69 +88,69 @@ class ApiException extends Exception
     }
 
     /**
-     * Create a validation error exception
+     * Buat exception error validasi
      *
-     * @param array $errors Validation errors
-     * @param string $message Error message
+     * @param array $errors Error validasi
+     * @param string $message Pesan error
      * @return static
      */
-    public static function validationError(array $errors, string $message = 'Validation failed'): self
+    public static function validationError(array $errors, string $message = 'Validasi gagal'): self
     {
         return new static($message, 422, $errors);
     }
 
     /**
-     * Create an unauthorized exception
+     * Buat exception unauthorized
      *
-     * @param string $message Error message
+     * @param string $message Pesan error
      * @return static
      */
-    public static function unauthorized(string $message = 'Unauthorized'): self
+    public static function unauthorized(string $message = 'Tidak terotorisasi'): self
     {
         return new static($message, 401);
     }
 
     /**
-     * Create a forbidden exception
+     * Buat exception forbidden
      *
-     * @param string $message Error message
+     * @param string $message Pesan error
      * @return static
      */
-    public static function forbidden(string $message = 'Forbidden'): self
+    public static function forbidden(string $message = 'Akses ditolak'): self
     {
         return new static($message, 403);
     }
 
     /**
-     * Create a not found exception
+     * Buat exception not found
      *
-     * @param string $message Error message
+     * @param string $message Pesan error
      * @return static
      */
-    public static function notFound(string $message = 'Resource not found'): self
+    public static function notFound(string $message = 'Resource tidak ditemukan'): self
     {
         return new static($message, 404);
     }
 
     /**
-     * Create a conflict exception
+     * Buat exception conflict
      *
-     * @param string $message Error message
+     * @param string $message Pesan error
      * @return static
      */
-    public static function conflict(string $message = 'Resource conflict'): self
+    public static function conflict(string $message = 'Konflik resource'): self
     {
         return new static($message, 409);
     }
 
     /**
-     * Create a server error exception
+     * Buat exception server error
      *
-     * @param string $message Error message
-     * @param mixed $errors Additional error details
+     * @param string $message Pesan error
+     * @param mixed $errors Detail error tambahan
      * @return static
      */
-    public static function serverError(string $message = 'Internal server error', $errors = null): self
+    public static function serverError(string $message = 'Kesalahan server internal', $errors = null): self
     {
         return new static($message, 500, $errors);
     }
