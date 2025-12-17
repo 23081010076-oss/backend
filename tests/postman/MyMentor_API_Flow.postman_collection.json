@@ -194,6 +194,23 @@
                             }
                         },
                         {
+                            "name": "Get Course Progress",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{studentToken}}"
+                                    }
+                                ],
+                                "url": "{{baseUrl}}/courses/1/progress"
+                            }
+                        },
+                        {
                             "name": "Complete Curriculum",
                             "request": {
                                 "method": "POST",
