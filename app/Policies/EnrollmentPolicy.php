@@ -26,8 +26,9 @@ class EnrollmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        // All authenticated users can view enrollments
-        return true;
+        // Only admin can view all enrollments
+        // Students should use /my-courses endpoint instead
+        return $user->role === 'admin';
     }
 
     /**
