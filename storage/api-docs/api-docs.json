@@ -2686,6 +2686,26 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "completed"
+                                ],
+                                "properties": {
+                                    "completed": {
+                                        "description": "Status penyelesaian (true = selesai, false = belum selesai)",
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Materi berhasil ditandai selesai",

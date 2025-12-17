@@ -215,6 +215,13 @@ namespace App\Swagger;
  *     tags={"Curriculum"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(name="curriculumId", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"completed"},
+ *             @OA\Property(property="completed", type="boolean", description="Status penyelesaian (true = selesai, false = belum selesai)", example=true)
+ *         )
+ *     ),
  *     @OA\Response(
  *         response=200,
  *         description="Materi berhasil ditandai selesai",
