@@ -22,6 +22,74 @@ class CurriculumProgressController extends Controller
     use ApiResponse;
 
     /**
+     * @OA\Get(
+     *     path="/api/courses/{courseId}/progress",
+     *     tags={"Progress"},
+     *     summary="Mendapatkan progress kursus",
+     *     description="Menampilkan progress penyelesaian kursus oleh user yang sedang login",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="courseId",
+     *         in="path",
+     *         required=true,
+     *         description="ID kursus",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Progress berhasil diambil",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Progress retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="progress",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="enrollment_id", type="integer", example=5),
+     *                         @OA\Property(property="curriculum_id", type="integer", example=2),
+     *                         @OA\Property(property="completed", type="boolean", example=true),
+     *                         @OA\Property(property="completed_at", type="string", format="date-time", example="2024-01-15T10:30:00.000000Z"),
+     *                         @OA\Property(
+     *                             property="curriculum",
+     *                             type="object",
+     *                             @OA\Property(property="id", type="integer", example=2),
+     *                             @OA\Property(property="course_id", type="integer", example=1),
+     *                             @OA\Property(property="title", type="string", example="Pengenalan Laravel"),
+     *                             @OA\Property(property="section", type="string", example="Bab 1: Dasar-Dasar")
+     *                         )
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="statistics",
+     *                     type="object",
+     *                     @OA\Property(property="total_items", type="integer", example=20),
+     *                     @OA\Property(property="completed_items", type="integer", example=8),
+     *                     @OA\Property(property="percentage", type="number", format="float", example=40.0)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="User belum terdaftar di kursus ini",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Anda belum terdaftar di kursus ini")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     *
      * Get user's progress for a specific course
      */
     public function index(Request $request, int $courseId): JsonResponse
@@ -57,6 +125,106 @@ class CurriculumProgressController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/curriculums/{curriculumId}/complete",
+     *     tags={"Progress"},
+     *     summary="Tandai materi selesai",
+     *     description="Menandai item curriculum sebagai selesai. Progress enrollment akan otomatis terupdate dan sertifikat akan otomatis dibuat jika progress mencapai 100%",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="curriculumId",
+     *         in="path",
+     *         required=true,
+     *         description="ID curriculum",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"completed"},
+     *             @OA\Property(
+     *                 property="completed",
+     *                 type="boolean",
+     *                 description="Status penyelesaian (true = selesai, false = belum selesai)",
+     *                 example=true
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Progress berhasil diupdate",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Progress updated successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="sukses", type="boolean", example=true),
+     *                 @OA\Property(property="pesan", type="string", example="Materi berhasil ditandai selesai"),
+     *                 @OA\Property(
+     *                     property="data",
+     *                     type="object",
+     *                     @OA\Property(
+     *                         property="curriculum_progress",
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="enrollment_id", type="integer", example=5),
+     *                         @OA\Property(property="curriculum_id", type="integer", example=2),
+     *                         @OA\Property(property="completed", type="boolean", example=true),
+     *                         @OA\Property(property="completed_at", type="string", format="date-time", example="2024-01-15T10:30:00.000000Z"),
+     *                         @OA\Property(property="created_at", type="string", format="date-time"),
+     *                         @OA\Property(property="updated_at", type="string", format="date-time")
+     *                     ),
+     *                     @OA\Property(
+     *                         property="enrollment",
+     *                         type="object",
+     *                         @OA\Property(property="progress", type="integer", description="Persentase progress (0-100)", example=45),
+     *                         @OA\Property(property="completed", type="boolean", description="Apakah kursus sudah selesai 100%", example=false)
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="User belum terdaftar di kursus ini",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Anda belum terdaftar di kursus ini")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Curriculum tidak ditemukan",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\CourseCurriculum]")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The completed field is required."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="completed",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The completed field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     *
      * Mark curriculum item as completed
      */
     public function markCompleted(Request $request, int $curriculumId): JsonResponse

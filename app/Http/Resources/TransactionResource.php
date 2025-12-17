@@ -97,7 +97,6 @@ class TransactionResource extends JsonResource
             ],
             default => null,
         };
-        ];
     }
 
     /**
