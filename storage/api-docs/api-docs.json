@@ -6804,411 +6804,13 @@
                 ]
             }
         },
-        "/api/subscriptions": {
-            "get": {
-                "tags": [
-                    "Subscriptions"
-                ],
-                "summary": "Get my subscriptions",
-                "description": "Retrieve all subscriptions for the authenticated user",
-                "operationId": "getMySubscriptions",
-                "responses": {
-                    "200": {
-                        "description": "Subscriptions retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "plan": {
-                                                        "type": "string",
-                                                        "example": "premium"
-                                                    },
-                                                    "package_type": {
-                                                        "type": "string",
-                                                        "example": "all_in_one"
-                                                    },
-                                                    "duration": {
-                                                        "type": "integer",
-                                                        "example": 12
-                                                    },
-                                                    "duration_unit": {
-                                                        "type": "string",
-                                                        "example": "months"
-                                                    },
-                                                    "start_date": {
-                                                        "type": "string",
-                                                        "format": "date",
-                                                        "example": "2025-12-01"
-                                                    },
-                                                    "end_date": {
-                                                        "type": "string",
-                                                        "format": "date",
-                                                        "example": "2026-12-01"
-                                                    },
-                                                    "status": {
-                                                        "type": "string",
-                                                        "example": "active"
-                                                    },
-                                                    "price": {
-                                                        "type": "number",
-                                                        "example": 500000
-                                                    },
-                                                    "auto_renew": {
-                                                        "type": "boolean",
-                                                        "example": false
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Subscriptions"
-                ],
-                "summary": "Create a subscription",
-                "description": "Subscribe to a chosen plan",
-                "operationId": "createSubscription",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "plan",
-                                    "package_type",
-                                    "duration",
-                                    "duration_unit",
-                                    "price"
-                                ],
-                                "properties": {
-                                    "plan": {
-                                        "type": "string",
-                                        "enum": [
-                                            "basic",
-                                            "premium",
-                                            "pro"
-                                        ],
-                                        "example": "premium"
-                                    },
-                                    "package_type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "single_course",
-                                            "all_in_one"
-                                        ],
-                                        "example": "all_in_one"
-                                    },
-                                    "duration": {
-                                        "type": "integer",
-                                        "example": 12
-                                    },
-                                    "duration_unit": {
-                                        "type": "string",
-                                        "enum": [
-                                            "days",
-                                            "weeks",
-                                            "months",
-                                            "years"
-                                        ],
-                                        "example": "months"
-                                    },
-                                    "courses_ids": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
-                                        "example": [
-                                            1,
-                                            2,
-                                            3
-                                        ]
-                                    },
-                                    "price": {
-                                        "type": "number",
-                                        "example": 500000
-                                    },
-                                    "auto_renew": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "start_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-12-03"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Subscription created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Subscription created successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "plan": {
-                                                    "type": "string",
-                                                    "example": "premium"
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "active"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/subscriptions/{id}": {
-            "get": {
-                "tags": [
-                    "Subscriptions"
-                ],
-                "summary": "Get subscription details",
-                "description": "Get details of a specific subscription",
-                "operationId": "getSubscriptionById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Subscription details retrieved successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Subscriptions"
-                ],
-                "summary": "Update subscription",
-                "description": "Update subscription settings",
-                "operationId": "updateSubscription",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "auto_renew": {
-                                        "type": "boolean",
-                                        "example": false
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Subscription updated successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Subscriptions"
-                ],
-                "summary": "Cancel subscription",
-                "description": "Cancel an active subscription",
-                "operationId": "deleteSubscription",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Subscription cancelled successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/subscriptions/{id}/upgrade": {
-            "post": {
-                "tags": [
-                    "Subscriptions"
-                ],
-                "summary": "Upgrade subscription",
-                "description": "Upgrade to a higher tier subscription",
-                "operationId": "upgradeSubscription",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "new_plan",
-                                    "payment_method"
-                                ],
-                                "properties": {
-                                    "new_plan": {
-                                        "type": "string",
-                                        "enum": [
-                                            "basic",
-                                            "premium",
-                                            "pro"
-                                        ],
-                                        "example": "premium"
-                                    },
-                                    "payment_method": {
-                                        "type": "string",
-                                        "enum": [
-                                            "manual",
-                                            "bank_transfer"
-                                        ],
-                                        "example": "manual"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Subscription upgrade initiated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Subscription upgrade initiated"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "transaction": {
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/api/transactions": {
             "get": {
                 "tags": [
                     "Transactions"
                 ],
                 "summary": "Get my transactions",
-                "description": "Retrieve all transactions for the authenticated user",
+                "description": "Retrieve all transactions for the authenticated user. Supports filtering by status and type.",
                 "operationId": "getMyTransactions",
                 "parameters": [
                     {
@@ -7247,9 +6849,13 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Daftar transaksi berhasil diambil"
                                         },
                                         "data": {
                                             "type": "array",
@@ -7257,49 +6863,160 @@
                                                 "properties": {
                                                     "id": {
                                                         "type": "integer",
-                                                        "example": 10
+                                                        "example": 18
                                                     },
                                                     "transaction_code": {
                                                         "type": "string",
-                                                        "example": "TRX-20251203-001"
+                                                        "example": "TRX20251217DC9865"
                                                     },
                                                     "type": {
                                                         "type": "string",
-                                                        "example": "subscription"
+                                                        "example": "course_enrollment"
+                                                    },
+                                                    "type_label": {
+                                                        "type": "string",
+                                                        "example": "Pendaftaran Kursus"
                                                     },
                                                     "amount": {
-                                                        "type": "number",
-                                                        "example": 500000
+                                                        "type": "string",
+                                                        "example": "3500000.00"
                                                     },
                                                     "payment_method": {
                                                         "type": "string",
-                                                        "example": "qris"
+                                                        "example": "bank_transfer"
                                                     },
                                                     "status": {
                                                         "type": "string",
                                                         "example": "paid"
                                                     },
+                                                    "status_label": {
+                                                        "type": "string",
+                                                        "example": "Lunas"
+                                                    },
+                                                    "payment_proof": {
+                                                        "type": "string",
+                                                        "example": "http://127.0.0.1:8000/storage/payment-proofs/xxx.png",
+                                                        "nullable": true
+                                                    },
+                                                    "payment_details": {
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    },
+                                                    "paid_at": {
+                                                        "type": "string",
+                                                        "format": "datetime",
+                                                        "example": "2025-12-17T06:26:14.000000Z",
+                                                        "nullable": true
+                                                    },
+                                                    "expired_at": {
+                                                        "type": "string",
+                                                        "format": "datetime",
+                                                        "example": "2025-12-18T06:21:01.000000Z"
+                                                    },
                                                     "created_at": {
+                                                        "type": "string",
+                                                        "format": "datetime",
+                                                        "example": "2025-12-17T06:21:01.000000Z"
+                                                    },
+                                                    "updated_at": {
                                                         "type": "string",
                                                         "format": "datetime"
                                                     },
-                                                    "transactionable_type": {
-                                                        "type": "string",
-                                                        "example": "App\\\\Models\\\\Subscription"
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Test Admin"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "test.admin@learningplatform.com"
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     },
-                                                    "transactionable_id": {
-                                                        "type": "integer",
-                                                        "example": 1
+                                                    "item_name": {
+                                                        "type": "string",
+                                                        "example": "Machine Learning with Python"
+                                                    },
+                                                    "item_details": {
+                                                        "properties": {
+                                                            "enrollment_id": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "course_id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Machine Learning with Python"
+                                                            },
+                                                            "image": {
+                                                                "type": "string",
+                                                                "example": "https://images.unsplash.com/photo-xxx"
+                                                            },
+                                                            "instructor": {
+                                                                "type": "string",
+                                                                "example": "Dr. Ravi Kumar"
+                                                            },
+                                                            "level": {
+                                                                "type": "string",
+                                                                "example": "intermediate"
+                                                            },
+                                                            "duration": {
+                                                                "type": "string",
+                                                                "example": "16 weeks"
+                                                            },
+                                                            "progress": {
+                                                                "type": "integer",
+                                                                "example": 0
+                                                            },
+                                                            "completed": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     }
                                                 },
                                                 "type": "object"
                                             }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -7315,12 +7032,13 @@
                     "Transactions"
                 ],
                 "summary": "Get transaction details",
-                "description": "Retrieve details of a single transaction",
+                "description": "Retrieve details of a single transaction including related item information",
                 "operationId": "getTransactionById",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "Transaction ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -7334,46 +7052,67 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Detail transaksi berhasil diambil"
                                         },
                                         "data": {
                                             "properties": {
                                                 "id": {
                                                     "type": "integer",
-                                                    "example": 10
+                                                    "example": 18
                                                 },
                                                 "transaction_code": {
                                                     "type": "string",
-                                                    "example": "TRX-20251203-001"
+                                                    "example": "TRX20251217DC9865"
                                                 },
                                                 "type": {
                                                     "type": "string",
-                                                    "example": "subscription"
+                                                    "example": "course_enrollment"
+                                                },
+                                                "type_label": {
+                                                    "type": "string",
+                                                    "example": "Pendaftaran Kursus"
                                                 },
                                                 "amount": {
-                                                    "type": "number",
-                                                    "example": 500000
+                                                    "type": "string",
+                                                    "example": "3500000.00"
                                                 },
                                                 "payment_method": {
                                                     "type": "string",
-                                                    "example": "manual"
+                                                    "example": "bank_transfer"
                                                 },
                                                 "status": {
                                                     "type": "string",
                                                     "example": "paid"
                                                 },
-                                                "expired_at": {
+                                                "status_label": {
                                                     "type": "string",
-                                                    "format": "datetime"
+                                                    "example": "Lunas"
+                                                },
+                                                "payment_proof": {
+                                                    "type": "string",
+                                                    "nullable": true
                                                 },
                                                 "paid_at": {
                                                     "type": "string",
                                                     "format": "datetime",
                                                     "nullable": true
                                                 },
-                                                "transactionable": {
+                                                "expired_at": {
+                                                    "type": "string",
+                                                    "format": "datetime"
+                                                },
+                                                "item_name": {
+                                                    "type": "string",
+                                                    "example": "Machine Learning with Python"
+                                                },
+                                                "item_details": {
+                                                    "description": "Structure varies based on transaction type (Course/Enrollment/Subscription/MentoringSession)",
                                                     "type": "object"
                                                 }
                                             },
@@ -7384,6 +7123,12 @@
                                 }
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Transaction not found"
+                    },
+                    "403": {
+                        "description": "Forbidden - Not your transaction"
                     }
                 },
                 "security": [
@@ -7399,12 +7144,13 @@
                     "Transactions"
                 ],
                 "summary": "Create course transaction",
-                "description": "Create payment transaction for course enrollment",
+                "description": "Create a payment transaction for course enrollment. After payment is confirmed, user will be enrolled in the course.",
                 "operationId": "createCourseTransaction",
                 "parameters": [
                     {
                         "name": "courseId",
                         "in": "path",
+                        "description": "Course ID to purchase",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -7421,12 +7167,13 @@
                                 ],
                                 "properties": {
                                     "payment_method": {
+                                        "description": "Payment method - manual requires payment proof upload",
                                         "type": "string",
                                         "enum": [
                                             "manual",
                                             "bank_transfer"
                                         ],
-                                        "example": "manual"
+                                        "example": "bank_transfer"
                                     }
                                 },
                                 "type": "object"
@@ -7441,13 +7188,13 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
-                                        "message": {
+                                        "pesan": {
                                             "type": "string",
-                                            "example": "Transaction created successfully"
+                                            "example": "Transaksi berhasil dibuat"
                                         },
                                         "data": {
                                             "properties": {
@@ -7455,15 +7202,283 @@
                                                     "properties": {
                                                         "id": {
                                                             "type": "integer",
-                                                            "example": 15
+                                                            "example": 18
                                                         },
                                                         "transaction_code": {
                                                             "type": "string",
-                                                            "example": "TRX-20251203-002"
+                                                            "example": "TRX20251217DC9865"
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "example": "course_enrollment"
+                                                        },
+                                                        "type_label": {
+                                                            "type": "string",
+                                                            "example": "Pendaftaran Kursus"
                                                         },
                                                         "amount": {
-                                                            "type": "number",
-                                                            "example": 2500000
+                                                            "type": "string",
+                                                            "example": "3500000.00"
+                                                        },
+                                                        "payment_method": {
+                                                            "type": "string",
+                                                            "example": "bank_transfer"
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "pending"
+                                                        },
+                                                        "status_label": {
+                                                            "type": "string",
+                                                            "example": "Menunggu Pembayaran"
+                                                        },
+                                                        "expired_at": {
+                                                            "type": "string",
+                                                            "format": "datetime",
+                                                            "example": "2025-12-18T06:21:01.000000Z"
+                                                        },
+                                                        "item_name": {
+                                                            "type": "string",
+                                                            "example": "Machine Learning with Python"
+                                                        },
+                                                        "item_details": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 5
+                                                                },
+                                                                "title": {
+                                                                    "type": "string",
+                                                                    "example": "Machine Learning with Python"
+                                                                },
+                                                                "image": {
+                                                                    "type": "string",
+                                                                    "example": "https://images.unsplash.com/photo-xxx"
+                                                                },
+                                                                "instructor": {
+                                                                    "type": "string",
+                                                                    "example": "Dr. Ravi Kumar"
+                                                                },
+                                                                "level": {
+                                                                    "type": "string",
+                                                                    "example": "intermediate"
+                                                                },
+                                                                "duration": {
+                                                                    "type": "string",
+                                                                    "example": "16 weeks"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "instructions": {
+                                                    "properties": {
+                                                        "bank_name": {
+                                                            "type": "string",
+                                                            "example": "BCA"
+                                                        },
+                                                        "account_number": {
+                                                            "type": "string",
+                                                            "example": "1234567890"
+                                                        },
+                                                        "account_holder": {
+                                                            "type": "string",
+                                                            "example": "PT Edukasi Masa Depan"
+                                                        },
+                                                        "instructions": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "example": [
+                                                                "Transfer sesuai nominal yang tertera.",
+                                                                "Simpan bukti transfer.",
+                                                                "Upload bukti transfer melalui menu Riwayat Transaksi.",
+                                                                "Tunggu verifikasi admin (maksimal 1x24 jam)."
+                                                            ]
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Already enrolled in this course"
+                    },
+                    "404": {
+                        "description": "Course not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transactions/subscriptions": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Create subscription transaction",
+                "description": "Create a payment transaction for subscription plan",
+                "operationId": "createSubscriptionTransaction",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "plan",
+                                    "payment_method"
+                                ],
+                                "properties": {
+                                    "plan": {
+                                        "description": "Subscription plan type",
+                                        "type": "string",
+                                        "enum": [
+                                            "regular",
+                                            "premium"
+                                        ],
+                                        "example": "premium"
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "manual",
+                                            "bank_transfer"
+                                        ],
+                                        "example": "bank_transfer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Subscription transaction created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Transaksi langganan berhasil dibuat"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "transaction": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 20
+                                                        },
+                                                        "transaction_code": {
+                                                            "type": "string",
+                                                            "example": "TRX20251217AB1234"
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "example": "subscription"
+                                                        },
+                                                        "type_label": {
+                                                            "type": "string",
+                                                            "example": "Langganan"
+                                                        },
+                                                        "amount": {
+                                                            "type": "string",
+                                                            "example": "199000.00"
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "pending"
+                                                        },
+                                                        "status_label": {
+                                                            "type": "string",
+                                                            "example": "Menunggu Pembayaran"
+                                                        },
+                                                        "item_name": {
+                                                            "type": "string",
+                                                            "example": "premium - null"
+                                                        },
+                                                        "item_details": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 5
+                                                                },
+                                                                "plan": {
+                                                                    "type": "string",
+                                                                    "example": "premium"
+                                                                },
+                                                                "package_type": {
+                                                                    "type": "string",
+                                                                    "nullable": true
+                                                                },
+                                                                "start_date": {
+                                                                    "type": "string",
+                                                                    "format": "date"
+                                                                },
+                                                                "end_date": {
+                                                                    "type": "string",
+                                                                    "format": "date"
+                                                                },
+                                                                "status": {
+                                                                    "type": "string",
+                                                                    "example": "pending"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "subscription": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "plan": {
+                                                            "type": "string",
+                                                            "example": "premium"
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "pending"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "instructions": {
+                                                    "properties": {
+                                                        "bank_name": {
+                                                            "type": "string",
+                                                            "example": "BCA"
+                                                        },
+                                                        "account_number": {
+                                                            "type": "string",
+                                                            "example": "1234567890"
+                                                        },
+                                                        "account_holder": {
+                                                            "type": "string",
+                                                            "example": "PT Edukasi Masa Depan"
                                                         }
                                                     },
                                                     "type": "object"
@@ -7485,106 +7500,19 @@
                 ]
             }
         },
-        "/api/transactions/subscriptions": {
-            "post": {
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Create subscription transaction",
-                "description": "Create payment transaction for subscription",
-                "operationId": "createSubscriptionTransaction",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "plan",
-                                    "package_type",
-                                    "duration",
-                                    "duration_unit",
-                                    "payment_method"
-                                ],
-                                "properties": {
-                                    "plan": {
-                                        "type": "string",
-                                        "enum": [
-                                            "basic",
-                                            "premium",
-                                            "pro"
-                                        ],
-                                        "example": "premium"
-                                    },
-                                    "package_type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "single_course",
-                                            "all_in_one"
-                                        ],
-                                        "example": "all_in_one"
-                                    },
-                                    "duration": {
-                                        "type": "integer",
-                                        "example": 12
-                                    },
-                                    "duration_unit": {
-                                        "type": "string",
-                                        "enum": [
-                                            "days",
-                                            "weeks",
-                                            "months",
-                                            "years"
-                                        ],
-                                        "example": "months"
-                                    },
-                                    "payment_method": {
-                                        "type": "string",
-                                        "enum": [
-                                            "manual",
-                                            "bank_transfer"
-                                        ],
-                                        "example": "manual"
-                                    },
-                                    "courses_ids": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
-                                        "example": [
-                                            1,
-                                            2
-                                        ]
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Subscription transaction created successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/api/transactions/mentoring-sessions/{sessionId}": {
             "post": {
                 "tags": [
                     "Transactions"
                 ],
                 "summary": "Create mentoring transaction",
-                "description": "Create payment transaction for mentoring session",
+                "description": "Create a payment transaction for a mentoring session. Only the session member can create this transaction.",
                 "operationId": "createMentoringTransaction",
                 "parameters": [
                     {
                         "name": "sessionId",
                         "in": "path",
+                        "description": "Mentoring Session ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -7616,7 +7544,88 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Mentoring transaction created successfully"
+                        "description": "Mentoring transaction created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Transaksi mentoring berhasil dibuat"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "transaction": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 21
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "example": "mentoring_session"
+                                                        },
+                                                        "type_label": {
+                                                            "type": "string",
+                                                            "example": "Sesi Mentoring"
+                                                        },
+                                                        "amount": {
+                                                            "type": "string",
+                                                            "example": "150000.00"
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "pending"
+                                                        },
+                                                        "item_name": {
+                                                            "type": "string",
+                                                            "example": "Mentoring Akademik"
+                                                        },
+                                                        "item_details": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 3
+                                                                },
+                                                                "type": {
+                                                                    "type": "string",
+                                                                    "example": "academic"
+                                                                },
+                                                                "schedule": {
+                                                                    "type": "string",
+                                                                    "format": "datetime"
+                                                                },
+                                                                "status": {
+                                                                    "type": "string",
+                                                                    "example": "pending"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "instructions": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "You are not the member of this session"
+                    },
+                    "404": {
+                        "description": "Mentoring session not found"
                     }
                 },
                 "security": [
@@ -7632,12 +7641,13 @@
                     "Transactions"
                 ],
                 "summary": "Upload payment proof",
-                "description": "Upload payment proof for manual verification",
+                "description": "Upload payment proof (image or PDF) for manual payment verification. Max file size: 5MB. Allowed formats: jpeg, png, jpg, pdf.",
                 "operationId": "uploadPaymentProof",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "Transaction ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -7654,7 +7664,7 @@
                                 ],
                                 "properties": {
                                     "payment_proof": {
-                                        "description": "Payment proof image/document",
+                                        "description": "Payment proof image or PDF (max 5MB)",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -7666,7 +7676,131 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Payment proof uploaded successfully"
+                        "description": "Payment proof uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Bukti pembayaran berhasil diupload"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 18
+                                                },
+                                                "transaction_code": {
+                                                    "type": "string",
+                                                    "example": "TRX20251217DC9865"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "pending"
+                                                },
+                                                "status_label": {
+                                                    "type": "string",
+                                                    "example": "Menunggu Pembayaran"
+                                                },
+                                                "payment_proof": {
+                                                    "type": "string",
+                                                    "example": "http://127.0.0.1:8000/storage/payment-proofs/xxx.png"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error - Invalid file format or size"
+                    },
+                    "403": {
+                        "description": "Forbidden - Not your transaction"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transactions/{id}/confirm": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Confirm payment (Admin only)",
+                "description": "Manually confirm payment for a transaction. This will activate the subscription/enrollment.",
+                "operationId": "confirmPayment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Transaction ID to confirm",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment confirmed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Pembayaran berhasil dikonfirmasi"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 18
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "paid"
+                                                },
+                                                "status_label": {
+                                                    "type": "string",
+                                                    "example": "Lunas"
+                                                },
+                                                "paid_at": {
+                                                    "type": "string",
+                                                    "format": "datetime",
+                                                    "example": "2025-12-17T06:26:14.000000Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    },
+                    "404": {
+                        "description": "Transaction not found"
                     }
                 },
                 "security": [
@@ -7682,12 +7816,13 @@
                     "Transactions"
                 ],
                 "summary": "Request refund",
-                "description": "Submit refund request for a transaction",
+                "description": "Submit a refund request for a paid transaction",
                 "operationId": "requestRefund",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "Transaction ID to refund",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -7704,8 +7839,9 @@
                                 ],
                                 "properties": {
                                     "reason": {
+                                        "description": "Reason for refund request",
                                         "type": "string",
-                                        "example": "Course tidak sesuai dengan ekspektasi"
+                                        "example": "Kursus tidak sesuai dengan ekspektasi"
                                     }
                                 },
                                 "type": "object"
@@ -7715,60 +7851,57 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Refund request submitted successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/transactions/{id}/confirm": {
-            "post": {
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Confirm payment (Admin only)",
-                "description": "Manually confirm payment for a transaction",
-                "operationId": "confirmPayment",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "status"
-                                ],
-                                "properties": {
-                                    "status": {
-                                        "type": "string",
-                                        "enum": [
-                                            "paid",
-                                            "failed"
-                                        ],
-                                        "example": "paid"
-                                    }
-                                },
-                                "type": "object"
+                        "description": "Refund request submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Pengembalian dana berhasil diajukan"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 18
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "refunded"
+                                                },
+                                                "status_label": {
+                                                    "type": "string",
+                                                    "example": "Dikembalikan"
+                                                },
+                                                "payment_details": {
+                                                    "properties": {
+                                                        "refund_reason": {
+                                                            "type": "string",
+                                                            "example": "Kursus tidak sesuai dengan ekspektasi"
+                                                        },
+                                                        "refunded_at": {
+                                                            "type": "string",
+                                                            "format": "datetime"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
                             }
                         }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Payment confirmed successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Not your transaction"
                     }
                 },
                 "security": [
@@ -7784,7 +7917,7 @@
                     "Transactions"
                 ],
                 "summary": "Get transaction statistics (Admin only)",
-                "description": "Get transaction statistics and analytics",
+                "description": "Get transaction statistics and analytics including revenue breakdown",
                 "operationId": "getTransactionStatistics",
                 "responses": {
                     "200": {
@@ -7793,48 +7926,75 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Statistik transaksi berhasil diambil"
+                                        },
                                         "data": {
                                             "properties": {
-                                                "total_revenue": {
-                                                    "type": "number",
-                                                    "example": 50000000
-                                                },
                                                 "total_transactions": {
                                                     "type": "integer",
                                                     "example": 150
+                                                },
+                                                "total_revenue": {
+                                                    "type": "number",
+                                                    "example": 50000000
                                                 },
                                                 "pending_transactions": {
                                                     "type": "integer",
                                                     "example": 10
                                                 },
-                                                "completed_transactions": {
+                                                "paid_transactions": {
                                                     "type": "integer",
                                                     "example": 130
                                                 },
                                                 "failed_transactions": {
                                                     "type": "integer",
-                                                    "example": 10
+                                                    "example": 5
                                                 },
-                                                "revenue_by_type": {
-                                                    "properties": {
-                                                        "course": {
-                                                            "type": "number",
-                                                            "example": 20000000
+                                                "refunded_transactions": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "by_type": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "course_enrollment"
+                                                            },
+                                                            "count": {
+                                                                "type": "integer",
+                                                                "example": 80
+                                                            },
+                                                            "total": {
+                                                                "type": "number",
+                                                                "example": 28000000
+                                                            }
                                                         },
-                                                        "subscription": {
-                                                            "type": "number",
-                                                            "example": 25000000
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "by_payment_method": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "payment_method": {
+                                                                "type": "string",
+                                                                "example": "bank_transfer"
+                                                            },
+                                                            "count": {
+                                                                "type": "integer",
+                                                                "example": 100
+                                                            }
                                                         },
-                                                        "mentoring": {
-                                                            "type": "number",
-                                                            "example": 5000000
-                                                        }
-                                                    },
-                                                    "type": "object"
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -7844,6 +8004,9 @@
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
                     }
                 },
                 "security": [
@@ -8601,10 +8764,6 @@
         {
             "name": "Organizations",
             "description": "Organization management endpoints"
-        },
-        {
-            "name": "Subscriptions",
-            "description": "User subscription endpoints"
         },
         {
             "name": "Transactions",
