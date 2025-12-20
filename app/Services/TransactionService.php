@@ -46,7 +46,16 @@ class TransactionService
      */
     public function getUserTransactions(int $userId, array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
-        $query = Transaction::with(['user', 'transactionable'])
+        $query = Transaction::with([
+                'user', 
+                'transactionable' => function ($morphTo) {
+                    // Eager load course relationship for Enrollment
+                    $morphTo->morphWith([
+                        Enrollment::class => ['course'],
+                        MentoringSession::class => ['mentor'],
+                    ]);
+                }
+            ])
             ->where('user_id', $userId);
 
         // Filter berdasarkan tipe

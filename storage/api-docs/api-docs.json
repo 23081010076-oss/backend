@@ -7228,7 +7228,7 @@
                     "Transactions"
                 ],
                 "summary": "Get my transactions",
-                "description": "Retrieve all transactions for the authenticated user",
+                "description": "Retrieve all transactions for the authenticated user. Returns item_name and item_details based on transaction type and status.",
                 "operationId": "getMyTransactions",
                 "parameters": [
                     {
@@ -7267,9 +7267,13 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Daftar transaksi berhasil diambil"
                                         },
                                         "data": {
                                             "type": "array",
@@ -7277,43 +7281,165 @@
                                                 "properties": {
                                                     "id": {
                                                         "type": "integer",
-                                                        "example": 10
+                                                        "example": 16
                                                     },
                                                     "transaction_code": {
                                                         "type": "string",
-                                                        "example": "TRX-20251203-001"
+                                                        "example": "TRX202512174488C7"
                                                     },
                                                     "type": {
                                                         "type": "string",
-                                                        "example": "subscription"
+                                                        "example": "course_enrollment"
+                                                    },
+                                                    "type_label": {
+                                                        "type": "string",
+                                                        "example": "Pendaftaran Kursus"
                                                     },
                                                     "amount": {
-                                                        "type": "number",
-                                                        "example": 500000
+                                                        "type": "string",
+                                                        "example": "900000.00"
                                                     },
                                                     "payment_method": {
                                                         "type": "string",
-                                                        "example": "qris"
+                                                        "example": "bank_transfer"
                                                     },
                                                     "status": {
                                                         "type": "string",
                                                         "example": "paid"
                                                     },
+                                                    "status_label": {
+                                                        "type": "string",
+                                                        "example": "Lunas"
+                                                    },
+                                                    "payment_proof": {
+                                                        "type": "string",
+                                                        "example": "http://127.0.0.1:8000/storage/payment-proofs/proof.jpg",
+                                                        "nullable": true
+                                                    },
+                                                    "payment_details": {
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    },
+                                                    "paid_at": {
+                                                        "type": "string",
+                                                        "format": "datetime",
+                                                        "example": "2025-12-17T12:28:16.000000Z",
+                                                        "nullable": true
+                                                    },
+                                                    "expired_at": {
+                                                        "type": "string",
+                                                        "format": "datetime",
+                                                        "example": "2025-12-18T12:27:32.000000Z"
+                                                    },
                                                     "created_at": {
                                                         "type": "string",
-                                                        "format": "datetime"
+                                                        "format": "datetime",
+                                                        "example": "2025-12-17T12:27:32.000000Z"
                                                     },
-                                                    "transactionable_type": {
+                                                    "updated_at": {
                                                         "type": "string",
-                                                        "example": "App\\\\Models\\\\Subscription"
+                                                        "format": "datetime",
+                                                        "example": "2025-12-17T12:28:16.000000Z"
                                                     },
-                                                    "transactionable_id": {
-                                                        "type": "integer",
-                                                        "example": 1
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Test Admin"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "test.admin@learningplatform.com"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "item_name": {
+                                                        "description": "Name of the purchased item",
+                                                        "type": "string",
+                                                        "example": "Database Design and SQL"
+                                                    },
+                                                    "item_details": {
+                                                        "description": "Details vary by transaction type. For paid course: enrollment_id, course_id, title, image, instructor, level, duration, progress, completed. For pending course: id, title, image, instructor, level, duration. For subscription: id, plan, package_type, duration, start_date, end_date, status. For mentoring: id, session_id, type, schedule, meeting_link, status, mentor.",
+                                                        "properties": {
+                                                            "enrollment_id": {
+                                                                "description": "Only for paid course transactions",
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "course_id": {
+                                                                "type": "integer",
+                                                                "example": 7
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Database Design and SQL"
+                                                            },
+                                                            "image": {
+                                                                "type": "string",
+                                                                "example": "https://images.unsplash.com/photo-example?w=800"
+                                                            },
+                                                            "instructor": {
+                                                                "type": "string",
+                                                                "example": "Agus Prasetyo, S.T"
+                                                            },
+                                                            "level": {
+                                                                "type": "string",
+                                                                "example": "intermediate"
+                                                            },
+                                                            "duration": {
+                                                                "type": "string",
+                                                                "example": "6 weeks"
+                                                            },
+                                                            "progress": {
+                                                                "description": "Only for paid course transactions",
+                                                                "type": "integer",
+                                                                "example": 0
+                                                            },
+                                                            "completed": {
+                                                                "description": "Only for paid course transactions",
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     }
                                                 },
                                                 "type": "object"
                                             }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "per_halaman": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "halaman_sekarang": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "halaman_terakhir": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "dari": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "sampai": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -7335,7 +7461,7 @@
                     "Transactions"
                 ],
                 "summary": "Get transaction details",
-                "description": "Retrieve details of a single transaction",
+                "description": "Retrieve details of a single transaction with item information",
                 "operationId": "getTransactionById",
                 "parameters": [
                     {
@@ -7354,46 +7480,95 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Detail transaksi berhasil diambil"
                                         },
                                         "data": {
                                             "properties": {
                                                 "id": {
                                                     "type": "integer",
-                                                    "example": 10
+                                                    "example": 16
                                                 },
                                                 "transaction_code": {
                                                     "type": "string",
-                                                    "example": "TRX-20251203-001"
+                                                    "example": "TRX202512174488C7"
                                                 },
                                                 "type": {
                                                     "type": "string",
-                                                    "example": "subscription"
+                                                    "example": "course_enrollment"
+                                                },
+                                                "type_label": {
+                                                    "type": "string",
+                                                    "example": "Pendaftaran Kursus"
                                                 },
                                                 "amount": {
-                                                    "type": "number",
-                                                    "example": 500000
+                                                    "type": "string",
+                                                    "example": "900000.00"
                                                 },
                                                 "payment_method": {
                                                     "type": "string",
-                                                    "example": "manual"
+                                                    "example": "bank_transfer"
                                                 },
                                                 "status": {
                                                     "type": "string",
                                                     "example": "paid"
                                                 },
-                                                "expired_at": {
+                                                "status_label": {
                                                     "type": "string",
-                                                    "format": "datetime"
+                                                    "example": "Lunas"
+                                                },
+                                                "payment_proof": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "payment_details": {
+                                                    "type": "object",
+                                                    "nullable": true
                                                 },
                                                 "paid_at": {
                                                     "type": "string",
                                                     "format": "datetime",
                                                     "nullable": true
                                                 },
-                                                "transactionable": {
+                                                "expired_at": {
+                                                    "type": "string",
+                                                    "format": "datetime"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "datetime"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "datetime"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Test User"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "user@example.com"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "item_name": {
+                                                    "type": "string",
+                                                    "example": "Database Design and SQL"
+                                                },
+                                                "item_details": {
                                                     "type": "object"
                                                 }
                                             },
@@ -7419,12 +7594,13 @@
                     "Transactions"
                 ],
                 "summary": "Create course transaction",
-                "description": "Create payment transaction for course enrollment",
+                "description": "Create payment transaction for course enrollment. Returns transaction details and payment instructions.",
                 "operationId": "createCourseTransaction",
                 "parameters": [
                     {
                         "name": "courseId",
                         "in": "path",
+                        "description": "ID of the course to enroll in",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -7441,12 +7617,13 @@
                                 ],
                                 "properties": {
                                     "payment_method": {
+                                        "description": "Payment method to use",
                                         "type": "string",
                                         "enum": [
                                             "manual",
                                             "bank_transfer"
                                         ],
-                                        "example": "manual"
+                                        "example": "bank_transfer"
                                     }
                                 },
                                 "type": "object"
@@ -7461,13 +7638,13 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "sukses": {
                                             "type": "boolean",
                                             "example": true
                                         },
-                                        "message": {
+                                        "pesan": {
                                             "type": "string",
-                                            "example": "Transaction created successfully"
+                                            "example": "Transaksi berhasil dibuat"
                                         },
                                         "data": {
                                             "properties": {
@@ -7475,21 +7652,127 @@
                                                     "properties": {
                                                         "id": {
                                                             "type": "integer",
-                                                            "example": 15
+                                                            "example": 17
                                                         },
                                                         "transaction_code": {
                                                             "type": "string",
-                                                            "example": "TRX-20251203-002"
+                                                            "example": "TRX20251217ABC123"
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "example": "course_enrollment"
+                                                        },
+                                                        "type_label": {
+                                                            "type": "string",
+                                                            "example": "Pendaftaran Kursus"
                                                         },
                                                         "amount": {
-                                                            "type": "number",
-                                                            "example": 2500000
+                                                            "type": "string",
+                                                            "example": "900000.00"
+                                                        },
+                                                        "payment_method": {
+                                                            "type": "string",
+                                                            "example": "bank_transfer"
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "pending"
+                                                        },
+                                                        "status_label": {
+                                                            "type": "string",
+                                                            "example": "Menunggu Pembayaran"
+                                                        },
+                                                        "expired_at": {
+                                                            "type": "string",
+                                                            "format": "datetime"
+                                                        },
+                                                        "item_name": {
+                                                            "type": "string",
+                                                            "example": "Database Design and SQL"
+                                                        },
+                                                        "item_details": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 7
+                                                                },
+                                                                "title": {
+                                                                    "type": "string",
+                                                                    "example": "Database Design and SQL"
+                                                                },
+                                                                "image": {
+                                                                    "type": "string",
+                                                                    "example": "https://example.com/image.jpg"
+                                                                },
+                                                                "instructor": {
+                                                                    "type": "string",
+                                                                    "example": "John Doe"
+                                                                },
+                                                                "level": {
+                                                                    "type": "string",
+                                                                    "example": "intermediate"
+                                                                },
+                                                                "duration": {
+                                                                    "type": "string",
+                                                                    "example": "6 weeks"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "instructions": {
+                                                    "properties": {
+                                                        "bank_name": {
+                                                            "type": "string",
+                                                            "example": "BCA"
+                                                        },
+                                                        "account_number": {
+                                                            "type": "string",
+                                                            "example": "1234567890"
+                                                        },
+                                                        "account_holder": {
+                                                            "type": "string",
+                                                            "example": "PT Edukasi Masa Depan"
+                                                        },
+                                                        "instructions": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "example": [
+                                                                "Transfer sesuai nominal yang tertera.",
+                                                                "Simpan bukti transfer.",
+                                                                "Upload bukti transfer melalui menu Riwayat Transaksi.",
+                                                                "Tunggu verifikasi admin (maksimal 1x24 jam)."
+                                                            ]
                                                         }
                                                     },
                                                     "type": "object"
                                                 }
                                             },
                                             "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or already enrolled",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Anda sudah terdaftar di kursus ini"
                                         }
                                     },
                                     "type": "object"
