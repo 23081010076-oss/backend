@@ -14,12 +14,46 @@ class TransactionTest extends TestCase
 
     /**
      * Test creating a course transaction
-     * Note: This test has a pre-existing bug - Course/Transaction validation
-     * requires additional fields not being provided by the test
      */
     public function test_can_create_course_transaction()
     {
-        $this->markTestSkipped('Pre-existing bug: Course/Transaction validation requires additional fields not in test setup.');
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+        
+        $course = Course::factory()->create([
+            'price' => 100000,
+        ]);
+
+        $response = $this->postJson("/api/transactions/courses/{$course->id}", [
+            'payment_method' => 'manual',
+        ], [
+            'Authorization' => 'Bearer ' . $token,
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure([
+                'sukses',
+                'pesan',
+                'data' => [
+                    'transaction' => [
+                        'id',
+                        'transaction_code',
+                        'type',
+                        'amount',
+                        'payment_method',
+                        'status',
+                    ],
+                    'instructions' => [
+                        'bank_name',
+                        'account_number',
+                        'account_holder',
+                        'instructions',
+                    ],
+                ],
+            ])
+            ->assertJson([
+                'sukses' => true,
+            ]);
     }
 
     public function test_can_list_transactions()

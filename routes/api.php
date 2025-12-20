@@ -20,27 +20,6 @@ use App\Http\Controllers\Api\CoachingFileController;
 use App\Http\Controllers\Api\CourseCurriculumController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Semua route API menggunakan prefix /api/ (otomatis dari Laravel)
-| Contoh: POST /api/register, GET /api/courses
-|
-| Struktur Route:
-| - Public Routes: Bisa diakses tanpa login
-| - Protected Routes: Butuh JWT token (auth:api)
-| - Role-based Routes: Butuh role tertentu (admin, mentor, corporate)
-|
-*/
-
-
-// WEBHOOK ROUTES (Public - untuk callback dari payment gateway)
-
-
-// Route::post('/midtrans/webhook', [MidtransWebhookController::class, 'handleNotification'])
-//    ->name('midtrans.webhook');
 
 // PUBLIC ROUTES (Tanpa Autentikasi)
 
