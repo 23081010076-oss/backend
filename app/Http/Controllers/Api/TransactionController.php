@@ -77,6 +77,66 @@ class TransactionController extends Controller
     }
 
     /**
+     * Tampilkan daftar transaksi course enrollment user
+     */
+    public function getCourseTransactions(Request $request): JsonResponse
+    {
+        $transactions = $this->transactionService->getUserTransactions(
+            $request->user()->id,
+            ['type' => 'course_enrollment']
+        );
+
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
+        return $this->paginatedResponse(
+            $transactions,
+            'Daftar transaksi course berhasil diambil'
+        );
+    }
+
+    /**
+     * Tampilkan daftar transaksi subscription user
+     */
+    public function getSubscriptionTransactions(Request $request): JsonResponse
+    {
+        $transactions = $this->transactionService->getUserTransactions(
+            $request->user()->id,
+            ['type' => 'subscription']
+        );
+
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
+        return $this->paginatedResponse(
+            $transactions,
+            'Daftar transaksi subscription berhasil diambil'
+        );
+    }
+
+    /**
+     * Tampilkan daftar transaksi mentoring user
+     */
+    public function getMentoringTransactions(Request $request): JsonResponse
+    {
+        $transactions = $this->transactionService->getUserTransactions(
+            $request->user()->id,
+            ['type' => 'mentoring_session']
+        );
+
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
+        return $this->paginatedResponse(
+            $transactions,
+            'Daftar transaksi mentoring berhasil diambil'
+        );
+    }
+
+    /**
      * Tampilkan detail transaksi
      */
     public function show(int $id): JsonResponse

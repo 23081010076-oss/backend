@@ -261,6 +261,11 @@ Route::middleware('auth:api')->group(function () {
     
     Route::prefix('transactions')->name('transactions.')->group(function () {
         Route::get('/', [TransactionController::class, 'index'])->name('index');
+        
+        // Get transactions by type
+        Route::get('/courses', [TransactionController::class, 'getCourseTransactions'])->name('courses');
+        Route::get('/subscriptions', [TransactionController::class, 'getSubscriptionTransactions'])->name('subscriptions');
+        Route::get('/mentoring-sessions', [TransactionController::class, 'getMentoringTransactions'])->name('mentoring-sessions');
 
         // Admin Only - harus di atas route dengan parameter {id}
         Route::middleware('role:admin')->group(function () {
