@@ -63,6 +63,21 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Get authenticated user's subscriptions
+     *
+     * @return JsonResponse
+     */
+    public function mySubscriptions(): JsonResponse
+    {
+        $user = auth()->user();
+        $subscriptions = Subscription::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return $this->paginatedResponse($subscriptions, 'Langganan Anda berhasil diambil');
+    }
+
+    /**
      * Store a newly created subscription
      *
      * @param StoreSubscriptionRequest $request

@@ -118,10 +118,10 @@ class TransactionController extends Controller
                 $validated['payment_method']
             );
 
-            return $this->createdResponse([
-                'transaction' => new TransactionResource($result['transaction']),
-                'instructions' => $result['instructions'],
-            ], 'Transaksi berhasil dibuat');
+            return $this->createdResponse(
+                new TransactionResource($result),
+                'Transaksi berhasil dibuat'
+            );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 422);
         }
@@ -152,11 +152,10 @@ class TransactionController extends Controller
                 $validated['payment_method']
             );
 
-            return $this->createdResponse([
-                'transaction' => new TransactionResource($result['transaction']),
-                'subscription' => $result['subscription'],
-                'instructions' => $result['instructions'],
-            ], 'Transaksi langganan berhasil dibuat');
+            return $this->createdResponse(
+                new TransactionResource($result),
+                'Transaksi langganan berhasil dibuat'
+            );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 422);
         }
@@ -192,10 +191,10 @@ class TransactionController extends Controller
                 $validated['payment_method']
             );
 
-            return $this->createdResponse([
-                'transaction' => new TransactionResource($result['transaction']),
-                'instructions' => $result['instructions'],
-            ], 'Transaksi mentoring berhasil dibuat');
+            return $this->createdResponse(
+                new TransactionResource($result),
+                'Transaksi mentoring berhasil dibuat'
+            );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 422);
         }
