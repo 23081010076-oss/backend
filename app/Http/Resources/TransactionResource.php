@@ -89,6 +89,8 @@ class TransactionResource extends JsonResource
             'App\Models\Subscription' => [
                 'id' => $this->transactionable->id,
                 'plan' => $this->transactionable->plan,
+                'plan_label' => $this->getSubscriptionPlanLabel($this->transactionable->plan),
+                'image' => $this->getSubscriptionImage($this->transactionable->plan),
                 'package_type' => $this->transactionable->package_type,
                 'duration' => $this->transactionable->duration . ' ' . $this->transactionable->duration_unit,
                 'start_date' => $this->transactionable->start_date,
@@ -164,6 +166,38 @@ class TransactionResource extends JsonResource
             'expired' => 'Kadaluarsa',
             'refunded' => 'Dikembalikan',
             default => $this->status,
+        };
+    }
+
+    /**
+     * Get subscription image based on plan
+     * 
+     * @param string $plan
+     * @return string
+     */
+    private function getSubscriptionImage(string $plan): ?string
+    {
+        return match($plan) {
+            'premium' => 'https://img.freepik.com/free-vector/purple-diamond-sticker-isolated_1308-88426.jpg?semt=ais_hybrid&w=740&q=80',
+            'regular' => 'https://img.freepik.com/free-psd/pile-gleaming-gold-bullions_191095-83967.jpg?semt=ais_hybrid&w=740&q=80',
+            'free' => 'https://img.freepik.com/free-vector/golden-star-3d-icon_1308-169203.jpg?semt=ais_hybrid&w=740&q=80',
+            default => null,
+        };
+    }
+
+    /**
+     * Get subscription plan label in Indonesian
+     * 
+     * @param string $plan
+     * @return string
+     */
+    private function getSubscriptionPlanLabel(string $plan): string
+    {
+        return match($plan) {
+            'premium' => 'Paket Premium',
+            'regular' => 'Paket Reguler',
+            'free' => 'Paket Gratis',
+            default => ucfirst($plan),
         };
     }
 }
