@@ -252,10 +252,10 @@ class TransactionController extends Controller
                 $validated['payment_method']
             );
 
-            return $this->createdResponse(
-                new TransactionResource($result),
-                'Transaksi mentoring berhasil dibuat'
-            );
+            return $this->createdResponse([
+                'transaction' => new TransactionResource($result['transaction']),
+                'instructions' => $result['instructions'],
+            ], 'Transaksi mentoring berhasil dibuat');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 422);
         }
