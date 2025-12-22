@@ -338,6 +338,38 @@ class AuthController extends Controller
         ], 'CV berhasil diupload');
     }
 
+    /**
+     * GET CV (Curriculum Vitae)
+     *
+     * Endpoint: GET /api/auth/profile/cv
+     *
+     * Menampilkan informasi CV atau download CV user
+     */
+    public function getCv(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user->cv_path) {
+            return $this->errorResponse('CV tidak ditemukan', 404);
+        }
+
+        if (!Storage::disk('public')->exists($user->cv_path)) {
+            return $this->errorResponse('File CV tidak ditemukan', 404);
+        }
+
+        // Jika parameter download=true, return file untuk di-download
+        if ($request->query('download') === 'true') {
+            return Storage::disk('public')->download($user->cv_path);
+        }
+
+        // Jika tidak, return informasi CV
+        return $this->successResponse([
+            'cv_path' => $user->cv_path,
+            'cv_url'  => asset('storage/' . $user->cv_path),
+            'cv_name' => basename($user->cv_path),
+        ], 'CV berhasil diambil');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | BAGIAN 4: DASHBOARD & PORTOFOLIO

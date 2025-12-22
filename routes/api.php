@@ -76,6 +76,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/profile/cv', [AuthController::class, 'uploadCv'])
             ->middleware('throttle:uploads')
             ->name('upload-cv');
+        Route::get('/profile/cv', [AuthController::class, 'getCv'])->name('get-cv');
         Route::get('/recommendations', [AuthController::class, 'recommendations'])->name('recommendations');
         Route::get('/portfolio', [AuthController::class, 'portfolio'])->name('portfolio');
         Route::get('/activity-history', [AuthController::class, 'activityHistory'])->name('activity-history');
