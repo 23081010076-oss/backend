@@ -7803,9 +7803,6 @@
                             "schema": {
                                 "required": [
                                     "plan",
-                                    "package_type",
-                                    "duration",
-                                    "duration_unit",
                                     "payment_method"
                                 ],
                                 "properties": {
@@ -7818,45 +7815,13 @@
                                         ],
                                         "example": "premium"
                                     },
-                                    "package_type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "single_course",
-                                            "all_in_one"
-                                        ],
-                                        "example": "all_in_one"
-                                    },
-                                    "duration": {
-                                        "type": "integer",
-                                        "example": 12
-                                    },
-                                    "duration_unit": {
-                                        "type": "string",
-                                        "enum": [
-                                            "days",
-                                            "weeks",
-                                            "months",
-                                            "years"
-                                        ],
-                                        "example": "months"
-                                    },
                                     "payment_method": {
                                         "type": "string",
                                         "enum": [
                                             "manual",
                                             "bank_transfer"
                                         ],
-                                        "example": "manual"
-                                    },
-                                    "courses_ids": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
-                                        "example": [
-                                            1,
-                                            2
-                                        ]
+                                        "example": "bank_transfer"
                                     }
                                 },
                                 "type": "object"

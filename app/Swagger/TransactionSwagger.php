@@ -364,13 +364,9 @@ namespace App\Swagger;
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
- *             required={"plan", "package_type", "duration", "duration_unit", "payment_method"},
+ *             required={"plan", "payment_method"},
  *             @OA\Property(property="plan", type="string", enum={"basic", "premium", "pro"}, example="premium"),
- *             @OA\Property(property="package_type", type="string", enum={"single_course", "all_in_one"}, example="all_in_one"),
- *             @OA\Property(property="duration", type="integer", example=12),
- *             @OA\Property(property="duration_unit", type="string", enum={"days", "weeks", "months", "years"}, example="months"),
- *             @OA\Property(property="payment_method", type="string", enum={"manual", "bank_transfer"}, example="manual"),
- *             @OA\Property(property="courses_ids", type="array", @OA\Items(type="integer"), example={1, 2})
+ *             @OA\Property(property="payment_method", type="string", enum={"manual", "bank_transfer"}, example="bank_transfer"),
  *         )
  *     ),
  *     @OA\Response(
