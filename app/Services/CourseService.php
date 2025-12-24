@@ -26,15 +26,15 @@ class CourseService
     /**
      * Ambil daftar kursus dengan filter
      * 
-     * CACHING: Data di-cache selama 10 menit untuk performa lebih baik
+     * CACHING: Data di-cache selama 1 menit untuk performa lebih baik
      */
     public function getCourses(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         // Generate cache key berdasarkan filter
         $cacheKey = 'courses:' . md5(json_encode($filters) . $perPage . request('page', 1));
         
-        // Cache selama 10 menit (600 detik)
-        return Cache::remember($cacheKey, 600, function () use ($filters, $perPage) {
+        // Cache selama 1 menit (60 detik)
+        return Cache::remember($cacheKey, 60, function () use ($filters, $perPage) {
             $query = Course::withCount('enrollments') // Hitung jumlah enrollment untuk popularity
                 ->withAvg('reviews', 'rating'); // Hitung rata-rata rating
 
@@ -317,12 +317,18 @@ class CourseService
      */
     public function clearCache(): void
     {
-        // Clear cache dengan pattern 'courses:*'
-        // Untuk production, gunakan Redis dengan tags
+        // Clear cache statistics
         Cache::forget('courses:statistics');
         
-        // Clear cache list (simplified - di production gunakan cache tags)
-        // Cache::tags(['courses'])->flush();
+        // Clear semua cache courses dengan wildcard pattern
+        // Karena cache key pakai md5, kita flush semua cache yang dimulai dengan 'courses:'
+        $keys = Cache::getStore()->getRedis()->keys('laravel_database_courses:*');
+        if ($keys) {
+            foreach ($keys as $key) {
+                $key = str_replace('laravel_database_', '', $key);
+                Cache::forget($key);
+            }
+        }
     }
 }
 
