@@ -26,15 +26,15 @@ class CourseService
     /**
      * Ambil daftar kursus dengan filter
      * 
-     * CACHING: Data di-cache selama 1 menit untuk performa lebih baik
+     * CACHING: Data di-cache selama 10 detik untuk performa lebih baik
      */
     public function getCourses(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         // Generate cache key berdasarkan filter
         $cacheKey = 'courses:' . md5(json_encode($filters) . $perPage . request('page', 1));
         
-        // Cache selama 1 menit (60 detik)
-        return Cache::remember($cacheKey, 60, function () use ($filters, $perPage) {
+        // Cache selama 10 detik
+        return Cache::remember($cacheKey, 10, function () use ($filters, $perPage) {
             $query = Course::withCount('enrollments') // Hitung jumlah enrollment untuk popularity
                 ->withAvg('reviews', 'rating'); // Hitung rata-rata rating
 
