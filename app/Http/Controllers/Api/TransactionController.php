@@ -178,10 +178,10 @@ class TransactionController extends Controller
                 $validated['payment_method']
             );
 
-            return $this->createdResponse(
-                new TransactionResource($result),
-                'Transaksi berhasil dibuat'
-            );
+            return $this->createdResponse([
+                'transaction' => new TransactionResource($result['transaction']),
+                'instructions' => $result['instructions'],
+            ], 'Transaksi berhasil dibuat');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 422);
         }
@@ -239,9 +239,6 @@ class TransactionController extends Controller
             'payment_method.required' => 'Metode pembayaran harus diisi',
             'payment_method.in'       => 'Metode pembayaran tidak valid',
         ]);
-
-        // Cek akses dengan Policy
-        $this->authorize('create', Transaction::class);
 
         try {
             $session = MentoringSession::findOrFail($sessionId);

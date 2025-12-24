@@ -13,11 +13,13 @@ class NeedAssessment extends Model
     protected $fillable = [
         'mentoring_session_id',
         'form_data',
+        'mentor_notes',
         'completed_at',
     ];
 
     protected $casts = [
         'form_data' => 'array',
+        'mentor_notes' => 'array',
         'completed_at' => 'datetime',
     ];
 

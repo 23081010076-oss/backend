@@ -282,7 +282,19 @@ class AuthController extends Controller
     public function uploadProfilePhoto(Request $request): JsonResponse
     {
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'photo' => [
+                'required',
+                'file',
+                'image',
+                'mimes:jpeg,png,jpg,gif',
+                'max:2048',
+                function ($attribute, $value, $fail) {
+                    $blocked = ['php', 'phtml', 'phar', 'cgi', 'pl', 'exe', 'js', 'sh'];
+                    if (in_array(strtolower($value->getClientOriginalExtension()), $blocked, true)) {
+                        $fail('File tidak diizinkan.');
+                    }
+                },
+            ],
         ]);
 
         $user = $request->user();
@@ -315,7 +327,18 @@ class AuthController extends Controller
     public function uploadCv(Request $request): JsonResponse
     {
         $request->validate([
-            'cv' => 'required|file|mimes:pdf,doc,docx|max:2048',
+            'cv' => [
+                'required',
+                'file',
+                'mimes:pdf,doc,docx',
+                'max:2048',
+                function ($attribute, $value, $fail) {
+                    $blocked = ['php', 'phtml', 'phar', 'cgi', 'pl', 'exe', 'js', 'sh'];
+                    if (in_array(strtolower($value->getClientOriginalExtension()), $blocked, true)) {
+                        $fail('File tidak diizinkan.');
+                    }
+                },
+            ],
         ]);
 
         $user = $request->user();

@@ -24,7 +24,7 @@ class CurriculumProgressController extends Controller
     /**
      * Get user's progress for a specific course
      */
-    public function index(Request $request, int $courseId): JsonResponse
+    public function index(Request $request, $courseId): JsonResponse
     {
         // Get user's enrollment for this course
         $enrollment = Enrollment::where('user_id', $request->user()->id)
@@ -32,7 +32,9 @@ class CurriculumProgressController extends Controller
             ->first();
 
         if (!$enrollment) {
-            return $this->errorResponse('Anda belum terdaftar di kursus ini', 403);
+            // Debug info
+            $allEnrollments = Enrollment::where('user_id', $request->user()->id)->get(['id', 'course_id', 'user_id']);
+            return $this->errorResponse('Anda belum terdaftar di kursus ini. CourseId: ' . $courseId . ', UserId: ' . $request->user()->id . ', Enrollments: ' . $allEnrollments->toJson(), 403);
         }
 
         $progress = CurriculumProgress::where('enrollment_id', $enrollment->id)

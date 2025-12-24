@@ -41,11 +41,11 @@ class ArticlePolicy
 
     /**
      * Apakah user boleh membuat artikel?
-     * → Admin dan mentor boleh
+     * → Admin dan corporate boleh
      */
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'mentor']);
+        return in_array($user->role, ['admin', 'corporate']);
     }
 
     /**

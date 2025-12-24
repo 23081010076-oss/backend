@@ -60,7 +60,7 @@ class MentoringSessionSeeder extends Seeder
             // Completed sessions
             [
                 'mentor_id' => $mentors->first()->id,
-                'member_id' => $students->skip(2)->first()->id ?? $students->first()->id,
+                'member_id' => $students->first()->id,
                 'session_id' => 'MENT-' . now()->subDays(10)->format('Ymd') . '-001',
                 'type' => 'academic',
                 'schedule' => now()->subDays(10)->setTime(14, 0),

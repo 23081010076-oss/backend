@@ -1,826 +1,861 @@
 {
-    "info": {
-        "_postman_id": "my-mentor-api-flow-v1",
-        "name": "MyMentor API Flow (Detailed)",
-        "description": "Comprehensive API collection for MyMentor App, organized by User Flow (Student, Mentor, Corporate, Admin) to match the API Flow Test Report.",
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  "info": {
+    "_postman_id": "my-mentor-api-flow-v1",
+    "name": "MyMentor API Flow (Detailed)",
+    "description": "Comprehensive API collection for MyMentor App, organized by User Flow (Student, Mentor, Corporate, Admin) to match the API Flow Test Report.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000/api",
+      "type": "string"
     },
-    "variable": [
+    {
+      "key": "studentToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "mentorToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "corporateToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Student Flow",
+      "item": [
         {
-            "key": "baseUrl",
-            "value": "http://127.0.0.1:8000/api",
-            "type": "string"
+          "name": "01. Auth & Profile",
+          "item": [
+            {
+              "name": "Register Student",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Student Budi\",\n    \"email\": \"student.budi@example.com\",\n    \"password\": \"password\",\n    \"password_confirmation\": \"password\",\n    \"role\": \"student\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{baseUrl}}/register"
+              }
+            },
+            {
+              "name": "Login Student",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();",
+                      "if (jsonData.data && jsonData.data.token) {",
+                      "    pm.collectionVariables.set('studentToken', jsonData.data.token);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"student.budi@example.com\",\n    \"password\": \"password\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{baseUrl}}/login"
+              }
+            },
+            {
+              "name": "Update Profile",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"institution\": \"Universitas Indonesia\",\n    \"bio\": \"Mahasiswa TI\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{baseUrl}}/auth/profile"
+              }
+            }
+          ]
         },
         {
-            "key": "studentToken",
-            "value": "",
-            "type": "string"
+          "name": "02. Courses",
+          "item": [
+            {
+              "name": "Get All Courses",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/courses?sort=popular",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["courses"],
+                  "query": [
+                    {
+                      "key": "sort",
+                      "value": "popular",
+                      "description": "Sort: popular, rating, latest"
+                    },
+                    {
+                      "key": "type",
+                      "value": "bootcamp",
+                      "disabled": true
+                    },
+                    {
+                      "key": "level",
+                      "value": "beginner",
+                      "disabled": true
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Course Detail",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "url": "{{baseUrl}}/courses/1"
+              }
+            },
+            {
+              "name": "Enroll / Buy Course (Free)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{baseUrl}}/courses/1/enroll"
+              }
+            },
+            {
+              "name": "Buy Course (Paid)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"payment_method\": \"bank_transfer\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{baseUrl}}/transactions/courses/1"
+              }
+            },
+            {
+              "name": "Get Course Progress",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "url": "{{baseUrl}}/courses/1/progress"
+              }
+            },
+            {
+              "name": "Complete Curriculum Item",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"completed\": true\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{baseUrl}}/curriculums/1/complete"
+              }
+            }
+          ]
         },
         {
-            "key": "mentorToken",
-            "value": "",
-            "type": "string"
+          "name": "03. Mentoring",
+          "item": [
+            {
+              "name": "Get Mentor Schedule",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "url": "{{baseUrl}}/mentors/4/schedule"
+              }
+            },
+            {
+              "name": "Book Mentoring Session",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"mentor_id\": 4,\n    \"type\": \"academic\",\n    \"schedule\": \"2025-08-20 09:00:00\",\n    \"payment_method\": \"bank_transfer\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{baseUrl}}/mentoring-sessions"
+              }
+            },
+            {
+              "name": "Pay Mentoring Session",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"payment_method\": \"bank_transfer\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{baseUrl}}/transactions/mentoring-sessions/1"
+              }
+            },
+            {
+              "name": "Give Feedback",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"rating\": 5,\n    \"review\": \"Sangat bermanfaat!\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{baseUrl}}/mentoring-sessions/7/feedback"
+              }
+            }
+          ]
         },
         {
-            "key": "corporateToken",
-            "value": "",
-            "type": "string"
+          "name": "04. Scholarships",
+          "item": [
+            {
+              "name": "Get Scholarships",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scholarships?sort=popular",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["scholarships"],
+                  "query": [
+                    {
+                      "key": "sort",
+                      "value": "popular",
+                      "description": "Sort: popular, deadline, latest"
+                    },
+                    {
+                      "key": "status",
+                      "value": "open",
+                      "disabled": true
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Apply Scholarship",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"cv_path\": \"http://example.com/cv.pdf\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{baseUrl}}/scholarships/1/apply"
+              }
+            },
+            {
+              "name": "Get My Applications",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "url": "{{baseUrl}}/my-applications"
+              }
+            }
+          ]
         },
         {
-            "key": "adminToken",
-            "value": "",
-            "type": "string"
+          "name": "05. Portfolio & Experience",
+          "item": [
+            {
+              "name": "Upload CV",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "cv",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": "{{baseUrl}}/auth/profile/cv"
+              }
+            },
+            {
+              "name": "Add Experience",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{studentToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Intern at Google\",\n    \"company\": \"Google Indonesia\",\n    \"type\": \"job\",\n    \"start_date\": \"2024-01-01\",\n    \"end_date\": \"2024-06-01\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{baseUrl}}/experiences"
+              }
+            }
+          ]
         }
-    ],
-    "item": [
+      ]
+    },
+    {
+      "name": "02. Mentor Flow",
+      "item": [
         {
-            "name": "01. Student Flow",
-            "item": [
-                {
-                    "name": "01. Auth & Profile",
-                    "item": [
-                        {
-                            "name": "Register Student",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Student Budi\",\n    \"email\": \"student.budi@example.com\",\n    \"password\": \"password\",\n    \"password_confirmation\": \"password\",\n    \"role\": \"student\"\n}",
-                                    "options": { "raw": { "language": "json" } }
-                                },
-                                "url": "{{baseUrl}}/register"
-                            }
-                        },
-                        {
-                            "name": "Login Student",
-                            "event": [
-                                {
-                                    "listen": "test",
-                                    "script": {
-                                        "exec": [
-                                            "var jsonData = pm.response.json();",
-                                            "if (jsonData.data && jsonData.data.token) {",
-                                            "    pm.collectionVariables.set('studentToken', jsonData.data.token);",
-                                            "}"
-                                        ],
-                                        "type": "text/javascript"
-                                    }
-                                }
-                            ],
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"email\": \"student.budi@example.com\",\n    \"password\": \"password\"\n}",
-                                    "options": { "raw": { "language": "json" } }
-                                },
-                                "url": "{{baseUrl}}/login"
-                            }
-                        },
-                        {
-                            "name": "Update Profile",
-                            "request": {
-                                "method": "PUT",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"institution\": \"Universitas Indonesia\",\n    \"bio\": \"Mahasiswa TI\"\n}",
-                                    "options": { "raw": { "language": "json" } }
-                                },
-                                "url": "{{baseUrl}}/auth/profile"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "02. Courses",
-                    "item": [
-                        {
-                            "name": "Get All Courses",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{baseUrl}}/courses?sort=popular",
-                                    "host": ["{{baseUrl}}"],
-                                    "path": ["courses"],
-                                    "query": [
-                                        {
-                                            "key": "sort",
-                                            "value": "popular",
-                                            "description": "Sort: popular, rating, latest"
-                                        },
-                                        {
-                                            "key": "type",
-                                            "value": "bootcamp",
-                                            "disabled": true
-                                        },
-                                        {
-                                            "key": "level",
-                                            "value": "beginner",
-                                            "disabled": true
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "name": "Get Course Detail",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "url": "{{baseUrl}}/courses/1"
-                            }
-                        },
-                        {
-                            "name": "Enroll / Buy Course",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"payment_method\": \"bank_transfer\"\n}",
-                                    "options": { "raw": { "language": "json" } }
-                                },
-                                "url": "{{baseUrl}}/transactions/courses/1"
-                            }
-                        },
-                        {
-                            "name": "Get Course Progress",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "url": "{{baseUrl}}/courses/1/progress"
-                            }
-                        },
-                        {
-                            "name": "Complete Curriculum",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"completed\": true\n}",
-                                    "options": { "raw": { "language": "json" } }
-                                },
-                                "url": "{{baseUrl}}/curriculums/2/complete"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "03. Mentoring",
-                    "item": [
-                        {
-                            "name": "Get Mentor Schedule",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "url": "{{baseUrl}}/mentors/4/schedule"
-                            }
-                        },
-                        {
-                            "name": "Book Mentoring Session",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"mentor_id\": 4,\n    \"type\": \"academic\",\n    \"schedule\": \"2025-08-20 09:00:00\",\n    \"payment_method\": \"bank_transfer\"\n}",
-                                    "options": { "raw": { "language": "json" } }
-                                },
-                                "url": "{{baseUrl}}/mentoring-sessions"
-                            }
-                        },
-                        {
-                            "name": "Pay Mentoring Session",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"payment_method\": \"bank_transfer\"\n}",
-                                    "options": { "raw": { "language": "json" } }
-                                },
-                                "url": "{{baseUrl}}/transactions/mentoring-sessions/1"
-                            }
-                        },
-                        {
-                            "name": "Give Feedback",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"rating\": 5,\n    \"review\": \"Sangat bermanfaat!\"\n}",
-                                    "options": { "raw": { "language": "json" } }
-                                },
-                                "url": "{{baseUrl}}/mentoring-sessions/7/feedback"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "04. Scholarships",
-                    "item": [
-                        {
-                            "name": "Get Scholarships",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{baseUrl}}/scholarships?sort=popular",
-                                    "host": ["{{baseUrl}}"],
-                                    "path": ["scholarships"],
-                                    "query": [
-                                        {
-                                            "key": "sort",
-                                            "value": "popular",
-                                            "description": "Sort: popular, deadline, latest"
-                                        },
-                                        {
-                                            "key": "status",
-                                            "value": "open",
-                                            "disabled": true
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "name": "Apply Scholarship",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"cv_path\": \"http://example.com/cv.pdf\"\n}",
-                                    "options": { "raw": { "language": "json" } }
-                                },
-                                "url": "{{baseUrl}}/scholarships/1/apply"
-                            }
-                        },
-                        {
-                            "name": "Get My Applications",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "url": "{{baseUrl}}/my-applications"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "05. Portfolio & Experience",
-                    "item": [
-                        {
-                            "name": "Upload CV",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "formdata",
-                                    "formdata": [
-                                        {
-                                            "key": "cv",
-                                            "type": "file",
-                                            "src": []
-                                        }
-                                    ]
-                                },
-                                "url": "{{baseUrl}}/auth/profile/cv"
-                            }
-                        },
-                        {
-                            "name": "Add Experience",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{studentToken}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"title\": \"Intern at Google\",\n    \"company\": \"Google Indonesia\",\n    \"type\": \"job\",\n    \"start_date\": \"2024-01-01\",\n    \"end_date\": \"2024-06-01\"\n}",
-                                    "options": { "raw": { "language": "json" } }
-                                },
-                                "url": "{{baseUrl}}/experiences"
-                            }
-                        }
-                    ]
-                }
-            ]
+          "name": "Login Mentor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('mentorToken', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"dr.mentor@example.com\",\n    \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/login"
+          }
         },
         {
-            "name": "02. Mentor Flow",
-            "item": [
-                {
-                    "name": "Login Mentor",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "var jsonData = pm.response.json();",
-                                    "if (jsonData.data && jsonData.data.token) {",
-                                    "    pm.collectionVariables.set('mentorToken', jsonData.data.token);",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"email\": \"dr.mentor@example.com\",\n    \"password\": \"password\"\n}",
-                            "options": { "raw": { "language": "json" } }
-                        },
-                        "url": "{{baseUrl}}/login"
-                    }
-                },
-                {
-                    "name": "Create Schedule Slots",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{mentorToken}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"schedule\": \"2025-12-20 09:00:00\",\n    \"type\": \"academic\",\n    \"meeting_link\": \"https://meet.google.com/abc-defg-hij\"\n}",
-                            "options": { "raw": { "language": "json" } }
-                        },
-                        "url": "{{baseUrl}}/mentoring-sessions"
-                    }
-                },
-                {
-                    "name": "Get My Sessions",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{mentorToken}}"
-                            }
-                        ],
-                        "url": "{{baseUrl}}/my-mentoring-sessions"
-                    }
-                },
-                {
-                    "name": "Submit Need Assessment",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{mentorToken}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"notes\": \"Perlu diperdalam di Bab 1\"\n}",
-                            "options": { "raw": { "language": "json" } }
-                        },
-                        "url": "{{baseUrl}}/mentoring-sessions/1/need-assessments"
-                    }
-                },
-                {
-                    "name": "Upload Coaching Files",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{mentorToken}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "file",
-                                    "type": "file",
-                                    "src": []
-                                },
-                                {
-                                    "key": "description",
-                                    "value": "Material Bab 1",
-                                    "type": "text"
-                                }
-                            ]
-                        },
-                        "url": "{{baseUrl}}/mentoring-sessions/1/coaching-files"
-                    }
-                },
-                {
-                    "name": "Complete Session",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{mentorToken}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"status\": \"completed\"\n}",
-                            "options": { "raw": { "language": "json" } }
-                        },
-                        "url": "{{baseUrl}}/mentoring-sessions/1/status"
-                    }
-                },
-                {
-                    "name": "Update Profile Specialization",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{mentorToken}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"specialization\": [\"Data Science\", \"Machine Learning\", \"Python\"]\n}",
-                            "options": { "raw": { "language": "json" } }
-                        },
-                        "url": "{{baseUrl}}/auth/profile"
-                    }
-                }
-            ]
+          "name": "Create Schedule Slots",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mentorToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"schedule\": \"2025-12-20 09:00:00\",\n    \"type\": \"academic\",\n    \"meeting_link\": \"https://meet.google.com/abc-defg-hij\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/mentoring-sessions"
+          }
         },
         {
-            "name": "03. Corporate Flow",
-            "item": [
-                {
-                    "name": "Login Corporate",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "var jsonData = pm.response.json();",
-                                    "if (jsonData.data && jsonData.data.token) {",
-                                    "    pm.collectionVariables.set('corporateToken', jsonData.data.token);",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"email\": \"hr@corporate.com\",\n    \"password\": \"password\"\n}",
-                            "options": { "raw": { "language": "json" } }
-                        },
-                        "url": "{{baseUrl}}/login"
-                    }
-                },
-                {
-                    "name": "Create Scholarship",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{corporateToken}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"title\": \"Tech Scholarship 2025\",\n    \"description\": \"Scholarship untuk mahasiswa IT\",\n    \"funding_amount\": 10000000,\n    \"deadline\": \"2025-12-31\",\n    \"requirements\": \"IPK min 3.0\",\n    \"benefits\": \"Full tuition + Laptop\"\n}",
-                            "options": { "raw": { "language": "json" } }
-                        },
-                        "url": "{{baseUrl}}/scholarships"
-                    }
-                },
-                {
-                    "name": "Get Scholarship Detail with Applicants",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{corporateToken}}"
-                            }
-                        ],
-                        "url": "{{baseUrl}}/scholarships/1"
-                    }
-                },
-                {
-                    "name": "Accept Applicant",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{corporateToken}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"status\": \"accepted\"\n}",
-                            "options": { "raw": { "language": "json" } }
-                        },
-                        "url": "{{baseUrl}}/scholarship-applications/1/status"
-                    }
-                },
-                {
-                    "name": "Publish Article",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{corporateToken}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"title\": \"Industry Update: AI Revolution\",\n    \"content\": \"Artificial Intelligence is transforming industries...\",\n    \"category\": \"technology\"\n}",
-                            "options": { "raw": { "language": "json" } }
-                        },
-                        "url": "{{baseUrl}}/articles"
-                    }
-                }
-            ]
+          "name": "Get My Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mentorToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/my-mentoring-sessions"
+          }
         },
         {
-            "name": "04. Admin Flow",
-            "item": [
+          "name": "Submit Need Assessment (Student)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{studentToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"form_data\": {\n        \"goals\": \"Improve public speaking\",\n        \"challenges\": [\"Stage fright\", \"Voice control\"],\n        \"expectations\": \"Confident presentation skills\"\n    }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/mentoring-sessions/1/need-assessments"
+          }
+        },
+        {
+          "name": "Add Mentor Notes",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mentorToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mentor_notes\": {\n        \"preparation\": \"Siapkan materi presentasi dasar\",\n        \"focus_areas\": [\"Body language\", \"Voice control\"],\n        \"session_plan\": \"Practice with real case study\"\n    }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/mentoring-sessions/1/need-assessments"
+          }
+        },
+        {
+          "name": "Upload Coaching Files",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mentorToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
                 {
-                    "name": "Login Admin",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "var jsonData = pm.response.json();",
-                                    "if (jsonData.data && jsonData.data.token) {",
-                                    "    pm.collectionVariables.set('adminToken', jsonData.data.token);",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password\"\n}",
-                            "options": { "raw": { "language": "json" } }
-                        },
-                        "url": "{{baseUrl}}/login"
-                    }
+                  "key": "file",
+                  "type": "file",
+                  "src": []
                 },
                 {
-                    "name": "Suspend User",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{adminToken}}"
-                            }
-                        ],
-                        "url": "{{baseUrl}}/admin/users/11/suspend"
-                    }
-                },
-                {
-                    "name": "Create New Course",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{adminToken}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"title\": \"Advanced Laravel Development\",\n    \"description\": \"Comprehensive Laravel course\",\n    \"price\": 500000,\n    \"type\": \"bootcamp\",\n    \"level\": \"intermediate\"\n}",
-                            "options": { "raw": { "language": "json" } }
-                        },
-                        "url": "{{baseUrl}}/courses"
-                    }
-                },
-                {
-                    "name": "Verify Transaction (Confirm Payment)",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{adminToken}}"
-                            }
-                        ],
-                        "url": "{{baseUrl}}/transactions/1/confirm"
-                    }
-                },
-                {
-                    "name": "Delete Article (Moderation)",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{adminToken}}"
-                            }
-                        ],
-                        "url": "{{baseUrl}}/articles/1"
-                    }
-                },
-                {
-                    "name": "Get Corporate Contacts",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            { "key": "Accept", "value": "application/json" },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{adminToken}}"
-                            }
-                        ],
-                        "url": "{{baseUrl}}/corporate-contacts"
-                    }
+                  "key": "description",
+                  "value": "Material Bab 1",
+                  "type": "text"
                 }
-            ]
+              ]
+            },
+            "url": "{{baseUrl}}/mentoring-sessions/1/coaching-files"
+          }
+        },
+        {
+          "name": "Complete Session",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mentorToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"completed\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/mentoring-sessions/1/status"
+          }
+        },
+        {
+          "name": "Update Profile Specialization",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mentorToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"specialization\": [\"Data Science\", \"Machine Learning\", \"Python\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/profile"
+          }
         }
-    ]
+      ]
+    },
+    {
+      "name": "03. Corporate Flow",
+      "item": [
+        {
+          "name": "Login Corporate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('corporateToken', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"hr@corporate.com\",\n    \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Create Scholarship",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{corporateToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Tech Scholarship 2025\",\n    \"description\": \"Scholarship untuk mahasiswa IT\",\n    \"funding_amount\": 10000000,\n    \"deadline\": \"2025-12-31\",\n    \"requirements\": \"IPK min 3.0\",\n    \"benefits\": \"Full tuition + Laptop\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/scholarships"
+          }
+        },
+        {
+          "name": "Get Scholarship Detail with Applicants",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{corporateToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/scholarships/1"
+          }
+        },
+        {
+          "name": "Accept Applicant",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{corporateToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"accepted\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/scholarship-applications/1/status"
+          }
+        },
+        {
+          "name": "Publish Article",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{corporateToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Industry Update: AI Revolution\",\n    \"content\": \"Artificial Intelligence is transforming industries...\",\n    \"category\": \"technology\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/articles"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Admin Flow",
+      "item": [
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('adminToken', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Suspend User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/users/11/suspend"
+          }
+        },
+        {
+          "name": "Create New Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Advanced Laravel Development\",\n    \"description\": \"Comprehensive Laravel course\",\n    \"price\": 500000,\n    \"type\": \"bootcamp\",\n    \"level\": \"intermediate\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/courses"
+          }
+        },
+        {
+          "name": "Verify Transaction (Confirm Payment)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/transactions/1/confirm"
+          }
+        },
+        {
+          "name": "Delete Article (Moderation)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/articles/1"
+          }
+        },
+        {
+          "name": "Get Corporate Contacts",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/corporate-contacts"
+          }
+        }
+      ]
+    }
+  ]
 }

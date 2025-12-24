@@ -40,9 +40,11 @@ class ArticleSeeder extends Seeder
 Ingatlah bahwa tidak ada pilihan yang salah, yang penting adalah komitmen dan usaha Anda dalam menjalani pendidikan tersebut.',
                 'category' => 'education',
                 'author' => 'Dr. Sari Wijayanti',
+                'image' => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800',
             ],
             [
                 'title' => 'Panduan Lengkap Mendaftar Beasiswa LPDP 2024',
+                'image' => 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800',
                 'content' => 'Beasiswa LPDP (Lembaga Pengelola Dana Pendidikan) adalah salah satu beasiswa bergengsi di Indonesia. Berikut panduan lengkap untuk mendaftar:
 
 ## Persyaratan Umum
@@ -79,6 +81,7 @@ Persiapan yang matang adalah kunci sukses mendapatkan beasiswa LPDP.',
             ],
             [
                 'title' => 'Strategi Membangun Portfolio Developer yang Menarik',
+                'image' => 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800',
                 'content' => 'Portfolio adalah hal pertama yang dilihat oleh recruiter ketika melamar pekerjaan sebagai developer. Berikut strategi membangun portfolio yang menarik:
 
 ## Komponen Wajib Portfolio
@@ -118,6 +121,7 @@ Remember: Quality over quantity. Lebih baik 3 project berkualitas daripada 10 pr
                 'author' => 'Budi Santoso',
             ],
             [
+                'image' => 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800',
                 'title' => 'Pengalaman Mendapat Beasiswa ke Jerman: DAAD Scholarship',
                 'content' => 'Hai teman-teman! Saya ingin berbagi pengalaman mendapatkan beasiswa DAAD untuk kuliah S2 di Jerman. Semoga bisa menginspirasi kalian yang bermimpi kuliah di luar negeri.
 
@@ -166,6 +170,7 @@ Feel free to reach out jika ada pertanyaan! Good luck! 🇩🇪',
                 'author' => 'Maya Sari',
             ],
             [
+                'image' => 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800',
                 'title' => 'Tren Teknologi 2024 yang Wajib Dikuasai Developer',
                 'content' => 'Dunia teknologi berkembang sangat cepat. Sebagai developer, kita perlu selalu update dengan tren terbaru agar tetap relevan di industri. Berikut tren teknologi 2024 yang wajib dikuasai:
 
@@ -240,6 +245,7 @@ What tech trends are you most excited about? Let me know in the comments! 💻',
             ],
             [
                 'title' => 'Mental Health untuk Mahasiswa: Tips Mengatasi Stress Kuliah',
+                'image' => 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800',
                 'content' => 'Kuliah bukan hanya tentang akademik, tapi juga tentang menjaga kesehatan mental. Stress adalah hal normal, tapi kita perlu tahu cara mengatasinya dengan baik.
 
 ## Mengenali Tanda-Tanda Stress
@@ -347,6 +353,7 @@ If you\'re struggling, please reach out. There are people who care and want to h
             Article::create([
                 'title' => $article['title'],
                 'content' => $article['content'],
+                'image' => $article['image'] ?? null,
                 'category' => $article['category'],
                 'author' => $article['author'],
                 'author_id' => $author ? $author->id : null,

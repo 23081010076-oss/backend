@@ -20,6 +20,7 @@ class Article extends Model
         'content',
         'category',
         'author', // author name as string
+        'image',
     ];
 
     // Relationships
