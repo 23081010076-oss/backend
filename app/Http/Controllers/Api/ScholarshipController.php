@@ -67,7 +67,9 @@ class ScholarshipController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $scholarship = Scholarship::with(['organization', 'applications'])->findOrFail($id);
+        $scholarship = Scholarship::with(['organization'])
+            ->withCount('applications')
+            ->findOrFail($id);
 
         return $this->successResponse($scholarship, 'Detail beasiswa berhasil diambil');
     }
@@ -183,10 +185,10 @@ class ScholarshipController extends Controller
         $this->authorize('updateApplicationStatus', $application->scholarship);
 
         $validated = $request->validate([
-            'status' => 'required|in:submitted,review,accepted,rejected',
+            'status' => 'required|in:draft,submitted,review,accepted,rejected',
         ], [
             'status.required' => 'Status harus diisi',
-            'status.in'       => 'Status harus salah satu dari: submitted, review, accepted, rejected',
+            'status.in'       => 'Status harus salah satu dari: draft, submitted, review, accepted, rejected',
         ]);
 
         $application = $this->scholarshipService->updateApplicationStatus(
@@ -195,5 +197,127 @@ class ScholarshipController extends Controller
         );
 
         return $this->successResponse($application, 'Status lamaran berhasil diupdate');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scholarship Application Flow Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Step 1: Simpan draft lamaran dengan dokumen
+     */
+    public function saveDraft(ApplyScholarshipRequest $request, int $id): JsonResponse
+    {
+        $scholarship = Scholarship::findOrFail($id);
+
+        // Cek akses dengan Policy
+        $this->authorize('apply', $scholarship);
+
+        try {
+            $application = $this->scholarshipService->saveDraft(
+                $scholarship,
+                Auth::user(),
+                $request->allFiles(),
+                $request->only(['motivation_letter_text'])
+            );
+
+            return $this->createdResponse($application, 'Draft lamaran berhasil disimpan');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        }
+    }
+
+    /**
+     * Step 2: Update pre-assessment data
+     */
+    public function updateAssessment(Request $request, int $id): JsonResponse
+    {
+        $application = ScholarshipApplication::findOrFail($id);
+
+        // Pastikan user adalah pemilik aplikasi
+        if ($application->user_id !== Auth::id()) {
+            return $this->errorResponse('Anda tidak memiliki akses ke lamaran ini', 403);
+        }
+
+        $validated = $request->validate([
+            'gpa'                  => 'nullable|numeric|min:0|max:4',
+            'has_other_scholarship'=> 'nullable|boolean',
+            'parent_income'        => 'nullable|integer|min:0',
+            'university'           => 'nullable|string|max:255',
+        ], [
+            'gpa.numeric'   => 'GPA harus berupa angka',
+            'gpa.min'       => 'GPA minimal 0',
+            'gpa.max'       => 'GPA maksimal 4',
+            'parent_income.integer' => 'Penghasilan orang tua harus berupa angka',
+            'parent_income.min'     => 'Penghasilan orang tua tidak boleh negatif',
+        ]);
+
+        try {
+            $application = $this->scholarshipService->updateAssessment($application, $validated);
+            return $this->successResponse($application, 'Data pre-assessment berhasil disimpan');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        }
+    }
+
+    /**
+     * Step 3: Get application detail untuk review
+     */
+    public function getApplication(int $id): JsonResponse
+    {
+        $application = $this->scholarshipService->getApplication($id, Auth::id());
+
+        if (!$application) {
+            return $this->errorResponse('Lamaran tidak ditemukan', 404);
+        }
+
+        return $this->successResponse($application, 'Detail lamaran berhasil diambil');
+    }
+
+    /**
+     * Step 3b: Update draft lamaran
+     */
+    public function updateDraft(ApplyScholarshipRequest $request, int $id): JsonResponse
+    {
+        $application = ScholarshipApplication::findOrFail($id);
+
+        // Pastikan user adalah pemilik aplikasi
+        if ($application->user_id !== Auth::id()) {
+            return $this->errorResponse('Anda tidak memiliki akses ke lamaran ini', 403);
+        }
+
+        try {
+            $application = $this->scholarshipService->updateDraft(
+                $application,
+                $request->allFiles(),
+                $request->only(['motivation_letter_text'])
+            );
+
+            return $this->successResponse($application, 'Draft lamaran berhasil diupdate');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        }
+    }
+
+    /**
+     * Step 4: Submit draft menjadi lamaran resmi
+     */
+    public function submitApplication(int $id): JsonResponse
+    {
+        $application = ScholarshipApplication::findOrFail($id);
+
+        // Pastikan user adalah pemilik aplikasi
+        if ($application->user_id !== Auth::id()) {
+            return $this->errorResponse('Anda tidak memiliki akses ke lamaran ini', 403);
+        }
+
+        try {
+            $application = $this->scholarshipService->submitApplication($application);
+            return $this->successResponse($application, 'Lamaran berhasil dikirim');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        }
     }
 }

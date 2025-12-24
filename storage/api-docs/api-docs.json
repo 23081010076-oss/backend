@@ -6782,8 +6782,8 @@
                 "tags": [
                     "Scholarship Applications"
                 ],
-                "summary": "Apply for scholarship",
-                "description": "Submit scholarship application with documents for a specific scholarship ID",
+                "summary": "Apply for scholarship (Direct Submit)",
+                "description": "Submit scholarship application directly with documents. Use /draft for step-by-step flow.",
                 "operationId": "applyScholarship",
                 "parameters": [
                     {
@@ -6801,27 +6801,23 @@
                     "content": {
                         "multipart/form-data": {
                             "schema": {
-                                "required": [
-                                    "motivation_letter",
-                                    "cv"
-                                ],
                                 "properties": {
                                     "motivation_letter": {
                                         "description": "Motivation letter file (PDF/DOC)",
                                         "type": "string",
                                         "format": "binary"
                                     },
-                                    "cv": {
-                                        "description": "CV file (PDF/DOC)",
+                                    "cv_path": {
+                                        "description": "CV file (PDF)",
                                         "type": "string",
                                         "format": "binary"
                                     },
-                                    "transcript": {
+                                    "transcript_path": {
                                         "description": "Transcript file (PDF)",
                                         "type": "string",
                                         "format": "binary"
                                     },
-                                    "recommendation": {
+                                    "recommendation_path": {
                                         "description": "Recommendation letter (PDF)",
                                         "type": "string",
                                         "format": "binary"
@@ -6847,6 +6843,492 @@
                 ]
             }
         },
+        "/api/scholarships/{id}/draft": {
+            "post": {
+                "tags": [
+                    "Scholarship Applications"
+                ],
+                "summary": "Step 1: Save Draft Application",
+                "description": "Create a draft scholarship application with uploaded documents. This is the first step in the application flow.",
+                "operationId": "saveDraftApplication",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Scholarship ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "cv_path": {
+                                        "description": "CV file (PDF) - Required for submit",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "transcript_path": {
+                                        "description": "Grade transcript (PDF)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "recommendation_path": {
+                                        "description": "Recommendation letter (PDF/DOC)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "motivation_letter": {
+                                        "description": "Motivation letter file (PDF/DOC) - optional if using text",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "motivation_letter_text": {
+                                        "description": "Motivation letter as text - optional if uploading file",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Draft saved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Draft lamaran berhasil disimpan"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "scholarship_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "draft"
+                                                },
+                                                "cv_path": {
+                                                    "type": "string",
+                                                    "example": "scholarship-docs/cv.pdf"
+                                                },
+                                                "motivation_letter_text": {
+                                                    "type": "string",
+                                                    "example": "Saya sangat tertarik..."
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or already applied"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/scholarship-applications/{id}/assessment": {
+            "put": {
+                "tags": [
+                    "Scholarship Applications"
+                ],
+                "summary": "Step 2: Update Pre-Assessment Data",
+                "description": "Fill in pre-assessment form (GPA, other scholarship, parent income, university)",
+                "operationId": "updateAssessment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Application ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "gpa": {
+                                        "description": "GPA (0-4)",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 3.75
+                                    },
+                                    "has_other_scholarship": {
+                                        "description": "Apakah sedang menerima beasiswa lain?",
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "parent_income": {
+                                        "description": "Penghasilan orang tua (Rupiah)",
+                                        "type": "integer",
+                                        "example": 5000000
+                                    },
+                                    "university": {
+                                        "description": "Nama universitas",
+                                        "type": "string",
+                                        "example": "Universitas Indonesia"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Assessment saved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data pre-assessment berhasil disimpan"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "gpa": {
+                                                    "type": "number",
+                                                    "example": 3.75
+                                                },
+                                                "has_other_scholarship": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "parent_income": {
+                                                    "type": "integer",
+                                                    "example": 5000000
+                                                },
+                                                "university": {
+                                                    "type": "string",
+                                                    "example": "Universitas Indonesia"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not your application"
+                    },
+                    "422": {
+                        "description": "Can only update draft"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/scholarship-applications/{id}": {
+            "get": {
+                "tags": [
+                    "Scholarship Applications"
+                ],
+                "summary": "Step 3: Get Application Detail (Review)",
+                "description": "Get detailed application data for review before submitting",
+                "operationId": "getApplicationDetail",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Application ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Application detail retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Detail lamaran berhasil diambil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "draft"
+                                                },
+                                                "cv_path": {
+                                                    "type": "string",
+                                                    "example": "scholarship-docs/cv.pdf"
+                                                },
+                                                "transcript_path": {
+                                                    "type": "string",
+                                                    "example": "scholarship-docs/transcript.pdf"
+                                                },
+                                                "recommendation_path": {
+                                                    "type": "string",
+                                                    "example": "scholarship-docs/recommendation.pdf"
+                                                },
+                                                "motivation_letter": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "motivation_letter_text": {
+                                                    "type": "string",
+                                                    "example": "Saya sangat tertarik..."
+                                                },
+                                                "gpa": {
+                                                    "type": "number",
+                                                    "example": 3.75
+                                                },
+                                                "has_other_scholarship": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "parent_income": {
+                                                    "type": "integer",
+                                                    "example": 5000000
+                                                },
+                                                "university": {
+                                                    "type": "string",
+                                                    "example": "Universitas Indonesia"
+                                                },
+                                                "scholarship": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Beasiswa LPDP"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Application not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/scholarship-applications/{id}/draft": {
+            "put": {
+                "tags": [
+                    "Scholarship Applications"
+                ],
+                "summary": "Step 3b: Update Draft Documents",
+                "description": "Update documents in draft application before submitting",
+                "operationId": "updateDraftApplication",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Application ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "cv_path": {
+                                        "description": "CV file (PDF)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "transcript_path": {
+                                        "description": "Grade transcript (PDF)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "recommendation_path": {
+                                        "description": "Recommendation letter (PDF/DOC)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "motivation_letter": {
+                                        "description": "Motivation letter file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "motivation_letter_text": {
+                                        "description": "Motivation letter as text",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Draft updated successfully"
+                    },
+                    "403": {
+                        "description": "Not your application"
+                    },
+                    "422": {
+                        "description": "Can only update draft"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/scholarship-applications/{id}/submit": {
+            "post": {
+                "tags": [
+                    "Scholarship Applications"
+                ],
+                "summary": "Step 4: Submit Application",
+                "description": "Submit the draft application. Changes status from 'draft' to 'submitted'. CV is required.",
+                "operationId": "submitApplication",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Application ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Application submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lamaran berhasil dikirim"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "submitted"
+                                                },
+                                                "submitted_at": {
+                                                    "type": "string",
+                                                    "format": "datetime",
+                                                    "example": "2024-12-24T12:30:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not your application"
+                    },
+                    "422": {
+                        "description": "Can only submit draft or CV required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/my-applications": {
             "get": {
                 "tags": [
@@ -6857,7 +7339,62 @@
                 "operationId": "getMyApplications",
                 "responses": {
                     "200": {
-                        "description": "Applications retrieved successfully"
+                        "description": "Applications retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Daftar lamaran berhasil diambil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "draft",
+                                                                    "submitted",
+                                                                    "review",
+                                                                    "accepted",
+                                                                    "rejected"
+                                                                ]
+                                                            },
+                                                            "scholarship": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer"
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -6872,14 +7409,14 @@
                 "tags": [
                     "Scholarship Applications"
                 ],
-                "summary": "Update application status",
+                "summary": "Update application status (Admin)",
                 "description": "Update the status of a scholarship application (Admin/Corporate only)",
                 "operationId": "updateApplicationStatus",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID of the scholarship application",
+                        "description": "Application ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -6896,9 +7433,10 @@
                                 ],
                                 "properties": {
                                     "status": {
-                                        "description": "The new status for the application",
+                                        "description": "The new status",
                                         "type": "string",
                                         "enum": [
+                                            "draft",
                                             "submitted",
                                             "review",
                                             "accepted",
@@ -6917,10 +7455,10 @@
                         "description": "Status updated successfully"
                     },
                     "403": {
-                        "description": "Unauthorized action"
+                        "description": "Unauthorized"
                     },
                     "422": {
-                        "description": "Invalid status provided"
+                        "description": "Invalid status"
                     }
                 },
                 "security": [
