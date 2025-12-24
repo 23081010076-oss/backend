@@ -194,6 +194,7 @@ class ScholarshipService
                 'closed'      => Scholarship::where('status', 'closed')->count(),
                 'applications' => [
                     'total'    => ScholarshipApplication::count(),
+                    'draft'    => ScholarshipApplication::where('status', 'draft')->count(),
                     'submitted'=> ScholarshipApplication::where('status', 'submitted')->count(),
                     'review'   => ScholarshipApplication::where('status', 'review')->count(),
                     'accepted' => ScholarshipApplication::where('status', 'accepted')->count(),
@@ -201,6 +202,177 @@ class ScholarshipService
                 ],
             ];
         });
+    }
+
+    /*
+     Scholarship Application Flow Methods
+    /**
+     * Step 1: Simpan draft lamaran dengan dokumen
+     *
+     * @throws \Exception jika sudah ada lamaran
+     */
+    public function saveDraft(Scholarship $scholarship, User $user, array $files = [], array $data = []): ScholarshipApplication
+    {
+        // Validasi: beasiswa harus open
+        if ($scholarship->status !== 'open') {
+            throw new \Exception('Beasiswa ini tidak sedang menerima lamaran');
+        }
+
+        // Cek apakah sudah ada draft atau lamaran
+        $existing = ScholarshipApplication::where('user_id', $user->id)
+            ->where('scholarship_id', $scholarship->id)
+            ->first();
+
+        if ($existing) {
+            throw new \Exception('Anda sudah memiliki lamaran untuk beasiswa ini');
+        }
+
+        $applicationData = [
+            'user_id'        => $user->id,
+            'scholarship_id' => $scholarship->id,
+            'status'         => 'draft',
+        ];
+
+        // Handle file uploads
+        if (!empty($files['cv_path'])) {
+            $applicationData['cv_path'] = $files['cv_path']->store('scholarship-docs', 'public');
+        }
+        if (!empty($files['transcript_path'])) {
+            $applicationData['transcript_path'] = $files['transcript_path']->store('scholarship-docs', 'public');
+        }
+        if (!empty($files['recommendation_path'])) {
+            $applicationData['recommendation_path'] = $files['recommendation_path']->store('scholarship-docs', 'public');
+        }
+        if (!empty($files['motivation_letter'])) {
+            $applicationData['motivation_letter'] = $files['motivation_letter']->store('scholarship-docs', 'public');
+        }
+
+        // Handle motivation letter text
+        if (!empty($data['motivation_letter_text'])) {
+            $applicationData['motivation_letter_text'] = $data['motivation_letter_text'];
+        }
+
+        return ScholarshipApplication::create($applicationData);
+    }
+
+    /**
+     * Step 1b: Update draft dengan dokumen baru
+     *
+     * @throws \Exception jika bukan draft
+     */
+    public function updateDraft(ScholarshipApplication $application, array $files = [], array $data = []): ScholarshipApplication
+    {
+        if ($application->status !== 'draft') {
+            throw new \Exception('Hanya draft yang bisa diupdate');
+        }
+
+        $updateData = [];
+
+        // Handle file uploads (replace old files)
+        if (!empty($files['cv_path'])) {
+            // Delete old file if exists
+            if ($application->cv_path) {
+                Storage::disk('public')->delete($application->cv_path);
+            }
+            $updateData['cv_path'] = $files['cv_path']->store('scholarship-docs', 'public');
+        }
+        if (!empty($files['transcript_path'])) {
+            if ($application->transcript_path) {
+                Storage::disk('public')->delete($application->transcript_path);
+            }
+            $updateData['transcript_path'] = $files['transcript_path']->store('scholarship-docs', 'public');
+        }
+        if (!empty($files['recommendation_path'])) {
+            if ($application->recommendation_path) {
+                Storage::disk('public')->delete($application->recommendation_path);
+            }
+            $updateData['recommendation_path'] = $files['recommendation_path']->store('scholarship-docs', 'public');
+        }
+        if (!empty($files['motivation_letter'])) {
+            if ($application->motivation_letter) {
+                Storage::disk('public')->delete($application->motivation_letter);
+            }
+            $updateData['motivation_letter'] = $files['motivation_letter']->store('scholarship-docs', 'public');
+        }
+
+        // Handle motivation letter text
+        if (array_key_exists('motivation_letter_text', $data)) {
+            $updateData['motivation_letter_text'] = $data['motivation_letter_text'];
+        }
+
+        if (!empty($updateData)) {
+            $application->update($updateData);
+        }
+
+        return $application->fresh();
+    }
+
+    /**
+     * Step 2: Update pre-assessment data
+     *
+     * @throws \Exception jika bukan draft
+     */
+    public function updateAssessment(ScholarshipApplication $application, array $data): ScholarshipApplication
+    {
+        if ($application->status !== 'draft') {
+            throw new \Exception('Hanya draft yang bisa diupdate');
+        }
+
+        $assessmentData = [];
+
+        if (array_key_exists('gpa', $data)) {
+            $assessmentData['gpa'] = $data['gpa'];
+        }
+        if (array_key_exists('has_other_scholarship', $data)) {
+            $assessmentData['has_other_scholarship'] = $data['has_other_scholarship'];
+        }
+        if (array_key_exists('parent_income', $data)) {
+            $assessmentData['parent_income'] = $data['parent_income'];
+        }
+        if (array_key_exists('university', $data)) {
+            $assessmentData['university'] = $data['university'];
+        }
+
+        if (!empty($assessmentData)) {
+            $application->update($assessmentData);
+        }
+
+        return $application->fresh();
+    }
+
+    /**
+     * Step 3: Get application detail untuk review
+     */
+    public function getApplication(int $applicationId, int $userId): ?ScholarshipApplication
+    {
+        return ScholarshipApplication::with('scholarship')
+            ->where('id', $applicationId)
+            ->where('user_id', $userId)
+            ->first();
+    }
+
+    /**
+     * Step 4: Submit draft menjadi lamaran resmi
+     *
+     * @throws \Exception jika bukan draft atau dokumen belum lengkap
+     */
+    public function submitApplication(ScholarshipApplication $application): ScholarshipApplication
+    {
+        if ($application->status !== 'draft') {
+            throw new \Exception('Hanya draft yang bisa disubmit');
+        }
+
+        // Validasi minimal dokumen (CV wajib)
+        if (empty($application->cv_path)) {
+            throw new \Exception('CV harus diupload sebelum submit');
+        }
+
+        $application->update([
+            'status'       => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        return $application->fresh();
     }
 
     /**

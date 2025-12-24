@@ -186,7 +186,21 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/scholarships/{id}', [ScholarshipController::class, 'destroy'])->name('scholarships.destroy');
     });
 
-    // Scholarship Application
+    // Scholarship Application Flow
+    // Step 1: Save draft dengan dokumen
+    Route::post('/scholarships/{id}/draft', [ScholarshipController::class, 'saveDraft'])->name('scholarships.save-draft');
+    
+    // Step 2: Pre-assessment form
+    Route::put('/scholarship-applications/{id}/assessment', [ScholarshipController::class, 'updateAssessment'])->name('scholarship-applications.update-assessment');
+    
+    // Step 3: Review - get detail & update draft
+    Route::get('/scholarship-applications/{id}', [ScholarshipController::class, 'getApplication'])->name('scholarship-applications.show');
+    Route::put('/scholarship-applications/{id}/draft', [ScholarshipController::class, 'updateDraft'])->name('scholarship-applications.update-draft');
+    
+    // Step 4: Submit application
+    Route::post('/scholarship-applications/{id}/submit', [ScholarshipController::class, 'submitApplication'])->name('scholarship-applications.submit');
+    
+    // Legacy apply endpoint (direct submit)
     Route::post('/scholarships/{id}/apply', [ScholarshipController::class, 'apply'])->name('scholarships.apply');
     Route::get('/my-applications', [ScholarshipController::class, 'myApplications'])->name('my-applications');
     Route::put('/scholarship-applications/{id}/status', [ScholarshipController::class, 'updateStatus'])
