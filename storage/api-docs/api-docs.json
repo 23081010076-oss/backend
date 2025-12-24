@@ -2888,7 +2888,7 @@
                     "Enrollment"
                 ],
                 "summary": "Daftar ke kursus",
-                "description": "Mendaftarkan user yang login ke kursus tertentu. Tidak perlu request body, hanya perlu ID kursus di URL.",
+                "description": "Mendaftarkan user yang login ke kursus tertentu. Pilih metode pembayaran: 'manual', 'bank_transfer', atau 'qris'. Jika qris, akan generate QR code otomatis.",
                 "operationId": "enrollCourse",
                 "parameters": [
                     {
@@ -2902,6 +2902,28 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "payment_method": {
+                                        "description": "Metode pembayaran: manual (transfer manual), bank_transfer (via bank), atau qris (scan QR code)",
+                                        "type": "string",
+                                        "enum": [
+                                            "manual",
+                                            "bank_transfer",
+                                            "qris"
+                                        ],
+                                        "example": "qris"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
                         "description": "Berhasil mendaftar ke kursus",
@@ -2938,6 +2960,43 @@
                                                 "completed": {
                                                     "type": "boolean",
                                                     "example": false
+                                                },
+                                                "transaction": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 123
+                                                        },
+                                                        "transaction_code": {
+                                                            "type": "string",
+                                                            "example": "TRX-20251224-ABC123"
+                                                        },
+                                                        "amount": {
+                                                            "type": "number",
+                                                            "example": 150000
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "pending"
+                                                        },
+                                                        "payment_method": {
+                                                            "type": "string",
+                                                            "example": "qris"
+                                                        },
+                                                        "qr_code_url": {
+                                                            "description": "Path QR code (hanya untuk qris)",
+                                                            "type": "string",
+                                                            "example": "qr-codes/TRX-20251224-ABC123.svg",
+                                                            "nullable": true
+                                                        },
+                                                        "qr_string": {
+                                                            "description": "Data QR code (hanya untuk qris)",
+                                                            "type": "string",
+                                                            "example": "ID.MERCHANT.TRX-20251224-ABC123.150000",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
                                                 }
                                             },
                                             "type": "object"
@@ -3530,7 +3589,7 @@
                     "Mentoring"
                 ],
                 "summary": "Booking sesi mentoring baru",
-                "description": "Student membuat booking sesi mentoring dengan mentor. Status awal: pending",
+                "description": "Student membuat booking sesi mentoring dengan mentor. Pilih metode pembayaran: manual, bank_transfer, atau qris. Jika qris, akan generate QR code otomatis. Status awal: pending",
                 "operationId": "createMentoringSession",
                 "requestBody": {
                     "required": true,
@@ -3559,14 +3618,14 @@
                                         "example": "academic"
                                     },
                                     "payment_method": {
+                                        "description": "Metode pembayaran: manual (transfer manual), bank_transfer (via bank), atau qris (scan QR code)",
                                         "type": "string",
                                         "enum": [
-                                            "qris",
+                                            "manual",
                                             "bank_transfer",
-                                            "credit_card",
-                                            "e_wallet"
+                                            "qris"
                                         ],
-                                        "example": "bank_transfer"
+                                        "example": "qris"
                                     },
                                     "schedule": {
                                         "description": "Jadwal yang diinginkan",
@@ -3601,7 +3660,54 @@
                                             "example": "Sesi mentoring berhasil dibuat"
                                         },
                                         "data": {
-                                            "$ref": "#/components/schemas/MentoringSession"
+                                            "type": "object",
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/MentoringSession"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "transaction": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 456
+                                                                },
+                                                                "transaction_code": {
+                                                                    "type": "string",
+                                                                    "example": "TRX-20251224-MNT123"
+                                                                },
+                                                                "amount": {
+                                                                    "type": "number",
+                                                                    "example": 200000
+                                                                },
+                                                                "status": {
+                                                                    "type": "string",
+                                                                    "example": "pending"
+                                                                },
+                                                                "payment_method": {
+                                                                    "type": "string",
+                                                                    "example": "qris"
+                                                                },
+                                                                "qr_code_url": {
+                                                                    "description": "Path QR code (hanya untuk qris)",
+                                                                    "type": "string",
+                                                                    "example": "qr-codes/TRX-20251224-MNT123.svg",
+                                                                    "nullable": true
+                                                                },
+                                                                "qr_string": {
+                                                                    "description": "Data QR code (hanya untuk qris)",
+                                                                    "type": "string",
+                                                                    "example": "ID.MERCHANT.TRX-20251224-MNT123.200000",
+                                                                    "nullable": true
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            ]
                                         }
                                     },
                                     "type": "object"
@@ -6911,7 +7017,7 @@
                     "Subscriptions"
                 ],
                 "summary": "Create a subscription",
-                "description": "Subscribe to a chosen plan",
+                "description": "Subscribe to a chosen plan with payment method selection (manual, bank_transfer, atau qris). Jika qris, akan generate QR code otomatis.",
                 "operationId": "createSubscription",
                 "requestBody": {
                     "required": true,
@@ -6980,6 +7086,16 @@
                                         "type": "string",
                                         "format": "date",
                                         "example": "2025-12-03"
+                                    },
+                                    "payment_method": {
+                                        "description": "Metode pembayaran: manual (transfer manual), bank_transfer (via bank), atau qris (scan QR code)",
+                                        "type": "string",
+                                        "enum": [
+                                            "manual",
+                                            "bank_transfer",
+                                            "qris"
+                                        ],
+                                        "example": "qris"
                                     }
                                 },
                                 "type": "object"
@@ -7015,6 +7131,43 @@
                                                 "status": {
                                                     "type": "string",
                                                     "example": "active"
+                                                },
+                                                "transaction": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 123
+                                                        },
+                                                        "transaction_code": {
+                                                            "type": "string",
+                                                            "example": "TRX-20251224-XYZ789"
+                                                        },
+                                                        "amount": {
+                                                            "type": "number",
+                                                            "example": 500000
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "pending"
+                                                        },
+                                                        "payment_method": {
+                                                            "type": "string",
+                                                            "example": "qris"
+                                                        },
+                                                        "qr_code_url": {
+                                                            "description": "Path QR code (hanya untuk qris)",
+                                                            "type": "string",
+                                                            "example": "qr-codes/TRX-20251224-XYZ789.svg",
+                                                            "nullable": true
+                                                        },
+                                                        "qr_string": {
+                                                            "description": "Data QR code (hanya untuk qris)",
+                                                            "type": "string",
+                                                            "example": "ID.MERCHANT.TRX-20251224-XYZ789.500000",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
                                                 }
                                             },
                                             "type": "object"

@@ -63,18 +63,19 @@ class EnrollmentController extends Controller
     /**
      * Daftar ke kursus
      */
-    public function enroll(int $courseId): JsonResponse
+    public function enroll(Request $request, int $courseId): JsonResponse
     {
         $this->authorize('create', Enrollment::class);
 
         $course = Course::findOrFail($courseId);
         $user = Auth::user();
+        $paymentMethod = $request->input('payment_method', 'manual');
 
         try {
-            $enrollment = $this->enrollmentService->enrollUserToCourse($user, $course);
+            $result = $this->enrollmentService->enrollUserToCourse($user, $course, $paymentMethod);
 
             return $this->createdResponse(
-                $enrollment->load('course'),
+                $result,
                 'Berhasil mendaftar ke kursus'
             );
         } catch (\InvalidArgumentException $e) {

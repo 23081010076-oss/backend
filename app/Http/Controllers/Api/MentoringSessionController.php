@@ -93,12 +93,12 @@ class MentoringSessionController extends Controller
         // Cek akses dengan Policy
         $this->authorize('create', MentoringSession::class);
 
-        $session = $this->mentoringService->createSession(
+        $result = $this->mentoringService->createSession(
             $request->validated(),
             Auth::user()
         );
 
-        return $this->createdResponse($session, 'Sesi mentoring berhasil dibuat');
+        return $this->createdResponse($result, 'Sesi mentoring berhasil dibuat');
     }
 
     /**

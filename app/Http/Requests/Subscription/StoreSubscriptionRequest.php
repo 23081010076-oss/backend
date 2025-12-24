@@ -25,16 +25,17 @@ class StoreSubscriptionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'plan'          => 'required|in:free,regular,premium',
-            'package_type'  => 'required|in:single_course,all_in_one',
-            'courses_ids'   => 'nullable|array',
-            'courses_ids.*' => 'exists:courses,id',
-            'duration'      => 'required|integer|min:1',
-            'duration_unit' => 'required|in:months,years',
-            'price'         => 'required|numeric|min:0',
-            'auto_renew'    => 'boolean',
-            'start_date'    => 'required|date',
-            'end_date'      => 'nullable|date|after:start_date',
+            'plan'           => 'required|in:free,regular,premium',
+            'package_type'   => 'required|in:single_course,all_in_one',
+            'courses_ids'    => 'nullable|array',
+            'courses_ids.*'  => 'exists:courses,id',
+            'duration'       => 'required|integer|min:1',
+            'duration_unit'  => 'required|in:months,years',
+            'price'          => 'required|numeric|min:0',
+            'auto_renew'     => 'boolean',
+            'start_date'     => 'required|date',
+            'end_date'       => 'nullable|date|after:start_date',
+            'payment_method' => 'nullable|in:manual,bank_transfer,qris',
         ];
     }
 

@@ -21,15 +21,23 @@ use InvalidArgumentException;
  */
 class EnrollmentService
 {
+    protected TransactionService $transactionService;
+
+    public function __construct(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
+
     /**
      * Enroll a user to a course
      *
      * @param User $user User to enroll
      * @param Course $course Course to enroll in
-     * @return Enrollment
+     * @param string $paymentMethod Payment method (manual, bank_transfer, qris)
+     * @return array
      * @throws InvalidArgumentException
      */
-    public function enrollUserToCourse(User $user, Course $course): Enrollment
+    public function enrollUserToCourse(User $user, Course $course, string $paymentMethod = 'manual'): array
     {
         try {
             DB::beginTransaction();
@@ -52,6 +60,13 @@ class EnrollmentService
                 'completed' => false,
             ]);
 
+            // Create transaction
+            $transaction = $this->transactionService->createCourseTransaction(
+                $course,
+                $user,
+                $paymentMethod
+            );
+
             DB::commit();
 
             Log::info('User enrolled in course successfully', [
@@ -59,9 +74,14 @@ class EnrollmentService
                 'user_id' => $user->id,
                 'course_id' => $course->id,
                 'course_title' => $course->title,
+                'transaction_id' => $transaction->id,
+                'payment_method' => $paymentMethod,
             ]);
 
-            return $enrollment;
+            return [
+                'enrollment' => $enrollment->load('course'),
+                'transaction' => $transaction,
+            ];
         } catch (InvalidArgumentException $e) {
             DB::rollBack();
             Log::warning('Enrollment failed: validation error', [

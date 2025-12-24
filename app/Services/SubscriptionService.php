@@ -19,15 +19,21 @@ use InvalidArgumentException;
  */
 class SubscriptionService
 {
+    protected TransactionService $transactionService;
+
+    public function __construct(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
     /**
      * Create a new subscription for a user
      *
      * @param array $data Subscription data
      * @param User $user User who is subscribing
-     * @return Subscription
+     * @return array
      * @throws InvalidArgumentException
      */
-    public function createSubscription(array $data, User $user): Subscription
+    public function createSubscription(array $data, User $user): array
     {
         try {
             DB::beginTransaction();
@@ -52,6 +58,14 @@ class SubscriptionService
             
             $subscription = Subscription::create($data);
 
+            // Create transaction
+            $paymentMethod = $data['payment_method'] ?? 'manual';
+            $transaction = $this->transactionService->createSubscriptionTransaction(
+                $user,
+                $subscription->plan,
+                $paymentMethod
+            );
+
             DB::commit();
 
             Log::info('Subscription created successfully', [
@@ -59,9 +73,14 @@ class SubscriptionService
                 'user_id' => $user->id,
                 'plan' => $subscription->plan,
                 'package_type' => $subscription->package_type,
+                'transaction_id' => $transaction['transaction']->id,
+                'payment_method' => $paymentMethod,
             ]);
 
-            return $subscription;
+            return [
+                'subscription' => $subscription,
+                'transaction' => $transaction['transaction'],
+            ];
         } catch (InvalidArgumentException $e) {
             DB::rollBack();
             Log::warning('Subscription creation failed: validation error', [

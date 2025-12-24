@@ -47,7 +47,7 @@ namespace App\Swagger;
  * @OA\Post(
  *     path="/api/mentoring-sessions",
  *     summary="Booking sesi mentoring baru",
- *     description="Student membuat booking sesi mentoring dengan mentor. Status awal: pending",
+ *     description="Student membuat booking sesi mentoring dengan mentor. Pilih metode pembayaran: manual, bank_transfer, atau qris. Jika qris, akan generate QR code otomatis. Status awal: pending",
  *     operationId="createMentoringSession",
  *     tags={"Mentoring"},
  *     security={{"bearerAuth":{}}},
@@ -57,7 +57,13 @@ namespace App\Swagger;
  *             required={"mentor_id", "type", "payment_method", "schedule"},
  *             @OA\Property(property="mentor_id", type="integer", example=7, description="ID mentor yang dipilih"),
  *             @OA\Property(property="type", type="string", enum={"academic", "life_plan"}, example="academic", description="Jenis mentoring: academic=bimbingan akademik, life_plan=perencanaan karir"),
- *             @OA\Property(property="payment_method", type="string", enum={"qris", "bank_transfer", "credit_card", "e_wallet"}, example="bank_transfer"),
+ *             @OA\Property(
+ *                 property="payment_method",
+ *                 type="string",
+ *                 enum={"manual", "bank_transfer", "qris"},
+ *                 example="qris",
+ *                 description="Metode pembayaran: manual (transfer manual), bank_transfer (via bank), atau qris (scan QR code)"
+ *             ),
  *             @OA\Property(property="schedule", type="string", format="date-time", example="2025-12-20 10:00:00", description="Jadwal yang diinginkan"),
  *             @OA\Property(property="note", type="string", example="Saya butuh bimbingan untuk skripsi tentang machine learning", description="Catatan/topik yang ingin dibahas")
  *         )
@@ -68,7 +74,18 @@ namespace App\Swagger;
  *         @OA\JsonContent(
  *             @OA\Property(property="sukses", type="boolean", example=true),
  *             @OA\Property(property="pesan", type="string", example="Sesi mentoring berhasil dibuat"),
- *             @OA\Property(property="data", ref="#/components/schemas/MentoringSession")
+ *             @OA\Property(property="data", type="object",
+ *                 allOf={@OA\Schema(ref="#/components/schemas/MentoringSession")},
+ *                 @OA\Property(property="transaction", type="object",
+ *                     @OA\Property(property="id", type="integer", example=456),
+ *                     @OA\Property(property="transaction_code", type="string", example="TRX-20251224-MNT123"),
+ *                     @OA\Property(property="amount", type="number", example=200000),
+ *                     @OA\Property(property="status", type="string", example="pending"),
+ *                     @OA\Property(property="payment_method", type="string", example="qris"),
+ *                     @OA\Property(property="qr_code_url", type="string", nullable=true, example="qr-codes/TRX-20251224-MNT123.svg", description="Path QR code (hanya untuk qris)"),
+ *                     @OA\Property(property="qr_string", type="string", nullable=true, example="ID.MERCHANT.TRX-20251224-MNT123.200000", description="Data QR code (hanya untuk qris)")
+ *                 )
+ *             )
  *         )
  *     ),
  *     @OA\Response(response=422, description="Validation error")

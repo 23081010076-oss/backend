@@ -6,6 +6,7 @@ use App\Models\MentoringSession;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * ==========================================================================
@@ -21,6 +22,12 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class MentoringService
 {
+    protected TransactionService $transactionService;
+
+    public function __construct(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
     /**
      * Ambil sesi mentoring berdasarkan user/mentor
      */
@@ -53,14 +60,34 @@ class MentoringService
     /**
      * Buat sesi mentoring baru
      */
-    public function createSession(array $data, User $user): MentoringSession
+    public function createSession(array $data, User $user): array
     {
-        $data['member_id'] = $user->id;
-        $data['status'] = 'pending';
+        try {
+            DB::beginTransaction();
 
-        $session = MentoringSession::create($data);
-        
-        return $session->load(['member', 'mentor']);
+            $data['member_id'] = $user->id;
+            $data['status'] = 'pending';
+            $paymentMethod = $data['payment_method'] ?? 'manual';
+
+            $session = MentoringSession::create($data);
+            
+            // Create transaction
+            $transaction = $this->transactionService->createMentoringTransaction(
+                $session,
+                $user,
+                $paymentMethod
+            );
+
+            DB::commit();
+
+            return [
+                'session' => $session->load(['member', 'mentor']),
+                'transaction' => $transaction,
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     /**

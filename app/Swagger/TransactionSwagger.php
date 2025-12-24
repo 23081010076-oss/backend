@@ -38,7 +38,7 @@ namespace App\Swagger;
  * @OA\Post(
  *     path="/api/subscriptions",
  *     summary="Create a subscription",
- *     description="Subscribe to a chosen plan",
+ *     description="Subscribe to a chosen plan with payment method selection (manual, bank_transfer, atau qris). Jika qris, akan generate QR code otomatis.",
  *     operationId="createSubscription",
  *     tags={"Subscriptions"},
  *     security={{"bearerAuth":{}}},
@@ -53,7 +53,14 @@ namespace App\Swagger;
  *             @OA\Property(property="courses_ids", type="array", @OA\Items(type="integer"), example={1, 2, 3}),
  *             @OA\Property(property="price", type="number", example=500000),
  *             @OA\Property(property="auto_renew", type="boolean", example=false),
- *             @OA\Property(property="start_date", type="string", format="date", example="2025-12-03")
+ *             @OA\Property(property="start_date", type="string", format="date", example="2025-12-03"),
+ *             @OA\Property(
+ *                 property="payment_method",
+ *                 type="string",
+ *                 enum={"manual", "bank_transfer", "qris"},
+ *                 example="qris",
+ *                 description="Metode pembayaran: manual (transfer manual), bank_transfer (via bank), atau qris (scan QR code)"
+ *             )
  *         )
  *     ),
  *     @OA\Response(
@@ -65,7 +72,16 @@ namespace App\Swagger;
  *             @OA\Property(property="data", type="object",
  *                 @OA\Property(property="id", type="integer", example=1),
  *                 @OA\Property(property="plan", type="string", example="premium"),
- *                 @OA\Property(property="status", type="string", example="active")
+ *                 @OA\Property(property="status", type="string", example="active"),
+ *                 @OA\Property(property="transaction", type="object",
+ *                     @OA\Property(property="id", type="integer", example=123),
+ *                     @OA\Property(property="transaction_code", type="string", example="TRX-20251224-XYZ789"),
+ *                     @OA\Property(property="amount", type="number", example=500000),
+ *                     @OA\Property(property="status", type="string", example="pending"),
+ *                     @OA\Property(property="payment_method", type="string", example="qris"),
+ *                     @OA\Property(property="qr_code_url", type="string", nullable=true, example="qr-codes/TRX-20251224-XYZ789.svg", description="Path QR code (hanya untuk qris)"),
+ *                     @OA\Property(property="qr_string", type="string", nullable=true, example="ID.MERCHANT.TRX-20251224-XYZ789.500000", description="Data QR code (hanya untuk qris)")
+ *                 )
  *             )
  *         )
  *     )

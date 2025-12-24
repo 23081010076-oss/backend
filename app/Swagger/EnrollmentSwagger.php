@@ -55,7 +55,7 @@ namespace App\Swagger;
  * @OA\Post(
  *     path="/api/courses/{courseId}/enroll",
  *     summary="Daftar ke kursus",
- *     description="Mendaftarkan user yang login ke kursus tertentu. Tidak perlu request body, hanya perlu ID kursus di URL.",
+ *     description="Mendaftarkan user yang login ke kursus tertentu. Pilih metode pembayaran: 'manual', 'bank_transfer', atau 'qris'. Jika qris, akan generate QR code otomatis.",
  *     operationId="enrollCourse",
  *     tags={"Enrollment"},
  *     security={{"bearerAuth":{}}},
@@ -65,6 +65,18 @@ namespace App\Swagger;
  *         description="ID Kursus yang ingin didaftarkan",
  *         required=true,
  *         @OA\Schema(type="integer", example=5)
+ *     ),
+ *     @OA\RequestBody(
+ *         required=false,
+ *         @OA\JsonContent(
+ *             @OA\Property(
+ *                 property="payment_method",
+ *                 type="string",
+ *                 enum={"manual", "bank_transfer", "qris"},
+ *                 example="qris",
+ *                 description="Metode pembayaran: manual (transfer manual), bank_transfer (via bank), atau qris (scan QR code)"
+ *             )
+ *         )
  *     ),
  *     @OA\Response(
  *         response=201,
@@ -77,7 +89,16 @@ namespace App\Swagger;
  *                 @OA\Property(property="user_id", type="integer", example=3),
  *                 @OA\Property(property="course_id", type="integer", example=5),
  *                 @OA\Property(property="progress", type="integer", example=0),
- *                 @OA\Property(property="completed", type="boolean", example=false)
+ *                 @OA\Property(property="completed", type="boolean", example=false),
+ *                 @OA\Property(property="transaction", type="object",
+ *                     @OA\Property(property="id", type="integer", example=123),
+ *                     @OA\Property(property="transaction_code", type="string", example="TRX-20251224-ABC123"),
+ *                     @OA\Property(property="amount", type="number", example=150000),
+ *                     @OA\Property(property="status", type="string", example="pending"),
+ *                     @OA\Property(property="payment_method", type="string", example="qris"),
+ *                     @OA\Property(property="qr_code_url", type="string", nullable=true, example="qr-codes/TRX-20251224-ABC123.svg", description="Path QR code (hanya untuk qris)"),
+ *                     @OA\Property(property="qr_string", type="string", nullable=true, example="ID.MERCHANT.TRX-20251224-ABC123.150000", description="Data QR code (hanya untuk qris)")
+ *                 )
  *             )
  *         )
  *     ),

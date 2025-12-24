@@ -24,6 +24,8 @@ class TransactionResource extends JsonResource
             'status' => $this->status,
             'status_label' => $this->getStatusLabel(),
             'payment_proof' => $this->payment_proof ? asset('storage/' . $this->payment_proof) : null,
+            'qr_code_url' => $this->qr_code_url ? asset('storage/' . $this->qr_code_url) : null,
+            'qr_string' => $this->qr_string, // String untuk generate QR di frontend
             'payment_details' => $this->payment_details,
             'paid_at' => $this->paid_at,
             'expired_at' => $this->expired_at,

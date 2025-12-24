@@ -11,6 +11,10 @@ use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Writer;
 
 /**
  * ==========================================================================
@@ -128,20 +132,10 @@ class TransactionService
 
     /**
      * Buat transaksi untuk kursus
-     * 
-     * @throws \Exception jika sudah terdaftar
+     * Note: Enrollment check sudah dilakukan di EnrollmentService
      */
-    public function createCourseTransaction(Course $course, User $user, string $paymentMethod): array
+    public function createCourseTransaction(Course $course, User $user, string $paymentMethod): Transaction
     {
-        // Cek apakah sudah terdaftar
-        $existingEnrollment = Enrollment::where('user_id', $user->id)
-            ->where('course_id', $course->id)
-            ->first();
-
-        if ($existingEnrollment) {
-            throw new \Exception('Anda sudah terdaftar di kursus ini');
-        }
-
         return DB::transaction(function () use ($course, $user, $paymentMethod) {
             // Buat transaksi (link ke Course dulu karena belum enrolled)
             $transaction = Transaction::create([
@@ -156,27 +150,31 @@ class TransactionService
                 'expired_at'           => now()->addHours(24),
             ]);
 
-            return [
-                'transaction' => $transaction->load('transactionable'),
-                'instructions' => $this->getPaymentInstructions(),
-            ];
+            // Generate QR code jika payment method adalah QRIS
+            if ($paymentMethod === 'qris') {
+                $this->generateQRCode($transaction);
+            }
+
+            return $transaction->fresh()->load('transactionable');
         });
     }
 
     /**
      * Buat transaksi untuk langganan
+     * Note: Subscription sudah dibuat di SubscriptionService
      */
     public function createSubscriptionTransaction(User $user, string $plan, string $paymentMethod): array
     {
         return DB::transaction(function () use ($user, $plan, $paymentMethod) {
-            // Buat subscription (status pending)
-            $subscription = Subscription::create([
-                'user_id'    => $user->id,
-                'plan'       => $plan,
-                'start_date' => now(),
-                'end_date'   => now()->addYear(),
-                'status'     => 'pending',
-            ]);
+            // Cari subscription pending terakhir user
+            $subscription = Subscription::where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->latest()
+                ->first();
+
+            if (!$subscription) {
+                throw new \Exception('Subscription not found');
+            }
 
             // Buat transaksi
             $transaction = Transaction::create([
@@ -191,10 +189,14 @@ class TransactionService
                 'expired_at'           => now()->addHours(24),
             ]);
 
+            // Generate QR code jika payment method adalah QRIS
+            if ($paymentMethod === 'qris') {
+                $this->generateQRCode($transaction);
+            }
+
             return [
-                'transaction'  => $transaction->load('transactionable'),
+                'transaction' => $transaction->fresh()->load('transactionable'),
                 'subscription' => $subscription,
-                'instructions' => $this->getPaymentInstructions(),
             ];
         });
     }
@@ -204,7 +206,7 @@ class TransactionService
      * 
      * @throws \Exception jika bukan member sesi
      */
-    public function createMentoringTransaction(MentoringSession $session, User $user, string $paymentMethod): array
+    public function createMentoringTransaction(MentoringSession $session, User $user, string $paymentMethod): Transaction
     {
         // Verifikasi user adalah member sesi
         if ($session->member_id !== $user->id) {
@@ -224,10 +226,12 @@ class TransactionService
                 'expired_at'           => now()->addHours(24),
             ]);
 
-            return [
-                'transaction' => $transaction->load('transactionable'),
-                'instructions' => $this->getPaymentInstructions(),
-            ];
+            // Generate QR code jika payment method adalah QRIS
+            if ($paymentMethod === 'qris') {
+                $this->generateQRCode($transaction);
+            }
+
+            return $transaction->fresh()->load('transactionable');
         });
     }
 
@@ -303,6 +307,39 @@ class TransactionService
 
             return $transaction->fresh();
         });
+    }
+
+    /**
+     * Generate QR code untuk pembayaran QRIS
+     * Generate langsung di backend dalam format SVG (tidak perlu Imagick/GD)
+     */
+    private function generateQRCode(Transaction $transaction): void
+    {
+        // Format QRIS string (simplified - dalam produksi gunakan format QRIS resmi)
+        // Format: ID.MERCHANTCODE.TRANSACTION_CODE.AMOUNT
+        $qrString = sprintf(
+            "ID.MERCHANT.%s.%s",
+            $transaction->transaction_code,
+            number_format($transaction->amount, 0, '', '')
+        );
+        
+        // Generate QR code dalam format SVG (tidak butuh extension tambahan)
+        $renderer = new ImageRenderer(
+            new RendererStyle(300),
+            new SvgImageBackEnd()
+        );
+        $writer = new Writer($renderer);
+        $qrCodeSvg = $writer->writeString($qrString);
+        
+        // Simpan QR code SVG ke storage
+        $qrCodePath = 'qr-codes/' . $transaction->transaction_code . '.svg';
+        Storage::disk('public')->put($qrCodePath, $qrCodeSvg);
+        
+        // Update transaction dengan QR info
+        $transaction->update([
+            'qr_code_url' => $qrCodePath,
+            'qr_string' => $qrString,
+        ]);
     }
 
     /**

@@ -21,23 +21,28 @@ class TransactionTest extends TestCase
     public function test_can_create_course_transaction()
     {
         $user = User::factory()->create();
-        $token = JWTAuth::fromUser($user);
         
         $course = Course::factory()->create([
             'price' => 100000,
+            'access_type' => 'free',
         ]);
 
-        $response = $this->postJson("/api/transactions/courses/{$course->id}", [
-            'payment_method' => 'manual',
-        ], [
-            'Authorization' => 'Bearer ' . $token,
-        ]);
+        $response = $this->actingAs($user, 'api')
+            ->postJson("/api/courses/{$course->id}/enroll", [
+                'payment_method' => 'manual',
+            ]);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
                 'sukses',
                 'pesan',
                 'data' => [
+                    'enrollment' => [
+                        'id',
+                        'user_id',
+                        'course_id',
+                        'progress',
+                    ],
                     'transaction' => [
                         'id',
                         'transaction_code',
@@ -45,12 +50,6 @@ class TransactionTest extends TestCase
                         'amount',
                         'payment_method',
                         'status',
-                    ],
-                    'instructions' => [
-                        'bank_name',
-                        'account_number',
-                        'account_holder',
-                        'instructions',
                     ],
                 ],
             ])
@@ -355,5 +354,75 @@ class TransactionTest extends TestCase
         ]);
 
         $response->assertStatus(403);
+    }
+
+    /**
+     * Test creating transaction with QRIS generates QR code
+     */
+    public function test_qris_transaction_generates_qr_code()
+    {
+        Storage::fake('public');
+        
+        $user = User::factory()->create();
+        
+        $course = Course::factory()->create([
+            'price' => 100000,
+            'access_type' => 'free',
+        ]);
+
+        $response = $this->actingAs($user, 'api')
+            ->postJson("/api/courses/{$course->id}/enroll", [
+                'payment_method' => 'qris',
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure([
+                'data' => [
+                    'transaction' => [
+                        'qr_code_url',
+                        'qr_string',
+                    ]
+                ]
+            ]);
+
+        // Verify QR code URL dan string exists in response
+        $qrCodeUrl = $response->json('data.transaction.qr_code_url');
+        $qrString = $response->json('data.transaction.qr_string');
+        $this->assertNotNull($qrCodeUrl);
+        $this->assertNotNull($qrString);
+        $this->assertStringContainsString('ID.MERCHANT', $qrString);
+
+        // Verify QR code file was created in storage
+        $transaction = Transaction::latest()->first();
+        $this->assertNotNull($transaction->qr_code_url);
+        $this->assertNotNull($transaction->qr_string);
+        Storage::disk('public')->assertExists($transaction->qr_code_url);
+        
+        // Verify file is SVG
+        $this->assertStringEndsWith('.svg', $transaction->qr_code_url);
+    }
+
+    /**
+     * Test non-QRIS payment method does not generate QR code
+     */
+    public function test_manual_payment_does_not_generate_qr_code()
+    {
+        $user = User::factory()->create();
+        
+        $course = Course::factory()->create([
+            'price' => 100000,
+            'access_type' => 'free',
+        ]);
+
+        $response = $this->actingAs($user, 'api')
+            ->postJson("/api/courses/{$course->id}/enroll", [
+                'payment_method' => 'manual',
+            ]);
+
+        $response->assertStatus(201);
+
+        $transaction = Transaction::latest()->first();
+        $this->assertNull($transaction->qr_string);
+        $this->assertNull($transaction->qr_code_url);
     }
 }

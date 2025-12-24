@@ -30,6 +30,8 @@ class TransactionFactory extends Factory
             'payment_method' => $this->faker->randomElement(['manual', 'bank_transfer', 'virtual_account', 'credit_card', 'qris']),
             'status' => $this->faker->randomElement(['pending', 'paid', 'expired', 'refunded']),
             'payment_proof' => null,
+            'qr_code_url' => null,
+            'qr_string' => null,
             'payment_details' => null,
             'paid_at' => null,
             'expired_at' => now()->addDays(1),

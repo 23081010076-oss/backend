@@ -88,12 +88,12 @@ class SubscriptionController extends Controller
         $this->authorize('create', Subscription::class);
 
         try {
-            $subscription = $this->subscriptionService->createSubscription(
+            $result = $this->subscriptionService->createSubscription(
                 $request->validated(),
                 $request->user()
             );
 
-            return $this->createdResponse($subscription, 'Subscription created successfully');
+            return $this->createdResponse($result, 'Subscription created successfully');
         } catch (\InvalidArgumentException $e) {
             return $this->validationErrorResponse(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
