@@ -77,6 +77,49 @@ class TransactionController extends Controller
     }
 
     /**
+     * Tampilkan semua transaksi (Admin only)
+     */
+    public function adminIndex(Request $request): JsonResponse
+    {
+        // Cek akses dengan Policy
+        $this->authorize('viewStatistics', Transaction::class);
+
+        $transactions = $this->transactionService->getAllTransactions(
+            $request->all()
+        );
+
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
+        return $this->paginatedResponse(
+            $transactions,
+            'Daftar semua transaksi berhasil diambil'
+        );
+    }
+
+    /**
+     * Tampilkan transaksi yang perlu diverifikasi (Admin only)
+     * Menampilkan transaksi pending yang sudah upload bukti pembayaran
+     */
+    public function pendingVerification(Request $request): JsonResponse
+    {
+        // Cek akses dengan Policy
+        $this->authorize('viewStatistics', Transaction::class);
+
+        $transactions = $this->transactionService->getPendingVerificationTransactions();
+
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
+        return $this->paginatedResponse(
+            $transactions,
+            'Daftar transaksi yang perlu diverifikasi berhasil diambil'
+        );
+    }
+
+    /**
      * Tampilkan daftar transaksi course enrollment user
      */
     public function getCourseTransactions(Request $request): JsonResponse
@@ -276,15 +319,19 @@ class TransactionController extends Controller
         // Cek akses dengan Policy
         $this->authorize('uploadProof', $transaction);
 
-        $transaction = $this->transactionService->uploadPaymentProof(
-            $transaction,
-            $request->file('payment_proof')
-        );
+        try {
+            $transaction = $this->transactionService->uploadPaymentProof(
+                $transaction,
+                $request->file('payment_proof')
+            );
 
-        return $this->successResponse(
-            new TransactionResource($transaction->load(['user', 'transactionable'])),
-            'Bukti pembayaran berhasil diupload'
-        );
+            return $this->successResponse(
+                new TransactionResource($transaction->load(['user', 'transactionable'])),
+                'Bukti pembayaran berhasil diupload'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        }
     }
 
     /**

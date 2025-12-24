@@ -10,6 +10,7 @@ use App\Models\MentoringSession;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * ==========================================================================
@@ -69,6 +70,60 @@ class TransactionService
         }
 
         return $query->orderBy('created_at', 'desc')->paginate($perPage);
+    }
+
+    /**
+     * Ambil semua transaksi (Admin only)
+     */
+    public function getAllTransactions(array $filters = [], int $perPage = 20): LengthAwarePaginator
+    {
+        $query = Transaction::with([
+                'user', 
+                'transactionable' => function ($morphTo) {
+                    $morphTo->morphWith([
+                        Enrollment::class => ['course'],
+                        MentoringSession::class => ['mentor'],
+                    ]);
+                }
+            ]);
+
+        // Filter berdasarkan tipe
+        if (!empty($filters['type'])) {
+            $query->where('type', $filters['type']);
+        }
+
+        // Filter berdasarkan status
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Filter berdasarkan payment method
+        if (!empty($filters['payment_method'])) {
+            $query->where('payment_method', $filters['payment_method']);
+        }
+
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+    }
+
+    /**
+     * Ambil transaksi yang perlu diverifikasi (Admin only)
+     * Transaksi dengan status pending dan sudah upload bukti pembayaran
+     */
+    public function getPendingVerificationTransactions(int $perPage = 20): LengthAwarePaginator
+    {
+        return Transaction::with([
+                'user', 
+                'transactionable' => function ($morphTo) {
+                    $morphTo->morphWith([
+                        Enrollment::class => ['course'],
+                        MentoringSession::class => ['mentor'],
+                    ]);
+                }
+            ])
+            ->where('status', 'pending')
+            ->whereNotNull('payment_proof') // Sudah upload bukti
+            ->orderBy('created_at', 'asc') // Yang paling lama duluan
+            ->paginate($perPage);
     }
 
     /**
@@ -181,9 +236,29 @@ class TransactionService
      */
     public function uploadPaymentProof(Transaction $transaction, $file): Transaction
     {
+        // Validasi: Hanya untuk metode pembayaran manual
+        if (!in_array($transaction->payment_method, ['manual', 'bank_transfer'])) {
+            throw new \Exception('Upload bukti pembayaran hanya untuk pembayaran manual');
+        }
+
+        // Validasi: Status harus pending
+        if (!in_array($transaction->status, ['pending'])) {
+            throw new \Exception('Tidak dapat upload bukti pembayaran untuk transaksi dengan status: ' . $transaction->status);
+        }
+
+        // Hapus file lama jika ada
+        if ($transaction->payment_proof && Storage::disk('public')->exists($transaction->payment_proof)) {
+            Storage::disk('public')->delete($transaction->payment_proof);
+        }
+
+        // Upload file baru
         $path = $file->store('payment-proofs', 'public');
-        $transaction->payment_proof = $path;
-        $transaction->save();
+        
+        // Update transaksi
+        $transaction->update([
+            'payment_proof' => $path,
+            // Status tetap pending, nanti diubah admin saat konfirmasi
+        ]);
 
         return $transaction;
     }

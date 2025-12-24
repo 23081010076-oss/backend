@@ -269,6 +269,8 @@ Route::middleware('auth:api')->group(function () {
 
         // Admin Only - harus di atas route dengan parameter {id}
         Route::middleware('role:admin')->group(function () {
+            Route::get('/admin/all', [TransactionController::class, 'adminIndex'])->name('admin.index');
+            Route::get('/admin/pending-verification', [TransactionController::class, 'pendingVerification'])->name('admin.pending-verification');
             Route::get('/statistics', [TransactionController::class, 'statistics'])->name('statistics');
         });
 
