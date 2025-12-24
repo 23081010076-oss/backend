@@ -320,14 +320,13 @@ class CourseService
         // Clear cache statistics
         Cache::forget('courses:statistics');
         
-        // Clear semua cache courses dengan wildcard pattern
-        // Karena cache key pakai md5, kita flush semua cache yang dimulai dengan 'courses:'
-        $keys = Cache::getStore()->getRedis()->keys('laravel_database_courses:*');
-        if ($keys) {
-            foreach ($keys as $key) {
-                $key = str_replace('laravel_database_', '', $key);
-                Cache::forget($key);
-            }
+        // Cara simple: flush semua cache
+        // Untuk production dengan traffic tinggi, gunakan cache tags
+        try {
+            Cache::flush();
+        } catch (\Exception $e) {
+            // Jika flush gagal, setidaknya statistics sudah ke-clear
+            // Log error jika perlu: \Log::error('Cache clear failed: ' . $e->getMessage());
         }
     }
 }
