@@ -228,7 +228,12 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/mentors/{id}/schedule', [MentoringSessionController::class, 'schedule'])
         ->name('mentors.schedule');
 
-
+    
+    // MENTORS
+    
+    // Public list of mentors (untuk user memilih mentor)
+    Route::get('/mentors', [UserController::class, 'mentors'])->name('mentors.index');
+    Route::get('/mentors/{id}', [UserController::class, 'show'])->name('mentors.show');
 
     // Need Assessment (nested under mentoring sessions)
     Route::prefix('mentoring-sessions/{mentoringSessionId}/need-assessments')->name('need-assessments.')->group(function () {
