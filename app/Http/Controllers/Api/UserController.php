@@ -215,12 +215,36 @@ class UserController extends Controller
     }
 
     /**
-     * Daftar mentor
+     * Daftar mentor (untuk admin)
      */
     public function mentors(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', User::class);
+        
+        $mentors = $this->userService->getMentors($request->all());
+
+        return $this->paginatedResponse($mentors, 'Daftar mentor berhasil diambil');
+    }
+
+    /**
+     * Daftar mentor (untuk semua authenticated user)
+     */
+    public function listMentors(Request $request): JsonResponse
     {
         $mentors = $this->userService->getMentors($request->all());
 
         return $this->paginatedResponse($mentors, 'Daftar mentor berhasil diambil');
+    }
+
+    /**
+     * Detail mentor (untuk semua authenticated user)
+     */
+    public function showMentor(int $id): JsonResponse
+    {
+        $mentor = User::where('role', 'mentor')->findOrFail($id);
+        
+        $mentorWithDetails = $this->userService->getUserWithDetails($id);
+
+        return $this->successResponse($mentorWithDetails, 'Detail mentor berhasil diambil');
     }
 }
