@@ -169,6 +169,8 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('enrollments', EnrollmentController::class);
     Route::put('/enrollments/{id}/progress', [EnrollmentController::class, 'updateProgress'])
         ->name('enrollments.update-progress');
+    Route::post('/enrollments/{id}/generate-certificate', [EnrollmentController::class, 'generateCertificate'])
+        ->name('enrollments.generate-certificate');
     
     // NEW: Curriculum Progress Tracking
     Route::get('/courses/{courseId}/progress', [App\Http\Controllers\Api\CurriculumProgressController::class, 'index'])

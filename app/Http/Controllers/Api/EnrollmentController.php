@@ -222,4 +222,47 @@ class EnrollmentController extends Controller
             return $this->serverErrorResponse('Gagal menandai materi selesai');
         }
     }
+
+    /**
+     * Generate certificate for completed enrollment
+     */
+    public function generateCertificate(int $id): JsonResponse
+    {
+        $enrollment = Enrollment::with(['user', 'course'])->findOrFail($id);
+        $this->authorize('view', $enrollment);
+
+        // Check if enrollment is completed
+        if (!$enrollment->completed) {
+            return $this->errorResponse('Kursus belum selesai, sertifikat tidak dapat dibuat', 422);
+        }
+
+        // Check if certificate already exists
+        if ($enrollment->certificate_url) {
+            return $this->successResponse([
+                'certificate_url' => $enrollment->certificate_url,
+            ], 'Sertifikat sudah ada');
+        }
+
+        try {
+            $certificateUrl = $this->enrollmentService->generateCertificate($enrollment);
+
+            if ($certificateUrl) {
+                $enrollment->certificate_url = $certificateUrl;
+                $enrollment->save();
+
+                return $this->successResponse([
+                    'certificate_url' => $certificateUrl,
+                ], 'Sertifikat berhasil dibuat');
+            } else {
+                return $this->serverErrorResponse('Gagal membuat sertifikat');
+            }
+        } catch (\Exception $e) {
+            Log::error('Certificate generation failed in controller', [
+                'enrollment_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Gagal membuat sertifikat');
+        }
+    }
 }

@@ -23,6 +23,8 @@ use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Jobs\SendWelcomeEmail;
+use App\Models\Subscription;
+use Carbon\Carbon;
 
 /**
  * ==========================================================================
@@ -89,6 +91,30 @@ class AuthController extends Controller
 
             // Kirim welcome email via queue (background)
             SendWelcomeEmail::dispatch($user);
+
+            // Berikan subscription gratis otomatis untuk akun baru
+            try {
+                $now = Carbon::now();
+                Subscription::create([
+                    'user_id' => $user->id,
+                    'plan' => 'free',
+                    'status' => 'active',
+                    'start_date' => $now,
+                    // set end_date jauh di masa depan agar dianggap aktif oleh cek durasi
+                    'end_date' => $now->copy()->addYears(100),
+                    'package_type' => 'all_in_one',
+                    'duration' => 100,
+                    'duration_unit' => 'years',
+                    'price' => 0,
+                    'auto_renew' => false,
+                ]);
+            } catch (\Exception $e) {
+                // Log error namun jangan gagalkan pendaftaran
+                \Illuminate\Support\Facades\Log::error('Failed to assign free subscription on register', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             // Return response dengan UserResource
             // UserResource akan format data user secara konsisten
