@@ -299,10 +299,13 @@ Route::middleware('auth:api')->group(function () {
 
         // Create Transactions
         Route::post('/courses/{courseId}', [TransactionController::class, 'createCourseTransaction'])
+            ->middleware('throttle:60,1')
             ->name('course.store');
         Route::post('/subscriptions', [TransactionController::class, 'createSubscriptionTransaction'])
+            ->middleware('throttle:60,1')
             ->name('subscription.store');
         Route::post('/mentoring-sessions/{sessionId}', [TransactionController::class, 'createMentoringTransaction'])
+            ->middleware('throttle:60,1')
             ->name('mentoring.store');
 
         // Payment Operations

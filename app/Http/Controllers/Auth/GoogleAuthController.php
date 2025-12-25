@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Subscription;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -210,6 +212,28 @@ class GoogleAuthController extends Controller
                 ]);
                 
                 Log::info('Created new user from Google: ' . $user->email . ' with role: ' . $role);
+
+                // Berikan subscription gratis otomatis
+                try {
+                    $now = Carbon::now();
+                    Subscription::create([
+                        'user_id' => $user->id,
+                        'plan' => 'free',
+                        'status' => 'active',
+                        'start_date' => $now,
+                        'end_date' => $now->copy()->addYears(100),
+                        'package_type' => 'all_in_one',
+                        'duration' => 100,
+                        'duration_unit' => 'years',
+                        'price' => 0,
+                        'auto_renew' => false,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to assign free subscription on Google register', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
         } else {
             // Update avatar if changed
