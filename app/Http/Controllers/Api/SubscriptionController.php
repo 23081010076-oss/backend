@@ -46,7 +46,9 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Display a listing of user's subscriptions
+     * Display a listing of subscriptions
+     * - Admin: Can see all subscriptions
+     * - User: Can only see their own subscriptions
      *
      * @param Request $request
      * @return JsonResponse
@@ -55,7 +57,19 @@ class SubscriptionController extends Controller
     {
         $this->authorize('viewAny', Subscription::class);
 
-        $subscriptions = Subscription::where('user_id', $request->user()->id)
+        $user = $request->user();
+        
+        // Admin can see all subscriptions with user details
+        if ($user->role === 'admin') {
+            $subscriptions = Subscription::with('user:id,name,email')
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+            
+            return $this->paginatedResponse($subscriptions, 'All subscriptions retrieved successfully');
+        }
+        
+        // Regular users see only their own subscriptions
+        $subscriptions = Subscription::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
