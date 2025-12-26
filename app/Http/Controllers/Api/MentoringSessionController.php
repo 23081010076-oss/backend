@@ -69,7 +69,7 @@ class MentoringSessionController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $session = MentoringSession::with(['member', 'mentor'])->findOrFail($id);
+        $session = MentoringSession::with(['member', 'mentor', 'reviews.user'])->findOrFail($id);
 
         // Cek akses dengan Policy
         $this->authorize('view', $session);
@@ -187,7 +187,7 @@ class MentoringSessionController extends Controller
             return $this->errorResponse('Feedback hanya bisa diberikan untuk sesi yang sudah selesai', 400);
         }
 
-        $session = $this->mentoringService->giveFeedback($session, $request->validated());
+        $session = $this->mentoringService->giveFeedback($session, $request->validated(), $request->user());
 
         return $this->successResponse($session, 'Feedback berhasil dikirim');
     }

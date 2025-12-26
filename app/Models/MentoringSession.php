@@ -58,4 +58,9 @@ class MentoringSession extends Model
     {
         return $this->hasMany(CoachingFile::class);
     }
+
+    public function reviews()
+    {
+        return $this->morphMany(Review::class, 'reviewable');
+    }
 }

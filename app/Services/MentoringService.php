@@ -119,19 +119,24 @@ class MentoringService
     }
 
     /**
-     * Berikan feedback
+     * Berikan feedback/review
      * 
      * @throws \Exception jika sesi belum selesai
      */
-    public function giveFeedback(MentoringSession $session, array $feedbackData): MentoringSession
+    public function giveFeedback(MentoringSession $session, array $feedbackData, User $user): MentoringSession
     {
         if ($session->status !== 'completed') {
             throw new \Exception('Feedback hanya bisa diberikan untuk sesi yang sudah selesai');
         }
 
-        $session->update($feedbackData);
+        // Simpan ke tabel reviews menggunakan polymorphic relationship
+        $session->reviews()->create([
+            'user_id' => $user->id,
+            'rating' => $feedbackData['rating'],
+            'comment' => $feedbackData['feedback'] ?? null, // Map 'feedback' to 'comment'
+        ]);
         
-        return $session->fresh()->load(['member', 'mentor']);
+        return $session->fresh()->load(['member', 'mentor', 'reviews']);
     }
 
     /**

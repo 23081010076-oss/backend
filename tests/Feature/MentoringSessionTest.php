@@ -79,4 +79,48 @@ class MentoringSessionTest extends TestCase
             'status' => 'scheduled',
         ]);
     }
+
+    public function test_student_can_give_feedback_and_visible_in_response()
+    {
+        $mentor = User::factory()->create(['role' => 'mentor']);
+        $student = User::factory()->create(['role' => 'student']);
+        
+        $session = MentoringSession::create([
+            'mentor_id' => $mentor->id,
+            'member_id' => $student->id,
+            'status' => 'completed',
+            'type' => 'academic',
+            'schedule' => now()->subDay(),
+        ]);
+
+        $token = JWTAuth::fromUser($student);
+
+        $response = $this->postJson("/api/mentoring-sessions/{$session->id}/feedback", [
+            'rating' => 5,
+            'feedback' => 'Great session!',
+        ], [
+            'Authorization' => 'Bearer ' . $token,
+        ]);
+
+        $response->assertStatus(200);
+
+        // Assert feedback is saved in reviews table
+        $this->assertDatabaseHas('reviews', [
+            'reviewable_id' => $session->id,
+            'reviewable_type' => MentoringSession::class,
+            'user_id' => $student->id,
+            'rating' => 5,
+            'comment' => 'Great session!',
+        ]);
+
+        // Assert feedback is visible in session detail
+        $mentorToken = JWTAuth::fromUser($mentor);
+        $response = $this->getJson("/api/mentoring-sessions/{$session->id}", [
+            'Authorization' => 'Bearer ' . $mentorToken,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.reviews.0.rating', 5)
+            ->assertJsonPath('data.reviews.0.comment', 'Great session!');
+    }
 }
