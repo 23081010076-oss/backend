@@ -113,9 +113,16 @@ class MentoringSessionController extends Controller
         // Cek akses dengan Policy
         $this->authorize('update', $session);
 
+        $validatedData = $request->validated();
+
+        // Security: Hanya Mentor atau Admin yang boleh update 'notes'
+        if (isset($validatedData['notes']) && Auth::user()->id !== $session->mentor_id && Auth::user()->role !== 'admin') {
+            unset($validatedData['notes']);
+        }
+
         $session = $this->mentoringService->updateSession(
             $session,
-            $request->validated()
+            $validatedData
         );
 
         return $this->successResponse($session, 'Sesi mentoring berhasil diupdate');

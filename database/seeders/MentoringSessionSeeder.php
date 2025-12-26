@@ -32,6 +32,7 @@ class MentoringSessionSeeder extends Seeder
                 'schedule' => now()->addDays(3)->setTime(14, 0),
                 'meeting_link' => 'https://meet.google.com/abc-defg-hij',
                 'payment_method' => 'manual',
+                'notes' => 'Initial consultation notes.',
                 'status' => 'scheduled',
                 'need_assessment_status' => 'completed',
             ],
@@ -44,6 +45,7 @@ class MentoringSessionSeeder extends Seeder
                 'meeting_link' => 'https://zoom.us/j/123456789',
                 'payment_method' => 'bank_transfer',
                 'status' => 'scheduled',
+                'notes' => 'Discussed life goals and career path.',
                 'need_assessment_status' => 'pending',
             ],
             [
@@ -66,6 +68,7 @@ class MentoringSessionSeeder extends Seeder
                 'schedule' => now()->subDays(10)->setTime(14, 0),
                 'meeting_link' => 'https://meet.google.com/completed-session-1',
                 'payment_method' => 'manual',
+                'notes' => 'Session completed successfully. Great progress.',
                 'status' => 'completed',
                 'need_assessment_status' => 'completed',
             ],

@@ -34,6 +34,7 @@ class UpdateMentoringSessionRequest extends FormRequest
             'payment_method' => 'nullable|in:manual,bank_transfer',
             'status'         => 'sometimes|in:pending,completed,refunded,scheduled,cancelled',
             'type'           => 'sometimes|in:academic,life_plan',
+            'notes'          => 'nullable|string',
         ];
     }
 
