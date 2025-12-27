@@ -33,6 +33,13 @@ class CourseService
         // Generate cache key berdasarkan filter
         $cacheKey = 'courses:' . md5(json_encode($filters) . $perPage . request('page', 1));
         
+        // Track cache key untuk bisa di-clear nanti
+        $cacheKeys = Cache::get('courses:cache_keys', []);
+        if (!in_array($cacheKey, $cacheKeys)) {
+            $cacheKeys[] = $cacheKey;
+            Cache::put('courses:cache_keys', $cacheKeys, 86400); // 24 jam
+        }
+        
         // Cache selama 10 detik
         return Cache::remember($cacheKey, 10, function () use ($filters, $perPage) {
             $query = Course::withCount('enrollments') // Hitung jumlah enrollment untuk popularity
@@ -317,17 +324,17 @@ class CourseService
      */
     public function clearCache(): void
     {
-        // Clear cache statistics
+        // Clear statistics cache
         Cache::forget('courses:statistics');
         
-        // Cara simple: flush semua cache
-        // Untuk production dengan traffic tinggi, gunakan cache tags
-        try {
-            Cache::flush();
-        } catch (\Exception $e) {
-            // Jika flush gagal, setidaknya statistics sudah ke-clear
-            // Log error jika perlu: \Log::error('Cache clear failed: ' . $e->getMessage());
+        // Clear all course list caches (with different filters and pages)
+        // Karena cache key menggunakan md5 hash dari filters, kita perlu clear semua
+        // yang dimulai dengan 'courses:'
+        $cacheKeys = Cache::get('courses:cache_keys', []);
+        foreach ($cacheKeys as $key) {
+            Cache::forget($key);
         }
+        Cache::forget('courses:cache_keys');
     }
 }
 

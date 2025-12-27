@@ -31,6 +31,13 @@ class ScholarshipService
         // Generate cache key berdasarkan filter
         $cacheKey = 'scholarships:' . md5(json_encode($filters) . $perPage . request('page', 1));
 
+        // Track cache key untuk bisa di-clear nanti
+        $cacheKeys = Cache::get('scholarships:cache_keys', []);
+        if (!in_array($cacheKey, $cacheKeys)) {
+            $cacheKeys[] = $cacheKey;
+            Cache::put('scholarships:cache_keys', $cacheKeys, 86400); // 24 jam
+        }
+
         return Cache::remember($cacheKey, 600, function () use ($filters, $perPage) {
             $query = Scholarship::with(['organization'])
                 ->withCount('applications'); // Hitung jumlah aplikasi untuk popularity
@@ -380,6 +387,16 @@ class ScholarshipService
      */
     public function clearCache(): void
     {
+        // Clear statistics cache
         Cache::forget('scholarships:statistics');
+        
+        // Clear all scholarship list caches (with different filters and pages)
+        // Karena cache key menggunakan md5 hash dari filters, kita perlu clear semua
+        // yang dimulai dengan 'scholarships:'
+        $cacheKeys = Cache::get('scholarships:cache_keys', []);
+        foreach ($cacheKeys as $key) {
+            Cache::forget($key);
+        }
+        Cache::forget('scholarships:cache_keys');
     }
 }
