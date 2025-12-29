@@ -30,19 +30,25 @@ class MentoringService
     }
     /**
      * Ambil sesi mentoring berdasarkan user/mentor
+     * 
+     * @param User $user User yang sedang login
+     * @param array $filters Filter tambahan (status, type)
+     * @param int $perPage Jumlah per halaman
+     * @param bool $onlyMine Jika true, hanya tampilkan sesi milik user (untuk my-sessions)
      */
-    public function getSessions(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function getSessions(User $user, array $filters = [], int $perPage = 15, bool $onlyMine = false): LengthAwarePaginator
     {
         $query = MentoringSession::with(['member', 'mentor']);
 
-        // Admin bisa lihat semua, mentor/student hanya sesi mereka
-        if ($user->role === 'admin') {
-            // Admin sees all sessions
-        } elseif ($user->role === 'mentor') {
-            $query->where('mentor_id', $user->id);
-        } else {
-            $query->where('member_id', $user->id);
+        // Jika $onlyMine = true, filter berdasarkan user yang login
+        if ($onlyMine) {
+            if ($user->role === 'mentor') {
+                $query->where('mentor_id', $user->id);
+            } else {
+                $query->where('member_id', $user->id);
+            }
         }
+        // Jika $onlyMine = false, semua user bisa lihat semua sesi
 
         // Filter berdasarkan status
         if (!empty($filters['status'])) {

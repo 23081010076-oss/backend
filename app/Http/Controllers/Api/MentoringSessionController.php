@@ -197,7 +197,9 @@ class MentoringSessionController extends Controller
     {
         $sessions = $this->mentoringService->getSessions(
             Auth::user(),
-            $request->all() // Tetap bawa filter lain (misal: status=pending)
+            $request->all(), // Tetap bawa filter lain (misal: status=pending)
+            15, // perPage
+            true // onlyMine = true, hanya tampilkan sesi milik user
         );
 
         return $this->paginatedResponse($sessions, 'Daftar sesi mentoring saya berhasil diambil');
