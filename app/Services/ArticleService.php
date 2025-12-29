@@ -28,8 +28,8 @@ class ArticleService
     {
         $query = Article::with('authorUser');
 
-        // Filter berdasarkan kategori
-        if (!empty($filters['category'])) {
+        // Filter berdasarkan kategori (abaikan jika "all")
+        if (!empty($filters['category']) && $filters['category'] !== 'all') {
             $query->where('category', $filters['category']);
         }
 

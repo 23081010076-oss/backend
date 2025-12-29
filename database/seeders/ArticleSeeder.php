@@ -41,7 +41,7 @@ class ArticleSeeder extends Seeder
 Ingatlah bahwa tidak ada pilihan yang salah, yang penting adalah komitmen dan usaha Anda dalam menjalani pendidikan tersebut.',
                 'category' => 'education',
                 'author' => 'Dr. Sari Wijayanti',
-                'image' => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800',
+                'image' => 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800',
             ],
             [
                 'title' => 'Mental Health untuk Mahasiswa: Tips Mengatasi Stress Kuliah',
