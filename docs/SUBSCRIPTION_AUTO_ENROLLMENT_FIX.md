@@ -5,6 +5,7 @@
 Sebelumnya, ketika user berlangganan **premium subscription** dan pembayaran dikonfirmasi oleh admin, subscription statusnya berubah menjadi `active`, tetapi user **tidak otomatis mendapat akses** ke kursus premium di halaman "My Courses".
 
 ### Penyebab
+
 - Saat admin mengkonfirmasi pembayaran subscription, hanya status subscription yang diubah
 - Tidak ada enrollment otomatis yang dibuat ke kursus-kursus premium
 - User harus mendaftar manual satu per satu ke setiap kursus premium
@@ -14,9 +15,11 @@ Sebelumnya, ketika user berlangganan **premium subscription** dan pembayaran dik
 Sistem sekarang **otomatis mendaftarkan user** ke semua kursus yang sesuai dengan paket langganan mereka:
 
 ### 1. Auto-Enrollment saat Konfirmasi Pembayaran
+
 **File**: `app/Services/TransactionService.php`
 
 Ketika admin mengkonfirmasi pembayaran subscription (method `confirmPayment()`):
+
 - ✅ **Premium Subscription** → Auto-enroll ke semua kursus `access_type = 'premium'`
 - ✅ **Regular Subscription** → Auto-enroll ke semua kursus `access_type = 'regular'` dan `'free'`
 
@@ -25,7 +28,7 @@ Ketika admin mengkonfirmasi pembayaran subscription (method `confirmPayment()`):
 elseif ($transaction->transactionable_type === Subscription::class) {
     $subscription = $transaction->transactionable;
     $subscription->update(['status' => 'active']);
-    
+
     // ✅ AUTO-ENROLL: Premium subscription
     if ($subscription->plan === 'premium') {
         $this->autoEnrollPremiumCourses($transaction->user_id);
@@ -38,9 +41,11 @@ elseif ($transaction->transactionable_type === Subscription::class) {
 ```
 
 ### 2. Auto-Enrollment saat Upgrade Subscription
+
 **File**: `app/Services/SubscriptionService.php`
 
 Ketika user upgrade subscription dari regular ke premium (method `upgradeSubscription()`):
+
 - ✅ Sistem akan otomatis mendaftarkan user ke semua kursus premium yang belum di-enroll
 
 ```php
@@ -51,13 +56,16 @@ if ($plan === 'premium' && $oldPlan !== 'premium') {
 ```
 
 ### 3. Helper Methods
+
 Menambahkan 2 helper methods untuk auto-enrollment:
 
 #### TransactionService.php
+
 - `autoEnrollPremiumCourses($userId)` - Enroll ke semua kursus premium
 - `autoEnrollRegularCourses($userId)` - Enroll ke semua kursus regular/free
 
 #### SubscriptionService.php
+
 - `autoEnrollPremiumCourses($userId)` - Enroll ke semua kursus premium saat upgrade
 
 ### 🔍 Cara Kerja Auto-Enrollment
@@ -65,6 +73,7 @@ Menambahkan 2 helper methods untuk auto-enrollment:
 **FLOW LENGKAP (Subscription Premium):**
 
 1. **User Subscribe** - `POST /api/subscriptions`
+
    ```php
    // Subscription dibuat dengan status = 'pending'
    Subscription::create([
@@ -76,6 +85,7 @@ Menambahkan 2 helper methods untuk auto-enrollment:
    ```
 
 2. **Transaction Dibuat** - `POST /api/transactions/subscriptions`
+
    ```php
    // Transaction dibuat dengan status = 'pending'
    Transaction::create([
@@ -87,6 +97,7 @@ Menambahkan 2 helper methods untuk auto-enrollment:
    ```
 
 3. **User Upload Bukti Pembayaran** - `POST /api/transactions/{id}/upload-proof`
+
    ```php
    // Upload file bukti pembayaran
    $transaction->update([
@@ -95,11 +106,12 @@ Menambahkan 2 helper methods untuk auto-enrollment:
    ```
 
 4. **Admin Konfirmasi Pembayaran** - `POST /api/transactions/{id}/confirm`
+
    ```php
    // confirmPayment() dipanggil
    $transaction->update(['status' => 'paid']);  // ⬅️ Pembayaran dikonfirmasi
    $subscription->update(['status' => 'active']); // ⬅️ Subscription aktif
-   
+
    // ✅ AUTO-ENROLLMENT TERJADI DI SINI
    if ($subscription->plan === 'premium') {
        $this->autoEnrollPremiumCourses($transaction->user_id);
@@ -107,16 +119,17 @@ Menambahkan 2 helper methods untuk auto-enrollment:
    ```
 
 5. **Auto-Enrollment Logic:**
+
    ```php
    // Ambil semua kursus premium
    $premiumCourses = Course::where('access_type', 'premium')->get();
-   
+
    foreach ($premiumCourses as $course) {
        // Cek apakah user sudah enrolled
        $alreadyEnrolled = Enrollment::where('user_id', $userId)
            ->where('course_id', $course->id)
            ->exists();
-       
+
        // Jika belum enrolled, buat enrollment baru
        if (!$alreadyEnrolled) {
            Enrollment::create([
@@ -136,6 +149,7 @@ Menambahkan 2 helper methods untuk auto-enrollment:
    - ✅ Kursus muncul di `GET /api/my-courses`
 
 **KEAMANAN:**
+
 - ⚠️ Auto-enrollment **TIDAK akan terjadi** jika:
   - Transaction masih status `pending`
   - User belum upload bukti pembayaran
@@ -145,6 +159,7 @@ Menambahkan 2 helper methods untuk auto-enrollment:
 ## 📊 Alur Lengkap
 
 ### Scenario 1: Subscription Baru (Premium)
+
 ```mermaid
 graph LR
     A[User Subscribe Premium] --> B[Transaction Created - Status Pending]
@@ -158,12 +173,14 @@ graph LR
 ```
 
 **PENTING**: Auto-enrollment **HANYA terjadi** setelah:
+
 1. ✅ User upload bukti pembayaran
 2. ✅ Admin konfirmasi pembayaran melalui `POST /api/transactions/{id}/confirm`
 3. ✅ Transaction status berubah menjadi `paid`
 4. ✅ Subscription status berubah menjadi `active`
 
 ### Scenario 2: Upgrade Subscription
+
 ```mermaid
 graph LR
     A[User Has Regular Plan] --> B[Request Upgrade to Premium]
@@ -176,30 +193,36 @@ graph LR
 ```
 
 **CATATAN untuk Upgrade**:
+
 - Upgrade juga harus melalui proses transaksi dan konfirmasi pembayaran
 - Admin harus konfirmasi pembayaran upgrade sebelum auto-enrollment terjadi
 
 ## 🎯 Keuntungan Fitur Ini
 
 ✅ **User Experience Lebih Baik**
+
 - User langsung bisa akses semua kursus premium setelah berlangganan
 - Tidak perlu mendaftar manual satu per satu
 
 ✅ **Konsistensi Data**
+
 - Semua user premium pasti punya akses ke semua kursus premium
 - Tidak ada kursus yang terlewat
 
 ✅ **Efisiensi Admin**
+
 - Admin tidak perlu mendaftarkan user manual ke setiap kursus
 - Proses otomatis dan transparan
 
 ✅ **Scalability**
+
 - Jika ada kursus premium baru ditambahkan, user yang sudah berlangganan bisa di-enroll otomatis
 - (Note: Untuk kursus baru setelah subscription aktif, perlu implementasi tambahan)
 
 ### 📝 Testing
 
 ### Test Case 1: Premium Subscription - New User (Full Flow)
+
 1. ✅ User buat subscription premium → `POST /api/subscriptions`
    - **Expected**: Subscription created with `status = 'pending'`
    - **Expected**: Transaction created with `status = 'pending'`
@@ -215,6 +238,7 @@ graph LR
    - **Expected**: Semua kursus premium muncul dalam daftar
 
 ### Test Case 2: Subscription Pending (Tanpa Konfirmasi Admin)
+
 1. User buat subscription premium
 2. User upload bukti pembayaran
 3. **Admin BELUM konfirmasi**
@@ -223,6 +247,7 @@ graph LR
 6. **Expected**: Subscription masih `status = 'pending'`
 
 ### Test Case 3: Upgrade Regular → Premium
+
 1. User dengan subscription regular (sudah aktif)
 2. Request upgrade ke premium
 3. Upload bukti pembayaran upgrade
@@ -231,6 +256,7 @@ graph LR
 6. **Expected**: Kursus premium muncul di my courses
 
 ### Test Case 4: Duplicate Prevention
+
 1. User sudah enrolled manual ke Course A (premium)
 2. Kemudian subscribe premium
 3. Admin konfirmasi pembayaran
@@ -240,10 +266,12 @@ graph LR
 ## 🔄 Future Improvements
 
 1. **Auto-Enroll Kursus Baru**
+
    - Ketika admin menambah kursus premium baru
    - Sistem bisa auto-enroll semua user yang sudah berlangganan premium
 
 2. **Notifikasi**
+
    - Kirim email/notifikasi ke user saat auto-enrollment berhasil
    - List semua kursus yang baru tersedia
 
@@ -254,6 +282,7 @@ graph LR
 ## 📁 Files Modified
 
 1. `app/Services/TransactionService.php`
+
    - Modified: `confirmPayment()` method
    - Added: `autoEnrollPremiumCourses()` method
    - Added: `autoEnrollRegularCourses()` method
@@ -272,14 +301,18 @@ graph LR
 ## 🐛 Troubleshooting
 
 ### Issue: Kursus tidak muncul di My Courses
+
 **Check**:
+
 1. Apakah subscription status = `active`?
 2. Apakah transaksi sudah status = `paid`?
 3. Check log: Apakah ada log "Auto-enrolled user to premium courses"?
 4. Check database: `SELECT * FROM enrollments WHERE user_id = X`
 
 ### Issue: Duplicate Enrollment
+
 **Check**:
+
 1. Lihat log error - seharusnya ada check `$alreadyEnrolled`
 2. Verify database unique constraint pada `enrollments` table
 
