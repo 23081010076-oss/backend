@@ -53,14 +53,11 @@ class EnrollmentService
                 throw new InvalidArgumentException("{$requiredPlan} subscription required for this course");
             }
             
-            $enrollment = Enrollment::create([
-                'user_id' => $user->id,
-                'course_id' => $course->id,
-                'progress' => 0,
-                'completed' => false,
-            ]);
-
-            // Create transaction
+            // ⚠️ PERUBAHAN: Enrollment TIDAK dibuat di sini
+            // Enrollment akan dibuat di TransactionService->confirmPayment()
+            // setelah admin mengkonfirmasi pembayaran
+            
+            // Create transaction ONLY (linked to Course, not Enrollment yet)
             $transaction = $this->transactionService->createCourseTransaction(
                 $course,
                 $user,
@@ -69,18 +66,18 @@ class EnrollmentService
 
             DB::commit();
 
-            Log::info('User enrolled in course successfully', [
-                'enrollment_id' => $enrollment->id,
+            Log::info('Course enrollment transaction created successfully', [
                 'user_id' => $user->id,
                 'course_id' => $course->id,
                 'course_title' => $course->title,
                 'transaction_id' => $transaction->id,
                 'payment_method' => $paymentMethod,
+                'note' => 'Enrollment will be created after payment confirmation',
             ]);
 
             return [
-                'enrollment' => $enrollment->load('course'),
                 'transaction' => $transaction,
+                'course' => $course,
             ];
         } catch (InvalidArgumentException $e) {
             DB::rollBack();

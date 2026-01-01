@@ -10,6 +10,7 @@ use App\Models\MentoringSession;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Renderer\ImageRenderer;
@@ -279,10 +280,11 @@ class TransactionService
             ]);
 
             // Handle Course Enrollment
+            // FLOW: User enroll → transaction created → upload bukti → admin confirm → enrollment created
             if ($transaction->transactionable_type === Course::class) {
                 $courseId = $transaction->transactionable_id;
                 
-                // Create Enrollment
+                // ✅ ENROLLMENT DIBUAT DI SINI - Setelah admin konfirmasi pembayaran
                 $enrollment = Enrollment::create([
                     'user_id'   => $transaction->user_id,
                     'course_id' => $courseId,
@@ -290,10 +292,17 @@ class TransactionService
                     'completed' => false,
                 ]);
 
-                // Update transaction to point to enrollment (optional but good for history)
+                // Update transaction to point to enrollment (good for tracking history)
                 $transaction->update([
                     'transactionable_id'   => $enrollment->id,
                     'transactionable_type' => Enrollment::class,
+                ]);
+                
+                Log::info('Course enrollment created after payment confirmation', [
+                    'enrollment_id' => $enrollment->id,
+                    'user_id' => $transaction->user_id,
+                    'course_id' => $courseId,
+                    'transaction_id' => $transaction->id,
                 ]);
             }
             // Handle Subscription Activation

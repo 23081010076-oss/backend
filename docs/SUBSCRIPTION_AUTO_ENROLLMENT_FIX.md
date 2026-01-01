@@ -1,20 +1,67 @@
-# 🔧 Fix: Auto-Enrollment Kursus Premium Setelah Langganan
+# 🔧 Fix: Payment Confirmation Flow untuk Course & Subscription
 
 ## 📋 Deskripsi Masalah
 
-Sebelumnya, ketika user berlangganan **premium subscription** dan pembayaran dikonfirmasi oleh admin, subscription statusnya berubah menjadi `active`, tetapi user **tidak otomatis mendapat akses** ke kursus premium di halaman "My Courses".
+Sebelumnya ada inkonsistensi dalam flow pembayaran:
 
-### Penyebab
+### Masalah 1: Course Enrollment
+- User enroll ke course → **Langsung dibuat enrollment** → Buat transaction
+- User bisa langsung akses course **sebelum bayar** dan **sebelum admin konfirmasi**
+- Ini tidak aman karena user bisa akses course gratis
 
-- Saat admin mengkonfirmasi pembayaran subscription, hanya status subscription yang diubah
-- Tidak ada enrollment otomatis yang dibuat ke kursus-kursus premium
-- User harus mendaftar manual satu per satu ke setiap kursus premium
+### Masalah 2: Subscription Auto-Enrollment
+- User subscribe premium → Pembayaran dikonfirmasi → Subscription active
+- Tapi user **tidak otomatis ter-enroll** ke kursus premium
+- User harus mendaftar manual satu per satu
 
 ## ✅ Solusi yang Diterapkan
 
-Sistem sekarang **otomatis mendaftarkan user** ke semua kursus yang sesuai dengan paket langganan mereka:
+Sistem sekarang memiliki **flow pembayaran yang konsisten dan aman**:
 
-### 1. Auto-Enrollment saat Konfirmasi Pembayaran
+### 1. Course Enrollment - Payment First Flow
+
+**File**: `app/Services/EnrollmentService.php` & `app/Services/TransactionService.php`
+
+**FLOW BARU:**
+```
+User Enroll → Transaction Created (pending) → Upload Bukti → Admin Confirm → Enrollment Created
+```
+
+**Perubahan:**
+- ❌ **BEFORE**: Enrollment dibuat langsung saat user enroll
+- ✅ **AFTER**: Enrollment HANYA dibuat setelah admin konfirmasi pembayaran
+
+```php
+// EnrollmentService.enrollUserToCourse()
+// ⚠️ Enrollment TIDAK dibuat di sini
+// Enrollment akan dibuat di TransactionService->confirmPayment()
+
+// Create transaction ONLY (linked to Course, not Enrollment yet)
+$transaction = $this->transactionService->createCourseTransaction(
+    $course,
+    $user,
+    $paymentMethod
+);
+```
+
+```php
+// TransactionService.confirmPayment()
+// Handle Course Enrollment
+// FLOW: User enroll → transaction created → upload bukti → admin confirm → enrollment created
+if ($transaction->transactionable_type === Course::class) {
+    $courseId = $transaction->transactionable_id;
+    
+    // ✅ ENROLLMENT DIBUAT DI SINI - Setelah admin konfirmasi pembayaran
+    $enrollment = Enrollment::create([
+        'user_id'   => $transaction->user_id,
+        'course_id' => $courseId,
+        'progress'  => 0,
+        'completed' => false,
+    ]);
+}
+```
+
+### 2. Subscription Auto-Enrollment saat Konfirmasi Pembayaran
 
 **File**: `app/Services/TransactionService.php`
 
@@ -39,14 +86,6 @@ elseif ($transaction->transactionable_type === Subscription::class) {
     }
 }
 ```
-
-### 2. Auto-Enrollment saat Upgrade Subscription
-
-**File**: `app/Services/SubscriptionService.php`
-
-Ketika user upgrade subscription dari regular ke premium (method `upgradeSubscription()`):
-
-- ✅ Sistem akan otomatis mendaftarkan user ke semua kursus premium yang belum di-enroll
 
 ```php
 // ✅ AUTO-ENROLL: Jika upgrade ke premium
@@ -158,7 +197,25 @@ Menambahkan 2 helper methods untuk auto-enrollment:
 
 ## 📊 Alur Lengkap
 
-### Scenario 1: Subscription Baru (Premium)
+### Scenario 1: Course Enrollment (Paid Course)
+```mermaid
+graph LR
+    A[User Enroll to Course] --> B[Transaction Created - Status Pending]
+    B --> C[User Upload Payment Proof]
+    C --> D[Admin Review Payment]
+    D --> E[Admin Confirm Payment]
+    E --> F[Transaction Status = Paid]
+    F --> G[Enrollment Created]
+    G --> H[Course Appears in My Courses]
+    H --> I[User Can Access Course Content]
+```
+
+**PENTING untuk Course**: 
+- ⚠️ Enrollment **TIDAK dibuat** saat user klik enroll
+- ⚠️ User **TIDAK bisa akses course** sebelum admin konfirmasi
+- ✅ Enrollment **HANYA dibuat** setelah admin konfirmasi pembayaran via `POST /api/transactions/{id}/confirm`
+
+### Scenario 2: Subscription Baru (Premium)
 
 ```mermaid
 graph LR
@@ -179,7 +236,7 @@ graph LR
 3. ✅ Transaction status berubah menjadi `paid`
 4. ✅ Subscription status berubah menjadi `active`
 
-### Scenario 2: Upgrade Subscription
+### Scenario 3: Upgrade Subscription
 
 ```mermaid
 graph LR
@@ -221,7 +278,34 @@ graph LR
 
 ### 📝 Testing
 
-### Test Case 1: Premium Subscription - New User (Full Flow)
+### Test Case 1: Course Enrollment (Paid Course)
+1. ✅ User enroll ke paid course → `POST /api/courses/{id}/enroll`
+   - **Expected**: Transaction created with `status = 'pending'`
+   - **Expected**: Response message: "Transaksi berhasil dibuat. Silakan upload bukti..."
+   - **Expected**: Enrollment BELUM dibuat
+2. ✅ User upload bukti pembayaran → `POST /api/transactions/{id}/upload-proof`
+   - **Expected**: Transaction memiliki `payment_proof` path
+   - **Expected**: Status masih `pending`
+3. ❌ User cek my courses → `GET /api/my-courses`
+   - **Expected**: Course BELUM muncul (karena enrollment belum dibuat)
+4. ✅ Admin konfirmasi pembayaran → `POST /api/transactions/{id}/confirm`
+   - **Expected**: Transaction `status = 'paid'`
+   - **Expected**: Enrollment DIBUAT dengan `progress = 0`
+   - **Expected**: Log "Course enrollment created after payment confirmation" muncul
+5. ✅ User cek my courses → `GET /api/my-courses`
+   - **Expected**: Course muncul dalam daftar
+   - **Expected**: User bisa akses course content
+
+### Test Case 2: Course Enrollment - Tanpa Konfirmasi Admin
+1. User enroll ke paid course
+2. User upload bukti pembayaran
+3. **Admin BELUM konfirmasi**
+4. **Expected**: Enrollment BELUM dibuat
+5. **Expected**: `GET /api/my-courses` TIDAK menampilkan course
+6. **Expected**: User TIDAK bisa akses course content
+7. **Expected**: Transaction masih `status = 'pending'`
+
+### Test Case 3: Premium Subscription - New User (Full Flow)
 
 1. ✅ User buat subscription premium → `POST /api/subscriptions`
    - **Expected**: Subscription created with `status = 'pending'`
@@ -237,7 +321,7 @@ graph LR
 4. ✅ Cek my courses → `GET /api/my-courses`
    - **Expected**: Semua kursus premium muncul dalam daftar
 
-### Test Case 2: Subscription Pending (Tanpa Konfirmasi Admin)
+### Test Case 4: Subscription Pending (Tanpa Konfirmasi Admin)
 
 1. User buat subscription premium
 2. User upload bukti pembayaran
@@ -246,7 +330,7 @@ graph LR
 5. **Expected**: `GET /api/my-courses` TIDAK menampilkan kursus premium
 6. **Expected**: Subscription masih `status = 'pending'`
 
-### Test Case 3: Upgrade Regular → Premium
+### Test Case 5: Upgrade Regular → Premium
 
 1. User dengan subscription regular (sudah aktif)
 2. Request upgrade ke premium
@@ -255,7 +339,7 @@ graph LR
 5. **Expected**: User ter-enroll ke semua kursus premium
 6. **Expected**: Kursus premium muncul di my courses
 
-### Test Case 4: Duplicate Prevention
+### Test Case 6: Duplicate Prevention
 
 1. User sudah enrolled manual ke Course A (premium)
 2. Kemudian subscribe premium
@@ -281,30 +365,65 @@ graph LR
 
 ## 📁 Files Modified
 
-1. `app/Services/TransactionService.php`
+1. **`app/Services/EnrollmentService.php`**
+   - Modified: `enrollUserToCourse()` method
+   - Changed: Enrollment creation removed (moved to confirmPayment)
+   - Now: Only creates transaction, enrollment created after payment confirmation
 
-   - Modified: `confirmPayment()` method
+2. **`app/Services/TransactionService.php`**
+   - Modified: `confirmPayment()` method - handles both course and subscription
    - Added: `autoEnrollPremiumCourses()` method
    - Added: `autoEnrollRegularCourses()` method
+   - Changed: Course enrollment now created in confirmPayment (after admin confirmation)
 
-2. `app/Services/SubscriptionService.php`
+3. **`app/Services/SubscriptionService.php`**
    - Modified: `upgradeSubscription()` method
    - Added: `autoEnrollPremiumCourses()` method
    - Added: Import `Enrollment` model
 
+4. **`app/Http/Controllers/Api/EnrollmentController.php`**
+   - Modified: `enroll()` method response message
+   - Changed: Message now informs user to upload payment proof and wait for confirmation
+
 ## 📞 API Endpoints yang Terpengaruh
 
-- `POST /api/transactions/{id}/confirm` - Admin confirm payment (trigger auto-enroll)
-- `PUT /api/subscriptions/{id}/upgrade` - Upgrade subscription (trigger auto-enroll)
-- `GET /api/my-courses` - Akan menampilkan kursus premium setelah auto-enroll
+### Course Enrollment
+- `POST /api/courses/{id}/enroll` - Creates transaction (NOT enrollment)
+- `POST /api/transactions/{id}/upload-proof` - User uploads payment proof
+- `POST /api/transactions/{id}/confirm` - **Admin confirms → Creates enrollment**
+- `GET /api/my-courses` - Shows courses only after enrollment created
+
+### Subscription
+- `POST /api/subscriptions` - Creates subscription (status pending)
+- `POST /api/transactions/{id}/upload-proof` - User uploads payment proof
+- `POST /api/transactions/{id}/confirm` - **Admin confirms → Activates subscription → Auto-enroll**
+- `PUT /api/subscriptions/{id}/upgrade` - Upgrade subscription
+- `GET /api/my-courses` - Shows all courses from subscription after activation
 
 ## 🐛 Troubleshooting
 
-### Issue: Kursus tidak muncul di My Courses
-
+### Issue: Course tidak muncul di My Courses (Single Course Purchase)
 **Check**:
+1. Apakah user sudah upload bukti pembayaran?
+2. Apakah admin sudah konfirmasi pembayaran via `POST /api/transactions/{id}/confirm`?
+3. Apakah transaction status = `paid`?
+4. Check database: `SELECT * FROM enrollments WHERE user_id = X AND course_id = Y`
+5. Check log: Apakah ada log "Course enrollment created after payment confirmation"?
 
+### Issue: Kursus premium tidak muncul di My Courses (Subscription)
+**Check**:
 1. Apakah subscription status = `active`?
+2. Apakah transaksi sudah status = `paid`?
+3. Check log: Apakah ada log "Auto-enrolled user to premium courses"?
+4. Check database: `SELECT * FROM enrollments WHERE user_id = X`
+5. Check database: `SELECT * FROM subscriptions WHERE user_id = X AND status = 'active'`
+
+### Issue: User bisa akses course sebelum bayar
+**Ini adalah BUG! Check**:
+1. Verifikasi bahwa `enrollUserToCourse()` TIDAK membuat enrollment
+2. Verifikasi enrollment hanya dibuat di `confirmPayment()`
+3. Check route protection - pastikan ada middleware auth
+4. Check course access policy
 2. Apakah transaksi sudah status = `paid`?
 3. Check log: Apakah ada log "Auto-enrolled user to premium courses"?
 4. Check database: `SELECT * FROM enrollments WHERE user_id = X`

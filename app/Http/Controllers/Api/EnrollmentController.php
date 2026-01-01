@@ -76,7 +76,7 @@ class EnrollmentController extends Controller
 
             return $this->createdResponse(
                 $result,
-                'Berhasil mendaftar ke kursus'
+                'Transaksi berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengakses kursus.'
             );
         } catch (\InvalidArgumentException $e) {
             $statusCode = str_contains($e->getMessage(), 'already enrolled') ? 422 : 403;

@@ -420,15 +420,16 @@ namespace App\Swagger;
  * @OA\Post(
  *     path="/api/transactions/{id}/payment-proof",
  *     summary="Upload payment proof",
- *     description="Upload payment proof for manual verification",
+ *     description="Upload bukti pembayaran untuk verifikasi manual oleh admin. Setelah upload, menunggu admin konfirmasi via POST /api/transactions/{id}/confirm. File yang diupload: JPG, PNG, PDF (max 2MB).",
  *     operationId="uploadPaymentProof",
  *     tags={"Transactions"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="id",
  *         in="path",
+ *         description="ID Transaction yang akan diupload bukti pembayarannya",
  *         required=true,
- *         @OA\Schema(type="integer")
+ *         @OA\Schema(type="integer", example=123)
  *     ),
  *     @OA\RequestBody(
  *         required=true,
@@ -436,13 +437,37 @@ namespace App\Swagger;
  *             mediaType="multipart/form-data",
  *             @OA\Schema(
  *                 required={"payment_proof"},
- *                 @OA\Property(property="payment_proof", type="string", format="binary", description="Payment proof image/document")
+ *                 @OA\Property(
+ *                     property="payment_proof",
+ *                     type="string",
+ *                     format="binary",
+ *                     description="File bukti pembayaran (JPG, PNG, PDF - max 2MB)"
+ *                 )
  *             )
  *         )
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Payment proof uploaded successfully"
+ *         description="Payment proof uploaded successfully - Waiting for admin confirmation",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="pesan", type="string", example="Bukti pembayaran berhasil diupload"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="id", type="integer", example=123),
+ *                 @OA\Property(property="transaction_code", type="string", example="TRX-20260101-ABC123"),
+ *                 @OA\Property(property="status", type="string", example="pending", description="Status masih pending, menunggu konfirmasi admin"),
+ *                 @OA\Property(property="payment_proof", type="string", example="payment-proofs/user_3/proof_123.jpg", description="Path file bukti pembayaran yang diupload")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden - User can only upload proof for their own transaction"
+ *     ),
+ *     @OA\Response(response=404, description="Transaction not found"),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation error - Invalid file type or size"
  *     )
  * )
  *
@@ -475,27 +500,48 @@ namespace App\Swagger;
  * @OA\Post(
  *     path="/api/transactions/{id}/confirm",
  *     summary="Confirm payment (Admin only)",
- *     description="Manually confirm payment for a transaction",
+ *     description="Konfirmasi pembayaran manual oleh admin. PENTING: Endpoint ini akan membuat enrollment untuk course atau mengaktifkan subscription setelah pembayaran dikonfirmasi. Flow: 1) Course - Membuat enrollment baru setelah konfirmasi, 2) Subscription - Mengaktifkan subscription dan auto-enroll ke semua kursus sesuai plan.",
  *     operationId="confirmPayment",
  *     tags={"Transactions"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="id",
  *         in="path",
+ *         description="ID Transaction yang akan dikonfirmasi",
  *         required=true,
- *         @OA\Schema(type="integer")
- *     ),
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             required={"status"},
- *             @OA\Property(property="status", type="string", enum={"paid", "failed"}, example="paid")
- *         )
+ *         @OA\Schema(type="integer", example=123)
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Payment confirmed successfully"
- *     )
+ *         description="Payment confirmed successfully - Enrollment created (for course) or Subscription activated (for subscription)",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="pesan", type="string", example="Pembayaran berhasil dikonfirmasi"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="id", type="integer", example=123),
+ *                 @OA\Property(property="transaction_code", type="string", example="TRX-20260101-ABC123"),
+ *                 @OA\Property(property="type", type="string", example="course_enrollment", description="Type: course_enrollment, subscription, mentoring_session"),
+ *                 @OA\Property(property="status", type="string", example="paid"),
+ *                 @OA\Property(property="paid_at", type="string", format="date-time", example="2026-01-01T10:30:00Z"),
+ *                 @OA\Property(property="transactionable", type="object", description="Enrollment (for course) or Subscription (for subscription)",
+ *                     @OA\Property(property="id", type="integer", example=45),
+ *                     @OA\Property(property="user_id", type="integer", example=3),
+ *                     @OA\Property(property="course_id", type="integer", example=5, description="Only for course enrollment"),
+ *                     @OA\Property(property="plan", type="string", example="premium", description="Only for subscription"),
+ *                     @OA\Property(property="status", type="string", example="active", description="Only for subscription")
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden - Admin only",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=false),
+ *             @OA\Property(property="pesan", type="string", example="Unauthorized - Admin access required")
+ *         )
+ *     ),
+ *     @OA\Response(response=404, description="Transaction not found")
  * )
  *
  * @OA\Get(
