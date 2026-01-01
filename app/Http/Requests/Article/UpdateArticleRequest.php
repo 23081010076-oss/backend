@@ -35,6 +35,7 @@ class UpdateArticleRequest extends FormRequest
             'content'  => 'sometimes|string',
             'category' => 'nullable|string|max:100',
             'author'   => 'nullable|string|max:255',
+            'image'    => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // Max 5MB
         ];
     }
 
@@ -47,6 +48,9 @@ class UpdateArticleRequest extends FormRequest
             'title.max'    => 'Judul maksimal 255 karakter',
             'category.max' => 'Kategori maksimal 100 karakter',
             'author.max'   => 'Nama penulis maksimal 255 karakter',
+            'image.image'  => 'File harus berupa gambar',
+            'image.mimes'  => 'Format gambar harus jpeg, jpg, png, gif, atau webp',
+            'image.max'    => 'Ukuran gambar maksimal 5MB',
         ];
     }
 }

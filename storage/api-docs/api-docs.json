@@ -85,6 +85,16 @@
                                                         "type": "string",
                                                         "example": "Dr. Sari Wijayanti"
                                                     },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "articles/article_1735123456_abc123def.jpg",
+                                                        "nullable": true
+                                                    },
+                                                    "image_url": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/storage/articles/article_1735123456_abc123def.jpg",
+                                                        "nullable": true
+                                                    },
                                                     "created_at": {
                                                         "type": "string",
                                                         "format": "datetime"
@@ -106,17 +116,16 @@
                     "Articles"
                 ],
                 "summary": "Create article",
-                "description": "Create a new article (Admin/Corporate only)",
+                "description": "Create a new article with optional image upload (Admin/Corporate only). Use multipart/form-data for image upload.",
                 "operationId": "createArticle",
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "title",
-                                    "content",
-                                    "category"
+                                    "content"
                                 ],
                                 "properties": {
                                     "title": {
@@ -125,7 +134,7 @@
                                     },
                                     "content": {
                                         "type": "string",
-                                        "example": "Artikel lengkap tentang..."
+                                        "example": "Artikel lengkap tentang karir di industri teknologi..."
                                     },
                                     "category": {
                                         "type": "string",
@@ -134,11 +143,17 @@
                                             "career",
                                             "scholarship",
                                             "testimonial"
-                                        ]
+                                        ],
+                                        "example": "career"
                                     },
                                     "author": {
                                         "type": "string",
                                         "example": "John Doe"
+                                    },
+                                    "image": {
+                                        "description": "Article image (jpeg, jpg, png, gif, webp, max 5MB)",
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -148,7 +163,92 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Article created successfully"
+                        "description": "Article created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Artikel berhasil ditambahkan"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Panduan Karir di Tech Industry"
+                                                },
+                                                "content": {
+                                                    "type": "string"
+                                                },
+                                                "category": {
+                                                    "type": "string",
+                                                    "example": "career"
+                                                },
+                                                "author": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "articles/article_1735123456_abc123def.jpg"
+                                                },
+                                                "image_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/articles/article_1735123456_abc123def.jpg"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "datetime"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Validasi gagal"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "image": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Format gambar harus jpeg, jpg, png, gif, atau webp"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -191,7 +291,7 @@
                     "Articles"
                 ],
                 "summary": "Update article",
-                "description": "Update an existing article",
+                "description": "Update an existing article with optional image upload. Use multipart/form-data for image upload. Note: Use POST method with _method=PUT for multipart requests.",
                 "operationId": "updateArticle",
                 "parameters": [
                     {
@@ -205,17 +305,39 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "properties": {
                                     "title": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Panduan Karir di Tech Industry (Updated)"
                                     },
                                     "content": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Konten artikel yang diupdate..."
                                     },
                                     "category": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "enum": [
+                                            "education",
+                                            "career",
+                                            "scholarship",
+                                            "testimonial"
+                                        ]
+                                    },
+                                    "author": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "image": {
+                                        "description": "New article image (jpeg, jpg, png, gif, webp, max 5MB). Old image will be deleted if new one is uploaded.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "_method": {
+                                        "description": "Required for multipart PUT request",
+                                        "type": "string",
+                                        "example": "PUT"
                                     }
                                 },
                                 "type": "object"
@@ -225,7 +347,48 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Article updated successfully"
+                        "description": "Article updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Artikel berhasil diupdate"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "image_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "datetime"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [

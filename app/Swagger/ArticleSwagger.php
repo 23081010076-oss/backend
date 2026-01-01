@@ -34,6 +34,8 @@ namespace App\Swagger;
  *                     @OA\Property(property="content", type="string", example="Memilih jurusan kuliah adalah..."),
  *                     @OA\Property(property="category", type="string", example="education"),
  *                     @OA\Property(property="author", type="string", example="Dr. Sari Wijayanti"),
+ *                     @OA\Property(property="image", type="string", nullable=true, example="articles/article_1735123456_abc123def.jpg"),
+ *                     @OA\Property(property="image_url", type="string", nullable=true, example="http://localhost:8000/storage/articles/article_1735123456_abc123def.jpg"),
  *                     @OA\Property(property="created_at", type="string", format="datetime")
  *                 )
  *             )
@@ -67,30 +69,64 @@ namespace App\Swagger;
  * @OA\Post(
  *     path="/api/articles",
  *     summary="Create article",
- *     description="Create a new article (Admin/Corporate only)",
+ *     description="Create a new article with optional image upload (Admin/Corporate only). Use multipart/form-data for image upload.",
  *     operationId="createArticle",
  *     tags={"Articles"},
  *     security={{"bearerAuth":{}}},
  *     @OA\RequestBody(
  *         required=true,
- *         @OA\JsonContent(
- *             required={"title","content","category"},
- *             @OA\Property(property="title", type="string", example="Panduan Karir di Tech Industry"),
- *             @OA\Property(property="content", type="string", example="Artikel lengkap tentang..."),
- *             @OA\Property(property="category", type="string", enum={"education", "career", "scholarship", "testimonial"}),
- *             @OA\Property(property="author", type="string", example="John Doe")
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 required={"title","content"},
+ *                 @OA\Property(property="title", type="string", example="Panduan Karir di Tech Industry"),
+ *                 @OA\Property(property="content", type="string", example="Artikel lengkap tentang karir di industri teknologi..."),
+ *                 @OA\Property(property="category", type="string", enum={"education", "career", "scholarship", "testimonial"}, example="career"),
+ *                 @OA\Property(property="author", type="string", example="John Doe"),
+ *                 @OA\Property(
+ *                     property="image",
+ *                     type="string",
+ *                     format="binary",
+ *                     description="Article image (jpeg, jpg, png, gif, webp, max 5MB)"
+ *                 )
+ *             )
  *         )
  *     ),
  *     @OA\Response(
  *         response=201,
- *         description="Article created successfully"
+ *         description="Article created successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="pesan", type="string", example="Artikel berhasil ditambahkan"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="id", type="integer", example=1),
+ *                 @OA\Property(property="title", type="string", example="Panduan Karir di Tech Industry"),
+ *                 @OA\Property(property="content", type="string"),
+ *                 @OA\Property(property="category", type="string", example="career"),
+ *                 @OA\Property(property="author", type="string", example="John Doe"),
+ *                 @OA\Property(property="image", type="string", example="articles/article_1735123456_abc123def.jpg"),
+ *                 @OA\Property(property="image_url", type="string", example="http://localhost:8000/storage/articles/article_1735123456_abc123def.jpg"),
+ *                 @OA\Property(property="created_at", type="string", format="datetime")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=false),
+ *             @OA\Property(property="pesan", type="string", example="Validasi gagal"),
+ *             @OA\Property(property="errors", type="object",
+ *                 @OA\Property(property="image", type="array", @OA\Items(type="string", example="Format gambar harus jpeg, jpg, png, gif, atau webp"))
+ *             )
+ *         )
  *     )
  * )
  *
  * @OA\Put(
  *     path="/api/articles/{id}",
  *     summary="Update article",
- *     description="Update an existing article",
+ *     description="Update an existing article with optional image upload. Use multipart/form-data for image upload. Note: Use POST method with _method=PUT for multipart requests.",
  *     operationId="updateArticle",
  *     tags={"Articles"},
  *     security={{"bearerAuth":{}}},
@@ -101,15 +137,42 @@ namespace App\Swagger;
  *         @OA\Schema(type="integer")
  *     ),
  *     @OA\RequestBody(
- *         @OA\JsonContent(
- *             @OA\Property(property="title", type="string"),
- *             @OA\Property(property="content", type="string"),
- *             @OA\Property(property="category", type="string")
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 @OA\Property(property="title", type="string", example="Panduan Karir di Tech Industry (Updated)"),
+ *                 @OA\Property(property="content", type="string", example="Konten artikel yang diupdate..."),
+ *                 @OA\Property(property="category", type="string", enum={"education", "career", "scholarship", "testimonial"}),
+ *                 @OA\Property(property="author", type="string", example="John Doe"),
+ *                 @OA\Property(
+ *                     property="image",
+ *                     type="string",
+ *                     format="binary",
+ *                     description="New article image (jpeg, jpg, png, gif, webp, max 5MB). Old image will be deleted if new one is uploaded."
+ *                 ),
+ *                 @OA\Property(
+ *                     property="_method",
+ *                     type="string",
+ *                     example="PUT",
+ *                     description="Required for multipart PUT request"
+ *                 )
+ *             )
  *         )
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Article updated successfully"
+ *         description="Article updated successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="pesan", type="string", example="Artikel berhasil diupdate"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="id", type="integer", example=1),
+ *                 @OA\Property(property="title", type="string"),
+ *                 @OA\Property(property="image", type="string", nullable=true),
+ *                 @OA\Property(property="image_url", type="string", nullable=true),
+ *                 @OA\Property(property="updated_at", type="string", format="datetime")
+ *             )
+ *         )
  *     )
  * )
  *

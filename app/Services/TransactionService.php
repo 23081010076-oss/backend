@@ -321,15 +321,35 @@ class TransactionService
             // FLOW: User subscribe → upload bukti → admin confirm → status active → auto-enroll
             elseif ($transaction->transactionable_type === Subscription::class) {
                 $subscription = $transaction->transactionable;
+                
+                \Log::info('🔄 Processing subscription payment confirmation', [
+                    'transaction_id' => $transaction->id,
+                    'subscription_id' => $subscription->id,
+                    'user_id' => $transaction->user_id,
+                    'plan' => $subscription->plan,
+                    'current_status' => $subscription->status,
+                ]);
+                
                 $subscription->update(['status' => 'active']);
+                
+                \Log::info('✅ Subscription activated', [
+                    'subscription_id' => $subscription->id,
+                    'new_status' => 'active',
+                ]);
                 
                 // ✅ AUTO-ENROLL: Hanya terjadi SETELAH admin konfirmasi pembayaran
                 // Jika premium subscription, daftarkan user ke semua kursus premium
                 if ($subscription->plan === 'premium') {
+                    \Log::info('🎯 Triggering auto-enrollment for premium plan', [
+                        'user_id' => $transaction->user_id,
+                    ]);
                     $this->autoEnrollPremiumCourses($transaction->user_id);
                 }
                 // Jika regular subscription, daftarkan user ke semua kursus regular
                 elseif ($subscription->plan === 'regular') {
+                    \Log::info('🎯 Triggering auto-enrollment for regular plan', [
+                        'user_id' => $transaction->user_id,
+                    ]);
                     $this->autoEnrollRegularCourses($transaction->user_id);
                 }
             }
@@ -380,8 +400,19 @@ class TransactionService
      */
     private function autoEnrollPremiumCourses(int $userId): void
     {
+        \Log::info('🚀 Starting auto-enrollment for premium courses', ['user_id' => $userId]);
+        
         // Ambil semua kursus premium
         $premiumCourses = Course::where('access_type', 'premium')->get();
+        
+        \Log::info('📚 Found premium courses', [
+            'total' => $premiumCourses->count(),
+            'course_ids' => $premiumCourses->pluck('id')->toArray(),
+            'course_titles' => $premiumCourses->pluck('title')->toArray(),
+        ]);
+        
+        $enrolledCount = 0;
+        $skippedCount = 0;
         
         foreach ($premiumCourses as $course) {
             // Cek apakah user sudah enrolled
@@ -389,20 +420,38 @@ class TransactionService
                 ->where('course_id', $course->id)
                 ->exists();
             
-            // Jika belum enrolled, buat enrollment baru
-            if (!$alreadyEnrolled) {
-                Enrollment::create([
-                    'user_id'   => $userId,
+            if ($alreadyEnrolled) {
+                \Log::info('⏭️ User already enrolled', [
+                    'user_id' => $userId,
                     'course_id' => $course->id,
-                    'progress'  => 0,
-                    'completed' => false,
+                    'course_title' => $course->title,
                 ]);
+                $skippedCount++;
+                continue;
             }
+            
+            // Jika belum enrolled, buat enrollment baru
+            $enrollment = Enrollment::create([
+                'user_id'   => $userId,
+                'course_id' => $course->id,
+                'progress'  => 0,
+                'completed' => false,
+            ]);
+            
+            \Log::info('✅ Created enrollment', [
+                'enrollment_id' => $enrollment->id,
+                'user_id' => $userId,
+                'course_id' => $course->id,
+                'course_title' => $course->title,
+            ]);
+            $enrolledCount++;
         }
         
-        \Log::info('Auto-enrolled user to premium courses', [
+        \Log::info('🎉 Auto-enrollment completed', [
             'user_id' => $userId,
-            'total_courses' => $premiumCourses->count(),
+            'total_premium_courses' => $premiumCourses->count(),
+            'newly_enrolled' => $enrolledCount,
+            'already_enrolled' => $skippedCount,
         ]);
     }
 

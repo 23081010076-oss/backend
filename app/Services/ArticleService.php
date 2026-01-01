@@ -64,6 +64,11 @@ class ArticleService
             $data['author'] = $author->name;
         }
 
+        // Handle image upload
+        if ($imageFile) {
+            $data['image'] = $this->uploadImage($imageFile);
+        }
+
         $article = Article::create($data);
         $article->load('authorUser');
         
@@ -78,6 +83,15 @@ class ArticleService
      */
     public function updateArticle(Article $article, array $data, $imageFile = null): Article
     {
+        // Handle image upload
+        if ($imageFile) {
+            // Hapus gambar lama jika ada
+            if ($article->image) {
+                $this->deleteImage($article->image);
+            }
+            $data['image'] = $this->uploadImage($imageFile);
+        }
+
         $article->update($data);
         $article->load('authorUser');
         
@@ -92,6 +106,11 @@ class ArticleService
      */
     public function deleteArticle(Article $article): bool
     {
+        // Hapus gambar jika ada
+        if ($article->image) {
+            $this->deleteImage($article->image);
+        }
+
         $result = $article->delete();
         
         // Clear cache setelah delete
@@ -131,5 +150,26 @@ class ArticleService
     {
         Cache::forget('articles:popular:5');
         Cache::forget('articles:popular:10');
+    }
+
+    /**
+     * Upload gambar artikel
+     */
+    private function uploadImage($imageFile): string
+    {
+        $filename = 'article_' . time() . '_' . Str::random(10) . '.' . $imageFile->getClientOriginalExtension();
+        $path = $imageFile->storeAs('articles', $filename, 'public');
+        
+        return $path;
+    }
+
+    /**
+     * Hapus gambar artikel
+     */
+    private function deleteImage(string $imagePath): void
+    {
+        if (Storage::disk('public')->exists($imagePath)) {
+            Storage::disk('public')->delete($imagePath);
+        }
     }
 }
