@@ -3050,8 +3050,8 @@
                 "tags": [
                     "Enrollment"
                 ],
-                "summary": "Daftar ke kursus (Buat Transaction)",
-                "description": "Membuat transaksi untuk pendaftaran kursus. PENTING: Enrollment TIDAK langsung dibuat. User harus upload bukti pembayaran, lalu admin konfirmasi pembayaran, baru enrollment dibuat dan user bisa akses course. Pilih metode pembayaran: 'manual', 'bank_transfer', atau 'qris'. Jika qris, akan generate QR code otomatis.",
+                "summary": "Daftar ke kursus",
+                "description": "Mendaftarkan user ke kursus. BEHAVIOR: (1) Course GRATIS → Langsung enrolled tanpa payment. (2) Course BERBAYAR (regular/premium) → Buat transaction, upload bukti, tunggu admin confirm, baru enrollment dibuat. Pilih metode pembayaran: 'manual', 'bank_transfer', atau 'qris'.",
                 "operationId": "enrollCourse",
                 "parameters": [
                     {
@@ -3072,7 +3072,7 @@
                             "schema": {
                                 "properties": {
                                     "payment_method": {
-                                        "description": "Metode pembayaran: manual (transfer manual), bank_transfer (via bank), atau qris (scan QR code)",
+                                        "description": "Metode pembayaran (diabaikan untuk course gratis)",
                                         "type": "string",
                                         "enum": [
                                             "manual",
@@ -3089,85 +3089,134 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Transaksi berhasil dibuat (Enrollment belum dibuat, menunggu konfirmasi admin)",
+                        "description": "Berhasil - Response berbeda untuk free vs paid course",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "sukses": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "pesan": {
-                                            "type": "string",
-                                            "example": "Transaksi berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengakses kursus."
-                                        },
-                                        "data": {
+                                    "oneOf": [
+                                        {
+                                            "description": "Free course - Langsung enrolled",
                                             "properties": {
-                                                "transaction": {
+                                                "sukses": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "pesan": {
+                                                    "type": "string",
+                                                    "example": "Berhasil mendaftar ke kursus gratis! Anda sudah bisa mengakses kursus di My Courses."
+                                                },
+                                                "data": {
                                                     "properties": {
-                                                        "id": {
-                                                            "type": "integer",
-                                                            "example": 123
+                                                        "enrollment": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 25
+                                                                },
+                                                                "user_id": {
+                                                                    "type": "integer",
+                                                                    "example": 4
+                                                                },
+                                                                "course_id": {
+                                                                    "type": "integer",
+                                                                    "example": 3
+                                                                },
+                                                                "progress": {
+                                                                    "type": "integer",
+                                                                    "example": 0
+                                                                },
+                                                                "completed": {
+                                                                    "type": "boolean",
+                                                                    "example": false
+                                                                }
+                                                            },
+                                                            "type": "object"
                                                         },
-                                                        "transaction_code": {
-                                                            "type": "string",
-                                                            "example": "TRX-20260101-ABC123"
+                                                        "course": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 3
+                                                                },
+                                                                "title": {
+                                                                    "type": "string",
+                                                                    "example": "Introduction to Programming"
+                                                                },
+                                                                "access_type": {
+                                                                    "type": "string",
+                                                                    "example": "free"
+                                                                }
+                                                            },
+                                                            "type": "object"
                                                         },
-                                                        "type": {
-                                                            "type": "string",
-                                                            "example": "course_enrollment"
-                                                        },
-                                                        "amount": {
-                                                            "type": "number",
-                                                            "example": 150000
-                                                        },
-                                                        "status": {
-                                                            "type": "string",
-                                                            "example": "pending"
-                                                        },
-                                                        "payment_method": {
-                                                            "type": "string",
-                                                            "example": "bank_transfer"
-                                                        },
-                                                        "qr_code_url": {
-                                                            "description": "Path QR code (hanya untuk qris)",
-                                                            "type": "string",
-                                                            "example": "qr-codes/TRX-20260101-ABC123.svg",
-                                                            "nullable": true
-                                                        },
-                                                        "qr_string": {
-                                                            "description": "Data QR code (hanya untuk qris)",
-                                                            "type": "string",
-                                                            "example": "ID.MERCHANT.TRX-20260101-ABC123.150000",
-                                                            "nullable": true
-                                                        },
-                                                        "expired_at": {
-                                                            "description": "Batas waktu pembayaran (24 jam)",
-                                                            "type": "string",
-                                                            "format": "date-time",
-                                                            "example": "2026-01-02T10:00:00Z"
+                                                        "is_free": {
+                                                            "type": "boolean",
+                                                            "example": true
                                                         }
                                                     },
                                                     "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "description": "Paid course - Transaction created, waiting for payment",
+                                            "properties": {
+                                                "sukses": {
+                                                    "type": "boolean",
+                                                    "example": true
                                                 },
-                                                "course": {
+                                                "pesan": {
+                                                    "type": "string",
+                                                    "example": "Transaksi berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengakses kursus."
+                                                },
+                                                "data": {
                                                     "properties": {
-                                                        "id": {
-                                                            "type": "integer",
-                                                            "example": 5
+                                                        "transaction": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 123
+                                                                },
+                                                                "transaction_code": {
+                                                                    "type": "string",
+                                                                    "example": "TRX-20260101-ABC123"
+                                                                },
+                                                                "status": {
+                                                                    "type": "string",
+                                                                    "example": "pending"
+                                                                },
+                                                                "payment_method": {
+                                                                    "type": "string",
+                                                                    "example": "bank_transfer"
+                                                                },
+                                                                "qr_code_url": {
+                                                                    "type": "string",
+                                                                    "nullable": true
+                                                                }
+                                                            },
+                                                            "type": "object"
                                                         },
-                                                        "title": {
-                                                            "type": "string",
-                                                            "example": "Full Stack Web Development"
+                                                        "course": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 5
+                                                                },
+                                                                "title": {
+                                                                    "type": "string",
+                                                                    "example": "Full Stack Web Development"
+                                                                },
+                                                                "access_type": {
+                                                                    "type": "string",
+                                                                    "example": "regular"
+                                                                }
+                                                            },
+                                                            "type": "object"
                                                         },
-                                                        "price": {
-                                                            "type": "number",
-                                                            "example": 150000
-                                                        },
-                                                        "access_type": {
-                                                            "type": "string",
-                                                            "example": "regular"
+                                                        "is_free": {
+                                                            "type": "boolean",
+                                                            "example": false
                                                         }
                                                     },
                                                     "type": "object"
@@ -3175,8 +3224,7 @@
                                             },
                                             "type": "object"
                                         }
-                                    },
-                                    "type": "object"
+                                    ]
                                 }
                             }
                         }
@@ -8055,6 +8103,151 @@
                     },
                     "422": {
                         "description": "Invalid status"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/subscription-status": {
+            "get": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Check subscription status",
+                "description": "Check user's current subscription status and available upgrade options. Returns information about active subscription and whether user can upgrade. Response will indicate if user has active subscription (with plan details) or no subscription (can subscribe to any plan).",
+                "operationId": "checkSubscriptionStatus",
+                "responses": {
+                    "200": {
+                        "description": "Subscription status retrieved successfully. has_active_subscription=true means user has active plan, false means user can subscribe.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "description": "User has active subscription",
+                                            "properties": {
+                                                "sukses": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "pesan": {
+                                                    "type": "string",
+                                                    "example": "Subscription status retrieved successfully"
+                                                },
+                                                "data": {
+                                                    "properties": {
+                                                        "has_active_subscription": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "current_plan": {
+                                                            "type": "string",
+                                                            "example": "premium"
+                                                        },
+                                                        "subscription": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "plan": {
+                                                                    "type": "string",
+                                                                    "example": "premium"
+                                                                },
+                                                                "status": {
+                                                                    "type": "string",
+                                                                    "example": "active"
+                                                                },
+                                                                "start_date": {
+                                                                    "type": "string",
+                                                                    "format": "date",
+                                                                    "example": "2025-11-01"
+                                                                },
+                                                                "end_date": {
+                                                                    "type": "string",
+                                                                    "format": "date",
+                                                                    "example": "2026-11-01"
+                                                                },
+                                                                "package_type": {
+                                                                    "type": "string",
+                                                                    "example": "all_in_one"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        },
+                                                        "can_upgrade": {
+                                                            "description": "false jika sudah premium",
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        },
+                                                        "available_plans": {
+                                                            "description": "Empty array jika sudah premium",
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "example": []
+                                                        },
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Anda sudah berlangganan paket Premium (paket tertinggi)."
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "description": "User has no active subscription",
+                                            "properties": {
+                                                "sukses": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "data": {
+                                                    "properties": {
+                                                        "has_active_subscription": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        },
+                                                        "current_plan": {
+                                                            "type": "string",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        },
+                                                        "can_upgrade": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "available_plans": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "example": [
+                                                                "regular",
+                                                                "premium"
+                                                            ]
+                                                        },
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Tidak ada paket aktif. Silakan pilih paket langganan."
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [

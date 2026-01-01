@@ -196,6 +196,64 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Check user's current subscription status
+     * Returns active subscription info and available upgrade options
+     *
+     * @return JsonResponse
+     */
+    public function checkStatus(): JsonResponse
+    {
+        $user = auth()->user();
+        
+        $activeSubscription = Subscription::where('user_id', $user->id)
+            ->where('status', 'active')
+            ->where('end_date', '>=', now())
+            ->latest()
+            ->first();
+
+        if (!$activeSubscription) {
+            return $this->successResponse([
+                'has_active_subscription' => false,
+                'current_plan' => null,
+                'can_upgrade' => true,
+                'available_plans' => ['regular', 'premium'],
+                'message' => 'Tidak ada paket aktif. Silakan pilih paket langganan.'
+            ], 'No active subscription found');
+        }
+
+        // Determine available upgrades based on current plan
+        $canUpgrade = false;
+        $availablePlans = [];
+        $message = '';
+
+        if ($activeSubscription->plan === 'regular') {
+            $canUpgrade = true;
+            $availablePlans = ['premium'];
+            $message = 'Anda dapat upgrade ke paket Premium untuk akses lebih banyak kursus.';
+        } elseif ($activeSubscription->plan === 'premium') {
+            $canUpgrade = false;
+            $availablePlans = [];
+            $message = 'Anda sudah berlangganan paket Premium (paket tertinggi).';
+        }
+
+        return $this->successResponse([
+            'has_active_subscription' => true,
+            'current_plan' => $activeSubscription->plan,
+            'subscription' => [
+                'id' => $activeSubscription->id,
+                'plan' => $activeSubscription->plan,
+                'status' => $activeSubscription->status,
+                'start_date' => $activeSubscription->start_date,
+                'end_date' => $activeSubscription->end_date,
+                'package_type' => $activeSubscription->package_type,
+            ],
+            'can_upgrade' => $canUpgrade,
+            'available_plans' => $availablePlans,
+            'message' => $message
+        ], 'Subscription status retrieved successfully');
+    }
+
+    /**
      * Remove the specified subscription
      *
      * @param int $id

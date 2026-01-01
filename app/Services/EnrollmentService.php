@@ -53,7 +53,33 @@ class EnrollmentService
                 throw new InvalidArgumentException("{$requiredPlan} subscription required for this course");
             }
             
-            // ⚠️ PERUBAHAN: Enrollment TIDAK dibuat di sini
+            // ✅ FREE COURSE: Langsung enroll tanpa transaksi
+            if ($course->access_type === 'free') {
+                $enrollment = Enrollment::create([
+                    'user_id' => $user->id,
+                    'course_id' => $course->id,
+                    'progress' => 0,
+                    'completed' => false,
+                ]);
+
+                DB::commit();
+
+                Log::info('Free course enrollment created immediately', [
+                    'user_id' => $user->id,
+                    'course_id' => $course->id,
+                    'course_title' => $course->title,
+                    'enrollment_id' => $enrollment->id,
+                    'access_type' => 'free',
+                ]);
+
+                return [
+                    'enrollment' => $enrollment,
+                    'course' => $course,
+                    'is_free' => true,
+                ];
+            }
+            
+            // ⚠️ PAID COURSE: Buat transaksi, enrollment dibuat setelah payment confirmed
             // Enrollment akan dibuat di TransactionService->confirmPayment()
             // setelah admin mengkonfirmasi pembayaran
             
@@ -66,18 +92,20 @@ class EnrollmentService
 
             DB::commit();
 
-            Log::info('Course enrollment transaction created successfully', [
+            Log::info('Paid course enrollment transaction created', [
                 'user_id' => $user->id,
                 'course_id' => $course->id,
                 'course_title' => $course->title,
                 'transaction_id' => $transaction->id,
                 'payment_method' => $paymentMethod,
+                'access_type' => $course->access_type,
                 'note' => 'Enrollment will be created after payment confirmation',
             ]);
 
             return [
                 'transaction' => $transaction,
                 'course' => $course,
+                'is_free' => false,
             ];
         } catch (InvalidArgumentException $e) {
             DB::rollBack();

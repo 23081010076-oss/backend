@@ -60,8 +60,8 @@ namespace App\Swagger;
  *
  * @OA\Post(
  *     path="/api/courses/{courseId}/enroll",
- *     summary="Daftar ke kursus (Buat Transaction)",
- *     description="Membuat transaksi untuk pendaftaran kursus. PENTING: Enrollment TIDAK langsung dibuat. User harus upload bukti pembayaran, lalu admin konfirmasi pembayaran, baru enrollment dibuat dan user bisa akses course. Pilih metode pembayaran: 'manual', 'bank_transfer', atau 'qris'. Jika qris, akan generate QR code otomatis.",
+ *     summary="Daftar ke kursus",
+ *     description="Mendaftarkan user ke kursus. BEHAVIOR: (1) Course GRATIS → Langsung enrolled tanpa payment. (2) Course BERBAYAR (regular/premium) → Buat transaction, upload bukti, tunggu admin confirm, baru enrollment dibuat. Pilih metode pembayaran: 'manual', 'bank_transfer', atau 'qris'.",
  *     operationId="enrollCourse",
  *     tags={"Enrollment"},
  *     security={{"bearerAuth":{}}},
@@ -80,35 +80,56 @@ namespace App\Swagger;
  *                 type="string",
  *                 enum={"manual", "bank_transfer", "qris"},
  *                 example="bank_transfer",
- *                 description="Metode pembayaran: manual (transfer manual), bank_transfer (via bank), atau qris (scan QR code)"
+ *                 description="Metode pembayaran (diabaikan untuk course gratis)"
  *             )
  *         )
  *     ),
  *     @OA\Response(
  *         response=201,
- *         description="Transaksi berhasil dibuat (Enrollment belum dibuat, menunggu konfirmasi admin)",
+ *         description="Berhasil - Response berbeda untuk free vs paid course",
  *         @OA\JsonContent(
- *             @OA\Property(property="sukses", type="boolean", example=true),
- *             @OA\Property(property="pesan", type="string", example="Transaksi berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengakses kursus."),
- *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="transaction", type="object",
- *                     @OA\Property(property="id", type="integer", example=123),
- *                     @OA\Property(property="transaction_code", type="string", example="TRX-20260101-ABC123"),
- *                     @OA\Property(property="type", type="string", example="course_enrollment"),
- *                     @OA\Property(property="amount", type="number", example=150000),
- *                     @OA\Property(property="status", type="string", example="pending"),
- *                     @OA\Property(property="payment_method", type="string", example="bank_transfer"),
- *                     @OA\Property(property="qr_code_url", type="string", nullable=true, example="qr-codes/TRX-20260101-ABC123.svg", description="Path QR code (hanya untuk qris)"),
- *                     @OA\Property(property="qr_string", type="string", nullable=true, example="ID.MERCHANT.TRX-20260101-ABC123.150000", description="Data QR code (hanya untuk qris)"),
- *                     @OA\Property(property="expired_at", type="string", format="date-time", example="2026-01-02T10:00:00Z", description="Batas waktu pembayaran (24 jam)")
+ *             oneOf={
+ *                 @OA\Schema(
+ *                     description="Free course - Langsung enrolled",
+ *                     @OA\Property(property="sukses", type="boolean", example=true),
+ *                     @OA\Property(property="pesan", type="string", example="Berhasil mendaftar ke kursus gratis! Anda sudah bisa mengakses kursus di My Courses."),
+ *                     @OA\Property(property="data", type="object",
+ *                         @OA\Property(property="enrollment", type="object",
+ *                             @OA\Property(property="id", type="integer", example=25),
+ *                             @OA\Property(property="user_id", type="integer", example=4),
+ *                             @OA\Property(property="course_id", type="integer", example=3),
+ *                             @OA\Property(property="progress", type="integer", example=0),
+ *                             @OA\Property(property="completed", type="boolean", example=false)
+ *                         ),
+ *                         @OA\Property(property="course", type="object",
+ *                             @OA\Property(property="id", type="integer", example=3),
+ *                             @OA\Property(property="title", type="string", example="Introduction to Programming"),
+ *                             @OA\Property(property="access_type", type="string", example="free")
+ *                         ),
+ *                         @OA\Property(property="is_free", type="boolean", example=true)
+ *                     )
  *                 ),
- *                 @OA\Property(property="course", type="object",
- *                     @OA\Property(property="id", type="integer", example=5),
- *                     @OA\Property(property="title", type="string", example="Full Stack Web Development"),
- *                     @OA\Property(property="price", type="number", example=150000),
- *                     @OA\Property(property="access_type", type="string", example="regular")
+ *                 @OA\Schema(
+ *                     description="Paid course - Transaction created, waiting for payment",
+ *                     @OA\Property(property="sukses", type="boolean", example=true),
+ *                     @OA\Property(property="pesan", type="string", example="Transaksi berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengakses kursus."),
+ *                     @OA\Property(property="data", type="object",
+ *                         @OA\Property(property="transaction", type="object",
+ *                             @OA\Property(property="id", type="integer", example=123),
+ *                             @OA\Property(property="transaction_code", type="string", example="TRX-20260101-ABC123"),
+ *                             @OA\Property(property="status", type="string", example="pending"),
+ *                             @OA\Property(property="payment_method", type="string", example="bank_transfer"),
+ *                             @OA\Property(property="qr_code_url", type="string", nullable=true)
+ *                         ),
+ *                         @OA\Property(property="course", type="object",
+ *                             @OA\Property(property="id", type="integer", example=5),
+ *                             @OA\Property(property="title", type="string", example="Full Stack Web Development"),
+ *                             @OA\Property(property="access_type", type="string", example="regular")
+ *                         ),
+ *                         @OA\Property(property="is_free", type="boolean", example=false)
+ *                     )
  *                 )
- *             )
+ *             }
  *         )
  *     ),
  *     @OA\Response(

@@ -46,7 +46,15 @@ class SubscriptionService
                 ->first();
 
             if ($existingSubscription) {
-                throw new InvalidArgumentException('You already have an active subscription. Please upgrade or wait until it expires.');
+                $planName = ucfirst($existingSubscription->plan);
+                $endDate = \Carbon\Carbon::parse($existingSubscription->end_date)->format('d M Y');
+                
+                // Provide specific message based on current plan
+                if ($existingSubscription->plan === 'premium') {
+                    throw new InvalidArgumentException("Anda sudah berlangganan paket {$planName} (paket tertinggi) hingga {$endDate}. Tidak perlu berlangganan lagi.");
+                } else {
+                    throw new InvalidArgumentException("Anda sudah berlangganan paket {$planName} hingga {$endDate}. Jika ingin upgrade, gunakan fitur Upgrade Subscription.");
+                }
             }
 
             $data['user_id'] = $user->id;
@@ -220,21 +228,22 @@ class SubscriptionService
     {
         // Cannot upgrade expired subscription
         if ($subscription->status === 'expired') {
-            throw new InvalidArgumentException('Cannot upgrade an expired subscription. Please create a new subscription.');
+            throw new InvalidArgumentException('Tidak dapat upgrade subscription yang sudah expired. Silakan buat subscription baru.');
         }
         
         // Validate upgrade path - no downgrades
         if ($subscription->plan === 'premium' && $newPlan !== 'premium') {
-            throw new InvalidArgumentException('Cannot downgrade from premium plan');
+            throw new InvalidArgumentException('Anda sudah berlangganan paket Premium (paket tertinggi). Tidak bisa downgrade ke paket yang lebih rendah.');
         }
         
         if ($subscription->plan === 'regular' && $newPlan === 'free') {
-            throw new InvalidArgumentException('Cannot downgrade from regular to free plan');
+            throw new InvalidArgumentException('Tidak bisa downgrade dari paket Regular ke Free.');
         }
 
         // Prevent "upgrading" to the same plan
         if ($subscription->plan === $newPlan) {
-            throw new InvalidArgumentException('Subscription is already on the ' . $newPlan . ' plan');
+            $planName = ucfirst($newPlan);
+            throw new InvalidArgumentException("Anda sudah berlangganan paket {$planName}. Tidak perlu upgrade lagi.");
         }
     }
     

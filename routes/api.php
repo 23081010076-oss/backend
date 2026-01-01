@@ -128,6 +128,7 @@ Route::middleware('auth:api')->group(function () {
     // SUBSCRIPTIONS
     
     Route::get('/my-subscriptions', [SubscriptionController::class, 'mySubscriptions'])->name('my-subscriptions');
+    Route::get('/subscription-status', [SubscriptionController::class, 'checkStatus'])->name('subscription-status');
     Route::apiResource('subscriptions', SubscriptionController::class);
     Route::post('/subscriptions/{id}/upgrade', [SubscriptionController::class, 'upgrade'])
         ->name('subscriptions.upgrade');

@@ -74,6 +74,15 @@ class EnrollmentController extends Controller
         try {
             $result = $this->enrollmentService->enrollUserToCourse($user, $course, $paymentMethod);
 
+            // Free course - langsung enrolled
+            if (isset($result['is_free']) && $result['is_free'] === true) {
+                return $this->createdResponse(
+                    $result,
+                    'Berhasil mendaftar ke kursus gratis! Anda sudah bisa mengakses kursus di My Courses.'
+                );
+            }
+
+            // Paid course - perlu payment
             return $this->createdResponse(
                 $result,
                 'Transaksi berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengakses kursus.'

@@ -4,6 +4,54 @@ namespace App\Swagger;
 
 /**
  * @OA\Get(
+ *     path="/api/subscription-status",
+ *     summary="Check subscription status",
+ *     description="Check user's current subscription status and available upgrade options. Returns information about active subscription and whether user can upgrade. Response will indicate if user has active subscription (with plan details) or no subscription (can subscribe to any plan).",
+ *     operationId="checkSubscriptionStatus",
+ *     tags={"Subscriptions"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Subscription status retrieved successfully. has_active_subscription=true means user has active plan, false means user can subscribe.",
+ *         @OA\JsonContent(
+ *             oneOf={
+ *                 @OA\Schema(
+ *                     description="User has active subscription",
+ *                     @OA\Property(property="sukses", type="boolean", example=true),
+ *                     @OA\Property(property="pesan", type="string", example="Subscription status retrieved successfully"),
+ *                     @OA\Property(property="data", type="object",
+ *                         @OA\Property(property="has_active_subscription", type="boolean", example=true),
+ *                         @OA\Property(property="current_plan", type="string", example="premium"),
+ *                         @OA\Property(property="subscription", type="object",
+ *                             @OA\Property(property="id", type="integer", example=1),
+ *                             @OA\Property(property="plan", type="string", example="premium"),
+ *                             @OA\Property(property="status", type="string", example="active"),
+ *                             @OA\Property(property="start_date", type="string", format="date", example="2025-11-01"),
+ *                             @OA\Property(property="end_date", type="string", format="date", example="2026-11-01"),
+ *                             @OA\Property(property="package_type", type="string", example="all_in_one")
+ *                         ),
+ *                         @OA\Property(property="can_upgrade", type="boolean", example=false, description="false jika sudah premium"),
+ *                         @OA\Property(property="available_plans", type="array", @OA\Items(type="string"), example={}, description="Empty array jika sudah premium"),
+ *                         @OA\Property(property="message", type="string", example="Anda sudah berlangganan paket Premium (paket tertinggi).")
+ *                     )
+ *                 ),
+ *                 @OA\Schema(
+ *                     description="User has no active subscription",
+ *                     @OA\Property(property="sukses", type="boolean", example=true),
+ *                     @OA\Property(property="data", type="object",
+ *                         @OA\Property(property="has_active_subscription", type="boolean", example=false),
+ *                         @OA\Property(property="current_plan", type="string", nullable=true, example=null),
+ *                         @OA\Property(property="can_upgrade", type="boolean", example=true),
+ *                         @OA\Property(property="available_plans", type="array", @OA\Items(type="string"), example={"regular", "premium"}),
+ *                         @OA\Property(property="message", type="string", example="Tidak ada paket aktif. Silakan pilih paket langganan.")
+ *                     )
+ *                 )
+ *             }
+ *         )
+ *     )
+ * )
+ *
+ * @OA\Get(
  *     path="/api/subscriptions",
  *     summary="Get my subscriptions",
  *     description="Retrieve all subscriptions for the authenticated user",
