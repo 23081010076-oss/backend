@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Course;
+use App\Models\Enrollment;
 use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -150,18 +151,24 @@ class SubscriptionService
             // Calculate new end_date: extend from current end_date based on duration
             $newEndDate = $this->calculateNewEndDate($subscription);
             
+            $oldPlan = $subscription->plan;
+            
             $subscription->update([
                 'plan' => $plan,
                 'status' => 'active',
                 'end_date' => $newEndDate,
             ]);
 
+            // ⚠️ CATATAN: AUTO-ENROLL tidak dilakukan di sini
+            // Auto-enroll akan dilakukan di TransactionService->confirmPayment()
+            // setelah admin mengkonfirmasi pembayaran upgrade
+
             DB::commit();
 
             Log::info('Subscription upgraded successfully', [
                 'subscription_id' => $subscription->id,
                 'user_id' => $subscription->user_id,
-                'old_plan' => $subscription->getOriginal('plan'),
+                'old_plan' => $oldPlan,
                 'new_plan' => $plan,
             ]);
             
@@ -244,6 +251,40 @@ class SubscriptionService
         return $subscription->duration_unit === 'years' 
             ? $currentEndDate->addYears($subscription->duration)
             : $currentEndDate->addMonths($subscription->duration);
+    }
+    
+    /**
+     * Auto-enroll user ke semua kursus premium saat berlangganan premium
+     *
+     * @param int $userId User ID
+     * @return void
+     */
+    protected function autoEnrollPremiumCourses(int $userId): void
+    {
+        // Ambil semua kursus premium
+        $premiumCourses = Course::where('access_type', 'premium')->get();
+        
+        foreach ($premiumCourses as $course) {
+            // Cek apakah user sudah enrolled
+            $alreadyEnrolled = Enrollment::where('user_id', $userId)
+                ->where('course_id', $course->id)
+                ->exists();
+            
+            // Jika belum enrolled, buat enrollment baru
+            if (!$alreadyEnrolled) {
+                Enrollment::create([
+                    'user_id'   => $userId,
+                    'course_id' => $course->id,
+                    'progress'  => 0,
+                    'completed' => false,
+                ]);
+            }
+        }
+        
+        Log::info('Auto-enrolled user to premium courses via subscription upgrade', [
+            'user_id' => $userId,
+            'total_courses' => $premiumCourses->count(),
+        ]);
     }
     
     /**

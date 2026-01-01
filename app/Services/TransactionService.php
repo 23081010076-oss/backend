@@ -297,8 +297,20 @@ class TransactionService
                 ]);
             }
             // Handle Subscription Activation
+            // FLOW: User subscribe → upload bukti → admin confirm → status active → auto-enroll
             elseif ($transaction->transactionable_type === Subscription::class) {
-                $transaction->transactionable->update(['status' => 'active']);
+                $subscription = $transaction->transactionable;
+                $subscription->update(['status' => 'active']);
+                
+                // ✅ AUTO-ENROLL: Hanya terjadi SETELAH admin konfirmasi pembayaran
+                // Jika premium subscription, daftarkan user ke semua kursus premium
+                if ($subscription->plan === 'premium') {
+                    $this->autoEnrollPremiumCourses($transaction->user_id);
+                }
+                // Jika regular subscription, daftarkan user ke semua kursus regular
+                elseif ($subscription->plan === 'regular') {
+                    $this->autoEnrollRegularCourses($transaction->user_id);
+                }
             }
             // Handle Mentoring Session
             elseif ($transaction->transactionable_type === MentoringSession::class) {
@@ -339,6 +351,70 @@ class TransactionService
         $transaction->update([
             'qr_code_url' => $qrCodePath,
             'qr_string' => $qrString,
+        ]);
+    }
+
+    /**
+     * Auto-enroll user ke semua kursus premium saat berlangganan premium
+     */
+    private function autoEnrollPremiumCourses(int $userId): void
+    {
+        // Ambil semua kursus premium
+        $premiumCourses = Course::where('access_type', 'premium')->get();
+        
+        foreach ($premiumCourses as $course) {
+            // Cek apakah user sudah enrolled
+            $alreadyEnrolled = Enrollment::where('user_id', $userId)
+                ->where('course_id', $course->id)
+                ->exists();
+            
+            // Jika belum enrolled, buat enrollment baru
+            if (!$alreadyEnrolled) {
+                Enrollment::create([
+                    'user_id'   => $userId,
+                    'course_id' => $course->id,
+                    'progress'  => 0,
+                    'completed' => false,
+                ]);
+            }
+        }
+        
+        \Log::info('Auto-enrolled user to premium courses', [
+            'user_id' => $userId,
+            'total_courses' => $premiumCourses->count(),
+        ]);
+    }
+
+    /**
+     * Auto-enroll user ke semua kursus regular (non-premium) saat berlangganan regular
+     */
+    private function autoEnrollRegularCourses(int $userId): void
+    {
+        // Ambil semua kursus regular (tidak premium)
+        $regularCourses = Course::where('access_type', 'regular')
+            ->orWhere('access_type', 'free')
+            ->get();
+        
+        foreach ($regularCourses as $course) {
+            // Cek apakah user sudah enrolled
+            $alreadyEnrolled = Enrollment::where('user_id', $userId)
+                ->where('course_id', $course->id)
+                ->exists();
+            
+            // Jika belum enrolled, buat enrollment baru
+            if (!$alreadyEnrolled) {
+                Enrollment::create([
+                    'user_id'   => $userId,
+                    'course_id' => $course->id,
+                    'progress'  => 0,
+                    'completed' => false,
+                ]);
+            }
+        }
+        
+        \Log::info('Auto-enrolled user to regular courses', [
+            'user_id' => $userId,
+            'total_courses' => $regularCourses->count(),
         ]);
     }
 
