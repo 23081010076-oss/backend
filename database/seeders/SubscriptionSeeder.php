@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Course;
+use App\Models\Enrollment;
 use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -96,9 +97,70 @@ class SubscriptionSeeder extends Seeder
         ];
 
         foreach ($subscriptions as $subscriptionData) {
-            Subscription::create($subscriptionData);
+            $subscription = Subscription::create($subscriptionData);
+            
+            // ✅ AUTO-ENROLL: Untuk subscription active, create enrollments
+            if ($subscription->status === 'active') {
+                $this->autoEnrollUserBasedOnPlan($subscription);
+            }
         }
 
         $this->command->info('Subscription seeder completed successfully!');
+    }
+
+    /**
+     * Auto-enroll user ke courses berdasarkan subscription plan
+     */
+    private function autoEnrollUserBasedOnPlan(Subscription $subscription): void
+    {
+        $userId = $subscription->user_id;
+        $enrolledCount = 0;
+
+        if ($subscription->plan === 'premium') {
+            // Enroll ke semua course premium
+            $premiumCourses = Course::where('access_type', 'premium')->get();
+            
+            foreach ($premiumCourses as $course) {
+                $enrollment = Enrollment::firstOrCreate(
+                    [
+                        'user_id' => $userId,
+                        'course_id' => $course->id,
+                    ],
+                    [
+                        'progress' => 0,
+                        'completed' => false,
+                    ]
+                );
+                
+                if ($enrollment->wasRecentlyCreated) {
+                    $enrolledCount++;
+                }
+            }
+            
+            $this->command->info("  ✅ Auto-enrolled user {$userId} to {$enrolledCount} premium courses");
+            
+        } elseif ($subscription->plan === 'regular') {
+            // Enroll ke semua course regular dan free
+            $regularCourses = Course::whereIn('access_type', ['regular', 'free'])->get();
+            
+            foreach ($regularCourses as $course) {
+                $enrollment = Enrollment::firstOrCreate(
+                    [
+                        'user_id' => $userId,
+                        'course_id' => $course->id,
+                    ],
+                    [
+                        'progress' => 0,
+                        'completed' => false,
+                    ]
+                );
+                
+                if ($enrollment->wasRecentlyCreated) {
+                    $enrolledCount++;
+                }
+            }
+            
+            $this->command->info("  ✅ Auto-enrolled user {$userId} to {$enrolledCount} regular/free courses");
+        }
     }
 }

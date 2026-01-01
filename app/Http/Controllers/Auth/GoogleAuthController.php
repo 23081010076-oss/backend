@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Subscription;
+use App\Models\Course;
+use App\Models\Enrollment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
@@ -228,6 +230,15 @@ class GoogleAuthController extends Controller
                         'price' => 0,
                         'auto_renew' => false,
                     ]);
+                    
+                    Log::info('✅ Free subscription created for new Google user', [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                    ]);
+                    
+                    // ✅ AUTO-ENROLL: Enroll ke semua course gratis
+                    $this->autoEnrollFreeCourses($user);
+                    
                 } catch (\Exception $e) {
                     Log::error('Failed to assign free subscription on Google register', [
                         'user_id' => $user->id,
@@ -245,6 +256,48 @@ class GoogleAuthController extends Controller
         }
 
         return $user;
+    }
+
+    /**
+     * Auto-enroll user to all free courses
+     *
+     * @param User $user
+     * @return void
+     */
+    private function autoEnrollFreeCourses(User $user): void
+    {
+        try {
+            $freeCourses = Course::where('access_type', 'free')->get();
+            $enrolledCount = 0;
+            
+            foreach ($freeCourses as $course) {
+                $enrollment = Enrollment::firstOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'course_id' => $course->id,
+                    ],
+                    [
+                        'progress' => 0,
+                        'completed' => false,
+                    ]
+                );
+                
+                if ($enrollment->wasRecentlyCreated) {
+                    $enrolledCount++;
+                }
+            }
+            
+            Log::info("✅ Auto-enrolled new Google user to {$enrolledCount} free courses", [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'enrolled_count' => $enrolledCount,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to auto-enroll free courses for Google user', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
