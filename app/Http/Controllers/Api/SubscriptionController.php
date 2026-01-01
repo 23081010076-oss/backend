@@ -107,7 +107,7 @@ class SubscriptionController extends Controller
                 $request->user()
             );
 
-            return $this->createdResponse($result, 'Subscription created successfully');
+            return $this->createdResponse($result, 'Langganan berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengaktifkan langganan dan akses kursus.');
         } catch (\InvalidArgumentException $e) {
             return $this->validationErrorResponse(['error' => $e->getMessage()]);
         } catch (\Exception $e) {

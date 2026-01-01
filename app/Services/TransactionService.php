@@ -274,6 +274,18 @@ class TransactionService
     public function confirmPayment(Transaction $transaction): Transaction
     {
         return DB::transaction(function () use ($transaction) {
+            // ⚠️ VALIDASI: Payment proof HARUS sudah diupload untuk pembayaran manual
+            if (in_array($transaction->payment_method, ['manual', 'bank_transfer'])) {
+                if (empty($transaction->payment_proof)) {
+                    throw new \Exception('Tidak dapat mengkonfirmasi pembayaran. User belum upload bukti pembayaran.');
+                }
+            }
+            
+            // ⚠️ VALIDASI: Status harus pending
+            if ($transaction->status !== 'pending') {
+                throw new \Exception('Hanya transaksi dengan status pending yang bisa dikonfirmasi. Status saat ini: ' . $transaction->status);
+            }
+            
             $transaction->update([
                 'status'  => 'paid',
                 'paid_at' => now(),
