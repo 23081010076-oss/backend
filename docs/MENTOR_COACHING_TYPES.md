@@ -1,10 +1,13 @@
 # Mentor Coaching Types API
 
 ## Masalah yang Diperbaiki
+
 Endpoint `GET /api/mentors` tidak menampilkan informasi tipe coaching (academic vs life coaching) yang dimiliki mentor.
 
 ## Solusi
+
 Menggunakan data yang sudah ada di `mentoring_sessions` table (field `type`) untuk menampilkan:
+
 1. **coaching_types**: Array tipe coaching yang tersedia/pernah dilakukan mentor
 2. **academic_sessions_count**: Jumlah sesi academic coaching
 3. **life_plan_sessions_count**: Jumlah sesi life plan coaching
@@ -12,15 +15,18 @@ Menggunakan data yang sudah ada di `mentoring_sessions` table (field `type`) unt
 ## Endpoints
 
 ### 1. List All Mentors (Updated!)
+
 **Endpoint:** `GET /api/mentors`  
 **Authentication:** Required
 
 **Query Parameters:**
+
 - `search` (optional): Cari mentor berdasarkan nama
 - `coaching_type` (optional): Filter mentor berdasarkan tipe coaching
   - Nilai: `academic` atau `life_plan`
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -63,10 +69,12 @@ Menggunakan data yang sudah ada di `mentoring_sessions` table (field `type`) unt
 ```
 
 ### 2. Show Mentor Details
+
 **Endpoint:** `GET /api/mentors/{id}`  
 **Authentication:** Required
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -94,30 +102,35 @@ Menggunakan data yang sudah ada di `mentoring_sessions` table (field `type`) unt
 ## Contoh Penggunaan
 
 ### 1. Lihat Semua Mentors
+
 ```bash
 curl -X GET "http://localhost:8000/api/mentors" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### 2. Filter Mentor Academic Coaching
+
 ```bash
 curl -X GET "http://localhost:8000/api/mentors?coaching_type=academic" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### 3. Filter Mentor Life Plan Coaching
+
 ```bash
 curl -X GET "http://localhost:8000/api/mentors?coaching_type=life_plan" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### 4. Search Mentor by Name
+
 ```bash
 curl -X GET "http://localhost:8000/api/mentors?search=Sarah" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### 5. Kombinasi Filter
+
 ```bash
 curl -X GET "http://localhost:8000/api/mentors?coaching_type=academic&search=Sarah" \
   -H "Authorization: Bearer YOUR_TOKEN"
@@ -125,20 +138,22 @@ curl -X GET "http://localhost:8000/api/mentors?coaching_type=academic&search=Sar
 
 ## Field Penjelasan
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `coaching_types` | array | Tipe coaching yang tersedia: `['academic', 'life_plan']` atau `['academic']` atau `['life_plan']`. Jika mentor belum punya sesi, default semua tipe tersedia |
-| `academic_sessions_count` | integer | Total sesi academic coaching yang pernah dilakukan |
-| `life_plan_sessions_count` | integer | Total sesi life plan coaching yang pernah dilakukan |
+| Field                      | Type    | Description                                                                                                                                                  |
+| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `coaching_types`           | array   | Tipe coaching yang tersedia: `['academic', 'life_plan']` atau `['academic']` atau `['life_plan']`. Jika mentor belum punya sesi, default semua tipe tersedia |
+| `academic_sessions_count`  | integer | Total sesi academic coaching yang pernah dilakukan                                                                                                           |
+| `life_plan_sessions_count` | integer | Total sesi life plan coaching yang pernah dilakukan                                                                                                          |
 
 ## Coaching Types Explanation
 
 ### Academic Coaching
+
 - Fokus pada pengembangan akademik
 - Contoh: Bantuan skripsi, riset, academic writing, study skills
 - Session type: `academic`
 
-### Life Plan Coaching  
+### Life Plan Coaching
+
 - Fokus pada perencanaan hidup dan karir
 - Contoh: Career guidance, goal setting, work-life balance, personal development
 - Session type: `life_plan`
@@ -146,9 +161,11 @@ curl -X GET "http://localhost:8000/api/mentors?coaching_type=academic&search=Sar
 ## Logic Implementasi
 
 1. **Data Source**: Field `type` di tabel `mentoring_sessions`
+
    - Nilai: `academic` atau `life_plan`
 
 2. **Counting**: Menggunakan `withCount()` di query
+
    ```php
    ->withCount([
        'mentoringSessionsAsMentor as academic_sessions_count' => function($q) {
@@ -161,6 +178,7 @@ curl -X GET "http://localhost:8000/api/mentors?coaching_type=academic&search=Sar
    ```
 
 3. **Coaching Types**: Accessor di Model User
+
    ```php
    public function getCoachingTypesAttribute()
    {
@@ -196,6 +214,7 @@ curl -X GET "http://localhost:8000/api/mentors?coaching_type=academic" \
 ```
 
 ## Notes
+
 - **Tidak ada field baru di database**: Menggunakan data existing dari `mentoring_sessions.type`
 - **Dynamic**: Coaching types otomatis update berdasarkan sessions yang dilakukan
 - **Backward Compatible**: Endpoint lama tetap berfungsi, hanya ditambahkan field baru
