@@ -115,6 +115,10 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/experiences/{id}/certificate', [ExperienceController::class, 'deleteCertificate'])
         ->name('experiences.delete-certificate');
 
+    // Public Organizations List (katalog publik)
+    Route::get('/organizations/list/all', [OrganizationController::class, 'listAll'])
+        ->name('organizations.list-all');
+    
     Route::apiResource('organizations', OrganizationController::class);
     
     // Organization Logo Upload

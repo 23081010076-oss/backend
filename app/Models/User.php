@@ -98,6 +98,29 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(MentoringSession::class, 'mentor_id');
     }
 
+    /**
+     * Get available coaching types for this mentor
+     * Based on mentoring sessions history
+     */
+    public function getCoachingTypesAttribute()
+    {
+        if ($this->role !== 'mentor') {
+            return [];
+        }
+
+        $types = $this->mentoringSessionsAsMentor()
+            ->distinct()
+            ->pluck('type')
+            ->toArray();
+
+        // If no sessions yet, return all types as available
+        if (empty($types)) {
+            return ['academic', 'life_plan'];
+        }
+
+        return $types;
+    }
+
     public function mentoringSessionsAsStudent()
     {
         return $this->hasMany(MentoringSession::class, 'member_id');

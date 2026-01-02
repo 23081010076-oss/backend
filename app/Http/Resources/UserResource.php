@@ -65,6 +65,13 @@ class UserResource extends JsonResource
             'specialization'  => $this->specialization,   // Spesialisasi (array)
             
             // ============================================================
+            // DATA MENTOR (khusus untuk role mentor)
+            // ============================================================
+            'coaching_types'  => $this->when($this->role === 'mentor', $this->coaching_types), // Tipe coaching yang tersedia
+            'academic_sessions_count' => $this->when($this->role === 'mentor', $this->academic_sessions_count ?? 0), // Jumlah sesi academic coaching
+            'life_plan_sessions_count' => $this->when($this->role === 'mentor', $this->life_plan_sessions_count ?? 0), // Jumlah sesi life plan coaching
+            
+            // ============================================================
             // DATA PROFIL
             // ============================================================
             'bio'           => $this->bio,            // Deskripsi singkat tentang user
