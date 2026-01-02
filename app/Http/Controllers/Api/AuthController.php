@@ -429,29 +429,97 @@ class AuthController extends Controller
      * REKOMENDASI KURSUS
      *
      * Endpoint: GET /api/auth/recommendations
+     * 
+     * Algoritma rekomendasi berdasarkan:
+     * 1. Subscription plan user (hanya tampilkan course yang bisa diakses)
+     * 2. Course yang belum di-enroll
+     * 3. Relevansi dengan major/jurusan (jika ada)
+     * 4. Popularity (jumlah enrollment)
+     * 5. Rating tertinggi
      */
     public function recommendations(Request $request): JsonResponse
     {
         $user = $request->user();
-        $major = $user->major;
-
-        $recommendedCourses = \App\Models\Course::query();
-
-        if ($major) {
-            $recommendedCourses->where(function ($query) use ($major) {
-                $query->where('title', 'like', '%' . $major . '%')
-                      ->orWhere('description', 'like', '%' . $major . '%');
-            });
-            $recommendations = $recommendedCourses->limit(5)->get();
+        $limit = $request->input('limit', 5);
+        
+        // Get user's active subscription to determine accessible courses
+        $subscription = $user->activeSubscription();
+        $plan = $subscription ? $subscription->plan : 'free';
+        
+        // Get courses user is already enrolled in
+        $enrolledCourseIds = $user->enrollments()->pluck('course_id')->toArray();
+        
+        // Build base query
+        $query = \App\Models\Course::query()
+            ->withCount('enrollments')
+            ->withAvg('reviews', 'rating')
+            ->whereNotIn('id', $enrolledCourseIds); // Exclude already enrolled courses
+        
+        // Filter by accessible courses based on subscription plan
+        if ($plan === 'free') {
+            $query->where('access_type', 'free');
+        } elseif ($plan === 'regular') {
+            $query->whereIn('access_type', ['free', 'regular']);
+        }
+        // Premium users can see all courses
+        
+        // Score-based recommendation using SELECT with scoring
+        if ($user->major) {
+            // Use CASE WHEN for relevance scoring based on major
+            $query->selectRaw('
+                courses.*,
+                (
+                    CASE 
+                        WHEN LOWER(title) LIKE ? THEN 100
+                        WHEN LOWER(description) LIKE ? THEN 50
+                        WHEN LOWER(category) LIKE ? THEN 30
+                        ELSE 0
+                    END
+                ) as relevance_score
+            ', [
+                '%' . strtolower($user->major) . '%',
+                '%' . strtolower($user->major) . '%',
+                '%' . strtolower($user->major) . '%',
+            ])
+            ->orderByDesc('relevance_score')
+            ->orderByDesc('reviews_avg_rating')
+            ->orderByDesc('enrollments_count');
         } else {
-            $recommendations = collect();
+            // No major: sort by rating and popularity
+            $query->orderByDesc('reviews_avg_rating')
+                  ->orderByDesc('enrollments_count');
         }
-
+        
+        $recommendations = $query->limit($limit)->get();
+        
+        // If no recommendations found (e.g., all courses enrolled), show top-rated accessible courses
         if ($recommendations->isEmpty()) {
-            $recommendations = \App\Models\Course::inRandomOrder()->limit(5)->get();
+            $fallbackQuery = \App\Models\Course::query()
+                ->withCount('enrollments')
+                ->withAvg('reviews', 'rating');
+                
+            if ($plan === 'free') {
+                $fallbackQuery->where('access_type', 'free');
+            } elseif ($plan === 'regular') {
+                $fallbackQuery->whereIn('access_type', ['free', 'regular']);
+            }
+            
+            $recommendations = $fallbackQuery
+                ->orderByDesc('reviews_avg_rating')
+                ->orderByDesc('enrollments_count')
+                ->limit($limit)
+                ->get();
         }
-
-        return $this->successResponse($recommendations, 'Rekomendasi kursus berhasil diambil');
+        
+        return $this->successResponse([
+            'recommendations' => $recommendations,
+            'criteria' => [
+                'subscription_plan' => $plan,
+                'major' => $user->major ?? 'not_specified',
+                'excluded_enrolled' => count($enrolledCourseIds),
+                'algorithm' => 'relevance_score + rating + popularity',
+            ],
+        ], 'Rekomendasi kursus berhasil diambil');
     }
 
     /**

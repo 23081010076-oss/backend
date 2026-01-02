@@ -6384,12 +6384,24 @@
                 "tags": [
                     "Profile"
                 ],
-                "summary": "Get recommendations",
-                "description": "Get personalized recommendations for courses, scholarships, etc. (based on user's major)",
+                "summary": "Get course recommendations",
+                "description": "Get personalized course recommendations based on user's subscription plan, major, popularity, and rating. Algorithm considers: 1) User's subscription access level, 2) Courses not yet enrolled, 3) Major relevance (if available), 4) Course popularity, 5) Course rating",
                 "operationId": "getRecommendations",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of recommendations to return (default: 5)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Personalized recommendations retrieved successfully",
+                        "description": "Personalized course recommendations retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -6398,9 +6410,13 @@
                                             "type": "boolean",
                                             "example": true
                                         },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Rekomendasi kursus berhasil diambil"
+                                        },
                                         "data": {
                                             "properties": {
-                                                "courses": {
+                                                "recommendations": {
                                                     "type": "array",
                                                     "items": {
                                                         "properties": {
@@ -6412,57 +6428,64 @@
                                                                 "type": "string",
                                                                 "example": "Full Stack Web Development"
                                                             },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Comprehensive bootcamp for web development"
+                                                            },
                                                             "type": {
                                                                 "type": "string",
                                                                 "example": "bootcamp"
                                                             },
+                                                            "category": {
+                                                                "type": "string",
+                                                                "example": "Web Development"
+                                                            },
                                                             "level": {
                                                                 "type": "string",
                                                                 "example": "intermediate"
+                                                            },
+                                                            "access_type": {
+                                                                "type": "string",
+                                                                "example": "premium"
+                                                            },
+                                                            "enrollments_count": {
+                                                                "type": "integer",
+                                                                "example": 150
+                                                            },
+                                                            "reviews_avg_rating": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 4.8
+                                                            },
+                                                            "relevance_score": {
+                                                                "description": "Only present if user has major specified",
+                                                                "type": "integer",
+                                                                "example": 100
                                                             }
                                                         },
                                                         "type": "object"
                                                     }
                                                 },
-                                                "scholarships": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 1
-                                                            },
-                                                            "name": {
-                                                                "type": "string",
-                                                                "example": "LPDP Scholarship"
-                                                            },
-                                                            "status": {
-                                                                "type": "string",
-                                                                "example": "open"
-                                                            }
+                                                "criteria": {
+                                                    "properties": {
+                                                        "subscription_plan": {
+                                                            "type": "string",
+                                                            "example": "premium"
                                                         },
-                                                        "type": "object"
-                                                    }
-                                                },
-                                                "mentors": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 7
-                                                            },
-                                                            "name": {
-                                                                "type": "string",
-                                                                "example": "Dr. Tech Expert"
-                                                            },
-                                                            "major": {
-                                                                "type": "string",
-                                                                "example": "Computer Science"
-                                                            }
+                                                        "major": {
+                                                            "type": "string",
+                                                            "example": "Teknik Informatika"
                                                         },
-                                                        "type": "object"
-                                                    }
+                                                        "excluded_enrolled": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "algorithm": {
+                                                            "type": "string",
+                                                            "example": "relevance_score + rating + popularity"
+                                                        }
+                                                    },
+                                                    "type": "object"
                                                 }
                                             },
                                             "type": "object"

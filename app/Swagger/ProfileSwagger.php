@@ -82,38 +82,44 @@ namespace App\Swagger;
  *
  * @OA\Get(
  *     path="/api/auth/recommendations",
- *     summary="Get recommendations",
- *     description="Get personalized recommendations for courses, scholarships, etc. (based on user's major)",
+ *     summary="Get course recommendations",
+ *     description="Get personalized course recommendations based on user's subscription plan, major, popularity, and rating. Algorithm considers: 1) User's subscription access level, 2) Courses not yet enrolled, 3) Major relevance (if available), 4) Course popularity, 5) Course rating",
  *     operationId="getRecommendations",
  *     tags={"Profile"},
  *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="limit",
+ *         in="query",
+ *         description="Number of recommendations to return (default: 5)",
+ *         required=false,
+ *         @OA\Schema(type="integer", example=5)
+ *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Personalized recommendations retrieved successfully",
+ *         description="Personalized course recommendations retrieved successfully",
  *         @OA\JsonContent(
  *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Rekomendasi kursus berhasil diambil"),
  *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="courses", type="array",
+ *                 @OA\Property(property="recommendations", type="array",
  *                     @OA\Items(type="object",
  *                         @OA\Property(property="id", type="integer", example=1),
  *                         @OA\Property(property="title", type="string", example="Full Stack Web Development"),
+ *                         @OA\Property(property="description", type="string", example="Comprehensive bootcamp for web development"),
  *                         @OA\Property(property="type", type="string", example="bootcamp"),
- *                         @OA\Property(property="level", type="string", example="intermediate")
+ *                         @OA\Property(property="category", type="string", example="Web Development"),
+ *                         @OA\Property(property="level", type="string", example="intermediate"),
+ *                         @OA\Property(property="access_type", type="string", example="premium"),
+ *                         @OA\Property(property="enrollments_count", type="integer", example=150),
+ *                         @OA\Property(property="reviews_avg_rating", type="number", format="float", example=4.8),
+ *                         @OA\Property(property="relevance_score", type="integer", example=100, description="Only present if user has major specified")
  *                     )
  *                 ),
- *                 @OA\Property(property="scholarships", type="array",
- *                     @OA\Items(type="object",
- *                         @OA\Property(property="id", type="integer", example=1),
- *                         @OA\Property(property="name", type="string", example="LPDP Scholarship"),
- *                         @OA\Property(property="status", type="string", example="open")
- *                     )
- *                 ),
- *                 @OA\Property(property="mentors", type="array",
- *                     @OA\Items(type="object",
- *                         @OA\Property(property="id", type="integer", example=7),
- *                         @OA\Property(property="name", type="string", example="Dr. Tech Expert"),
- *                         @OA\Property(property="major", type="string", example="Computer Science")
- *                     )
+ *                 @OA\Property(property="criteria", type="object",
+ *                     @OA\Property(property="subscription_plan", type="string", example="premium"),
+ *                     @OA\Property(property="major", type="string", example="Teknik Informatika"),
+ *                     @OA\Property(property="excluded_enrolled", type="integer", example=3),
+ *                     @OA\Property(property="algorithm", type="string", example="relevance_score + rating + popularity")
  *                 )
  *             )
  *         )
