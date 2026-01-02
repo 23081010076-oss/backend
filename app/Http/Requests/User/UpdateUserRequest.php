@@ -24,7 +24,8 @@ class UpdateUserRequest extends FormRequest
     }
 
     /**
-     * ATURAN VALIDASI
+     * ATURAN VALIDASI (UPDATED)
+     * Menambahkan field profile yang sebelumnya hilang.
      */
     public function rules(): array
     {
@@ -32,15 +33,31 @@ class UpdateUserRequest extends FormRequest
         $userId = $this->route('id');
         
         return [
+            // --- Akun Utama ---
             'name'         => 'sometimes|string|max:255',
             'email'        => 'sometimes|email|unique:users,email,' . $userId,
             'password'     => 'sometimes|string|min:8',
             'role'         => 'sometimes|in:admin,student,mentor,corporate',
+            'status'       => 'nullable|in:active,inactive,suspended',
+            
+            // --- Data Kontak & Bio ---
             'phone'        => 'nullable|string|max:20',
             'bio'          => 'nullable|string',
-            'status'       => 'nullable|in:active,inactive,suspended',
-            'organization' => 'nullable|string|max:255',
-            'job_title'    => 'nullable|string|max:255',
+            
+            // --- Data Profil Tambahan (YANG KEMARIN HILANG) ---
+            'gender'          => 'nullable|string|in:male,female,other',
+            'birth_date'      => 'nullable|date', // Penting: Validasi format tanggal
+            'address'         => 'nullable|string',
+            
+            // --- Data Akademik/Karir ---
+            'institution'     => 'nullable|string|max:255',
+            'major'           => 'nullable|string|max:255',
+            'education_level' => 'nullable|string|max:50',
+            'organization'    => 'nullable|string|max:255',
+            'job_title'       => 'nullable|string|max:255',
+            
+            // --- Specialization (PENTING: Validasi Array) ---
+            'specialization'  => 'nullable|array', 
         ];
     }
 
