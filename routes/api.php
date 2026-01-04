@@ -52,6 +52,10 @@ Route::get('/articles/{id}', [ArticleController::class, 'show'])->name('articles
 
 Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
 
+// Public Mentors (untuk landing page)
+Route::get('/mentors', [UserController::class, 'listMentors'])->name('mentors.index');
+Route::get('/mentors/{id}', [UserController::class, 'showMentor'])->name('mentors.show');
+
 // Corporate Contact (public - perusahaan bisa submit inquiry)
 Route::post('/corporate-contact', [CorporateContactController::class, 'store'])
     ->name('corporate-contact.store');
@@ -234,13 +238,6 @@ Route::middleware('auth:api')->group(function () {
         ->name('mentoring-sessions.feedback');
     Route::get('/mentors/{id}/schedule', [MentoringSessionController::class, 'schedule'])
         ->name('mentors.schedule');
-
-    
-    // MENTORS
-    
-    // Public list of mentors (untuk user memilih mentor)
-    Route::get('/mentors', [UserController::class, 'listMentors'])->name('mentors.index');
-    Route::get('/mentors/{id}', [UserController::class, 'showMentor'])->name('mentors.show');
 
     // Need Assessment (nested under mentoring sessions)
     Route::prefix('mentoring-sessions/{mentoringSessionId}/need-assessments')->name('need-assessments.')->group(function () {

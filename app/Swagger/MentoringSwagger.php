@@ -58,13 +58,13 @@ namespace App\Swagger;
  *
  * @OA\Get(
  *     path="/api/mentors",
- *     summary="Lihat daftar mentor",
- *     description="Student dapat melihat daftar semua mentor yang tersedia untuk dipilih saat booking mentoring.",
+ *     summary="Lihat daftar mentor (Public)",
+ *     description="Endpoint publik untuk melihat daftar mentor di landing page. Tidak memerlukan autentikasi.",
  *     operationId="listMentors",
  *     tags={"Mentoring"},
- *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(name="page", in="query", @OA\Schema(type="integer", default=1)),
  *     @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer", default=15)),
+ *     @OA\Parameter(name="search", in="query", @OA\Schema(type="string"), description="Cari berdasarkan nama mentor"),
  *     @OA\Response(
  *         response=200,
  *         description="Daftar mentor berhasil diambil",
@@ -89,17 +89,15 @@ namespace App\Swagger;
  *                 @OA\Property(property="total", type="integer", example=25)
  *             )
  *         )
- *     ),
- *     @OA\Response(response=401, description="Unauthorized")
+ *     )
  * )
  *
  * @OA\Get(
  *     path="/api/mentors/{id}",
- *     summary="Lihat detail mentor",
- *     description="Student dapat melihat detail profil mentor termasuk bio, pengalaman, dan keahlian sebelum booking.",
+ *     summary="Lihat detail mentor (Public)",
+ *     description="Endpoint publik untuk melihat detail profil mentor di landing page. Tidak memerlukan autentikasi.",
  *     operationId="showMentor",
  *     tags={"Mentoring"},
- *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(name="id", in="path", required=true, description="ID Mentor", @OA\Schema(type="integer")),
  *     @OA\Response(
  *         response=200,

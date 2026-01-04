@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Mentors - Landing Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 48px;
+            margin-bottom: 16px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        .search-box {
+            max-width: 500px;
+            margin: 0 auto 40px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 16px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            outline: none;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .search-box input:focus {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            padding: 40px;
+        }
+
+        .mentors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .mentor-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mentor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .mentor-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+        }
+
+        .mentor-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            border: 4px solid #f0f0f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .mentor-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .mentor-email {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+
+        .mentor-bio {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        .mentor-stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 16px 0;
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .mentor-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 40px;
+        }
+
+        .pagination button {
+            padding: 10px 20px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-info {
+            color: white;
+            font-weight: 600;
+            padding: 0 16px;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: white;
+            padding: 60px 20px;
+        }
+
+        .empty-state h2 {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state p {
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            .mentors-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mentor-card {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Meet Our Expert Mentors</h1>
+        <p class="subtitle">Learn from the best professionals in the industry</p>
+
+        <div class="search-box">
+            <input 
+                type="text" 
+                id="searchInput" 
+                placeholder="🔍 Search mentors by name..."
+                onkeyup="handleSearch()"
+            >
+        </div>
+
+        <div id="loading" class="loading">
+            Loading mentors... ⏳
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="mentorsContainer" class="mentors-grid"></div>
+
+        <div id="pagination" class="pagination" style="display: none;">
+            <button id="prevBtn" onclick="previousPage()">← Previous</button>
+            <span class="page-info" id="pageInfo"></span>
+            <button id="nextBtn" onclick="nextPage()">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://127.0.0.1:8000/api';
+        const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?size=120&background=667eea&color=fff&name=';
+        
+        // State
+        let currentPage = 1;
+        let totalPages = 1;
+        let searchQuery = '';
+        let searchTimeout = null;
+
+        // Load mentors on page load
+        window.onload = () => {
+            loadMentors();
+        };
+
+        // Search handler with debounce
+        function handleSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchQuery = document.getElementById('searchInput').value;
+                currentPage = 1;
+                loadMentors();
+            }, 500);
+        }
+
+        // Load mentors from API
+        async function loadMentors() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const container = document.getElementById('mentorsContainer');
+            const pagination = document.getElementById('pagination');
+
+            // Show loading
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            container.innerHTML = '';
+            pagination.style.display = 'none';
+
+            try {
+                // Build URL with query parameters
+                let url = `${API_BASE_URL}/mentors?page=${currentPage}&per_page=6`;
+                if (searchQuery) {
+                    url += `&search=${encodeURIComponent(searchQuery)}`;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                // Hide loading
+                loading.style.display = 'none';
+
+                if (!data.sukses) {
+                    throw new Error(data.pesan || 'Failed to load mentors');
+                }
+
+                const mentors = data.data.data;
+                totalPages = data.data.last_page;
+
+                if (mentors.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1 / -1;">
+                            <h2>No mentors found</h2>
+                            <p>Try adjusting your search criteria</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Display mentors
+                displayMentors(mentors);
+
+                // Show pagination if needed
+                if (totalPages > 1) {
+                    updatePagination();
+                }
+
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = `Error: ${err.message}`;
+                console.error('Error loading mentors:', err);
+            }
+        }
+
+        // Display mentors in grid
+        function displayMentors(mentors) {
+            const container = document.getElementById('mentorsContainer');
+            
+            container.innerHTML = mentors.map(mentor => {
+                const avatar = mentor.profile_photo || `${DEFAULT_AVATAR}${encodeURIComponent(mentor.name)}`;
+                const bio = mentor.bio || 'Professional mentor with years of experience';
+                const academicCount = mentor.academic_sessions_count || 0;
+                const lifePlanCount = mentor.life_plan_sessions_count || 0;
+                
+                return `
+                    <div class="mentor-card">
+                        <img src="${avatar}" alt="${mentor.name}" class="mentor-avatar" 
+                             onerror="this.src='${DEFAULT_AVATAR}${encodeURIComponent(mentor.name)}'">
+                        <div class="mentor-name">${mentor.name}</div>
+                        <div class="mentor-email">${mentor.email}</div>
+                        <div class="mentor-bio">${bio}</div>
+                        
+                        <div class="mentor-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Academic</div>
+                                <div class="stat-value">${academicCount}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Life Plan</div>
+                                <div class="stat-value">${lifePlanCount}</div>
+                            </div>
+                        </div>
+
+                        <div class="mentor-actions">
+                            <button class="btn btn-primary" onclick="viewMentorDetail(${mentor.id})">
+                                View Profile
+                            </button>
+                            <button class="btn btn-secondary" onclick="bookMentor(${mentor.id})">
+                                Book Now
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Pagination functions
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            pagination.style.display = 'flex';
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadMentors();
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadMentors();
+            }
+        }
+
+        // View mentor detail
+        async function viewMentorDetail(mentorId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/mentors/${mentorId}`);
+                const data = await response.json();
+
+                if (data.sukses) {
+                    const mentor = data.data;
+                    alert(`
+Mentor Detail:
+--------------
+Name: ${mentor.name}
+Email: ${mentor.email}
+Bio: ${mentor.bio || 'N/A'}
+Phone: ${mentor.phone || 'N/A'}
+
+Achievements: ${mentor.achievements?.length || 0}
+Experiences: ${mentor.experiences?.length || 0}
+Organizations: ${mentor.organizations?.length || 0}
+                    `);
+                    
+                    // You can open a modal or navigate to detail page here
+                    console.log('Full mentor data:', mentor);
+                }
+            } catch (err) {
+                alert('Error loading mentor detail: ' + err.message);
+            }
+        }
+
+        // Book mentor (requires login)
+        function bookMentor(mentorId) {
+            alert('To book this mentor, please login or register first!');
+            // Redirect to login page
+            // window.location.href = '/login?redirect=/book/' + mentorId;
+        }
+    </script>
+</body>
+</html>
