@@ -74,6 +74,7 @@ class UserSeeder extends Seeder
                 'major' => 'Computer Science',
                 'education_level' => 'S3',
                 'bio' => 'Senior Software Engineer at Google with 10+ years experience in full-stack development and team leadership.',
+                'profile_photo' => 'https://randomuser.me/api/portraits/women/44.jpg',
                 'email_verified_at' => now(),
             ],
             [
@@ -89,6 +90,7 @@ class UserSeeder extends Seeder
                 'major' => 'Teknik Informatika',
                 'education_level' => 'S3',
                 'bio' => 'Professor of Computer Science, researcher in machine learning and AI, mentor for 100+ students.',
+                'profile_photo' => 'https://randomuser.me/api/portraits/men/32.jpg',
                 'email_verified_at' => now(),
             ],
             [
@@ -104,6 +106,7 @@ class UserSeeder extends Seeder
                 'major' => 'Desain Komunikasi Visual',
                 'education_level' => 'S2',
                 'bio' => 'Senior UX Designer at Tokopedia, specialized in mobile app design and user research.',
+                'profile_photo' => 'https://randomuser.me/api/portraits/women/65.jpg',
                 'email_verified_at' => now(),
             ],
             // Corporate Users
@@ -125,7 +128,7 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $userData) {
-            User::firstOrCreate(
+            User::updateOrCreate(
                 ['email' => $userData['email']],
                 $userData
             );

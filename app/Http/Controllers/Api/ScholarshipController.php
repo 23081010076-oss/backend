@@ -199,6 +199,24 @@ class ScholarshipController extends Controller
         return $this->successResponse($application, 'Status lamaran berhasil diupdate');
     }
 
+    /**
+     * Beasiswa milik user yang login (untuk corporate melihat beasiswa sendiri)
+     */
+    public function myScholarships(Request $request): JsonResponse
+    {
+        // Hanya corporate yang bisa membuat beasiswa
+        if (Auth::user()->role !== 'corporate') {
+            return $this->errorResponse('Hanya corporate yang memiliki beasiswa', 403);
+        }
+
+        $scholarships = Scholarship::where('created_by', Auth::id())
+            ->withCount('applications')
+            ->orderBy('created_at', 'desc')
+            ->paginate($request->get('per_page', 15));
+
+        return $this->paginatedResponse($scholarships, 'Beasiswa Anda berhasil diambil');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Scholarship Application Flow Methods

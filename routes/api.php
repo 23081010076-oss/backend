@@ -190,6 +190,9 @@ Route::middleware('auth:api')->group(function () {
     
     // SCHOLARSHIPS
     
+    // User's own scholarships (untuk corporate melihat beasiswa sendiri)
+    Route::get('/my-scholarships', [ScholarshipController::class, 'myScholarships'])->name('my-scholarships');
+    
     // Scholarship CRUD (Admin/Corporate)
     Route::middleware('role:admin,corporate')->group(function () {
         Route::post('/scholarships', [ScholarshipController::class, 'store'])->name('scholarships.store');
@@ -260,6 +263,9 @@ Route::middleware('auth:api')->group(function () {
 
     
     // ARTICLES (Admin/Corporate)
+    
+    // User's own articles (untuk corporate/mentor melihat artikel sendiri)
+    Route::get('/my-articles', [ArticleController::class, 'myArticles'])->name('my-articles');
     
     Route::middleware('role:admin,corporate')->group(function () {
         Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
