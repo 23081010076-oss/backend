@@ -433,9 +433,10 @@ class AuthController extends Controller
      * Algoritma rekomendasi berdasarkan:
      * 1. Subscription plan user (hanya tampilkan course yang bisa diakses)
      * 2. Course yang belum di-enroll
-     * 3. Relevansi dengan major/jurusan (jika ada)
-     * 4. Popularity (jumlah enrollment)
-     * 5. Rating tertinggi
+     * 3. Relevansi dengan specialization/minat (prioritas tertinggi)
+     * 4. Relevansi dengan major/jurusan
+     * 5. Popularity (jumlah enrollment)
+     * 6. Rating tertinggi
      */
     public function recommendations(Request $request): JsonResponse
     {
@@ -463,29 +464,59 @@ class AuthController extends Controller
         }
         // Premium users can see all courses
         
+        // Get user's specialization (minat) and major for recommendation
+        $specializations = $user->specialization ?? [];
+        $major = $user->major;
+        
         // Score-based recommendation using SELECT with scoring
-        if ($user->major) {
-            // Use CASE WHEN for relevance scoring based on major
-            $query->selectRaw('
+        if (!empty($specializations) || $major) {
+            // Build dynamic CASE WHEN for specializations and major
+            $caseClauses = [];
+            $bindings = [];
+            
+            // Specialization matching (highest priority: 150-80 points)
+            if (!empty($specializations)) {
+                foreach ($specializations as $index => $spec) {
+                    $specLower = strtolower($spec);
+                    // Exact match in title gets highest score
+                    $caseClauses[] = "WHEN LOWER(title) LIKE ? THEN " . (150 - ($index * 10));
+                    $bindings[] = '%' . $specLower . '%';
+                    // Match in category gets medium score
+                    $caseClauses[] = "WHEN LOWER(category) LIKE ? THEN " . (100 - ($index * 10));
+                    $bindings[] = '%' . $specLower . '%';
+                    // Match in description gets lower score
+                    $caseClauses[] = "WHEN LOWER(description) LIKE ? THEN " . (80 - ($index * 10));
+                    $bindings[] = '%' . $specLower . '%';
+                }
+            }
+            
+            // Major matching (medium priority: 60-30 points)
+            if ($major) {
+                $majorLower = strtolower($major);
+                $caseClauses[] = "WHEN LOWER(title) LIKE ? THEN 60";
+                $bindings[] = '%' . $majorLower . '%';
+                $caseClauses[] = "WHEN LOWER(description) LIKE ? THEN 40";
+                $bindings[] = '%' . $majorLower . '%';
+                $caseClauses[] = "WHEN LOWER(category) LIKE ? THEN 30";
+                $bindings[] = '%' . $majorLower . '%';
+            }
+            
+            $caseClauses[] = "ELSE 0";
+            $caseStatement = implode(" ", $caseClauses);
+            
+            $query->selectRaw("
                 courses.*,
                 (
                     CASE 
-                        WHEN LOWER(title) LIKE ? THEN 100
-                        WHEN LOWER(description) LIKE ? THEN 50
-                        WHEN LOWER(category) LIKE ? THEN 30
-                        ELSE 0
+                        {$caseStatement}
                     END
                 ) as relevance_score
-            ', [
-                '%' . strtolower($user->major) . '%',
-                '%' . strtolower($user->major) . '%',
-                '%' . strtolower($user->major) . '%',
-            ])
+            ", $bindings)
             ->orderByDesc('relevance_score')
             ->orderByDesc('reviews_avg_rating')
             ->orderByDesc('enrollments_count');
         } else {
-            // No major: sort by rating and popularity
+            // No specialization or major: sort by rating and popularity
             $query->orderByDesc('reviews_avg_rating')
                   ->orderByDesc('enrollments_count');
         }
@@ -515,9 +546,10 @@ class AuthController extends Controller
             'recommendations' => $recommendations,
             'criteria' => [
                 'subscription_plan' => $plan,
+                'specializations' => $specializations ?? [],
                 'major' => $user->major ?? 'not_specified',
                 'excluded_enrolled' => count($enrolledCourseIds),
-                'algorithm' => 'relevance_score + rating + popularity',
+                'algorithm' => 'specialization_score + major_score + rating + popularity',
             ],
         ], 'Rekomendasi kursus berhasil diambil');
     }

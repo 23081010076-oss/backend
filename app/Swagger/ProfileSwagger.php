@@ -82,21 +82,21 @@ namespace App\Swagger;
  *
  * @OA\Get(
  *     path="/api/auth/recommendations",
- *     summary="Get course recommendations",
- *     description="Get personalized course recommendations based on user's subscription plan, major, popularity, and rating. Algorithm considers: 1) User's subscription access level, 2) Courses not yet enrolled, 3) Major relevance (if available), 4) Course popularity, 5) Course rating",
+ *     summary="Get personalized course recommendations",
+ *     description="Get AI-powered course recommendations based on user's specialization (interests), major, subscription plan, and engagement metrics. **Algorithm Priority:** 1) **Specialization/Interests** (150-80 points) - highest priority matching with user's declared interests, 2) **Major/Field of Study** (60-30 points) - matches with user's educational background, 3) **Rating & Popularity** - considers course quality and enrollment count, 4) **Subscription Access** - filters based on user's plan (free/regular/premium), 5) **Enrollment Status** - excludes already enrolled courses",
  *     operationId="getRecommendations",
  *     tags={"Profile"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="limit",
  *         in="query",
- *         description="Number of recommendations to return (default: 5)",
+ *         description="Number of course recommendations to return (default: 5, max recommended: 20)",
  *         required=false,
- *         @OA\Schema(type="integer", example=5)
+ *         @OA\Schema(type="integer", example=5, default=5)
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Personalized course recommendations retrieved successfully",
+ *         description="Personalized course recommendations retrieved successfully with relevance scoring",
  *         @OA\JsonContent(
  *             @OA\Property(property="success", type="boolean", example=true),
  *             @OA\Property(property="message", type="string", example="Rekomendasi kursus berhasil diambil"),
@@ -104,29 +104,46 @@ namespace App\Swagger;
  *                 @OA\Property(property="recommendations", type="array",
  *                     @OA\Items(type="object",
  *                         @OA\Property(property="id", type="integer", example=1),
- *                         @OA\Property(property="title", type="string", example="Full Stack Web Development"),
- *                         @OA\Property(property="description", type="string", example="Comprehensive bootcamp for web development"),
- *                         @OA\Property(property="type", type="string", example="bootcamp"),
+ *                         @OA\Property(property="title", type="string", example="React Advanced Development"),
+ *                         @OA\Property(property="image", type="string", example="http://127.0.0.1:8000/storage/courses/react-course.jpg"),
+ *                         @OA\Property(property="description", type="string", example="Master React with hooks, context, and advanced patterns"),
+ *                         @OA\Property(property="type", type="string", example="bootcamp", description="online, offline, bootcamp"),
  *                         @OA\Property(property="category", type="string", example="Web Development"),
- *                         @OA\Property(property="level", type="string", example="intermediate"),
- *                         @OA\Property(property="access_type", type="string", example="premium"),
- *                         @OA\Property(property="enrollments_count", type="integer", example=150),
- *                         @OA\Property(property="reviews_avg_rating", type="number", format="float", example=4.8),
- *                         @OA\Property(property="relevance_score", type="integer", example=100, description="Only present if user has major specified")
+ *                         @OA\Property(property="level", type="string", example="intermediate", description="beginner, intermediate, advanced"),
+ *                         @OA\Property(property="duration", type="string", example="8 minggu"),
+ *                         @OA\Property(property="price", type="number", format="decimal", example=1500000.00),
+ *                         @OA\Property(property="access_type", type="string", example="premium", description="free, regular, premium"),
+ *                         @OA\Property(property="instructor", type="string", example="Sarah Johnson"),
+ *                         @OA\Property(property="enrollments_count", type="integer", example=245, description="Total number of enrolled students"),
+ *                         @OA\Property(property="reviews_avg_rating", type="number", format="float", example=4.8, description="Average rating from reviews"),
+ *                         @OA\Property(property="average_rating", type="number", format="float", example=4.8, description="Average rating (appended attribute)"),
+ *                         @OA\Property(property="total_reviews", type="integer", example=89, description="Total number of reviews"),
+ *                         @OA\Property(property="total_materials", type="integer", example=42, description="Total curriculum items"),
+ *                         @OA\Property(property="total_curriculum_duration", type="string", example="12 jam 30 menit"),
+ *                         @OA\Property(property="relevance_score", type="integer", example=150, description="Scoring based on specialization & major matching (0-150). Higher = more relevant. Only present if user has specialization or major.")
  *                     )
  *                 ),
- *                 @OA\Property(property="criteria", type="object",
- *                     @OA\Property(property="subscription_plan", type="string", example="premium"),
- *                     @OA\Property(property="major", type="string", example="Teknik Informatika"),
- *                     @OA\Property(property="excluded_enrolled", type="integer", example=3),
- *                     @OA\Property(property="algorithm", type="string", example="relevance_score + rating + popularity")
+ *                 @OA\Property(property="criteria", type="object", description="Recommendation algorithm criteria used",
+ *                     @OA\Property(property="subscription_plan", type="string", example="premium", description="User's current subscription plan"),
+ *                     @OA\Property(property="specializations", type="array", 
+ *                         @OA\Items(type="string", example="Web Development"),
+ *                         example={"Web Development", "React", "UI/UX Design"},
+ *                         description="User's interests/specializations used for matching"
+ *                     ),
+ *                     @OA\Property(property="major", type="string", example="Teknik Informatika", description="User's field of study"),
+ *                     @OA\Property(property="excluded_enrolled", type="integer", example=3, description="Number of already enrolled courses excluded"),
+ *                     @OA\Property(property="algorithm", type="string", example="specialization_score + major_score + rating + popularity", description="Algorithm formula used")
  *                 )
  *             )
  *         )
  *     ),
  *     @OA\Response(
  *         response=401,
- *         description="Unauthorized"
+ *         description="Unauthorized - Invalid or missing JWT token",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Unauthenticated")
+ *         )
  *     )
  * )
  *

@@ -6379,24 +6379,25 @@
                 "tags": [
                     "Profile"
                 ],
-                "summary": "Get course recommendations",
-                "description": "Get personalized course recommendations based on user's subscription plan, major, popularity, and rating. Algorithm considers: 1) User's subscription access level, 2) Courses not yet enrolled, 3) Major relevance (if available), 4) Course popularity, 5) Course rating",
+                "summary": "Get personalized course recommendations",
+                "description": "Get AI-powered course recommendations based on user's specialization (interests), major, subscription plan, and engagement metrics. **Algorithm Priority:** 1) **Specialization/Interests** (150-80 points) - highest priority matching with user's declared interests, 2) **Major/Field of Study** (60-30 points) - matches with user's educational background, 3) **Rating & Popularity** - considers course quality and enrollment count, 4) **Subscription Access** - filters based on user's plan (free/regular/premium), 5) **Enrollment Status** - excludes already enrolled courses",
                 "operationId": "getRecommendations",
                 "parameters": [
                     {
                         "name": "limit",
                         "in": "query",
-                        "description": "Number of recommendations to return (default: 5)",
+                        "description": "Number of course recommendations to return (default: 5, max recommended: 20)",
                         "required": false,
                         "schema": {
                             "type": "integer",
+                            "default": 5,
                             "example": 5
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Personalized course recommendations retrieved successfully",
+                        "description": "Personalized course recommendations retrieved successfully with relevance scoring",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -6421,13 +6422,18 @@
                                                             },
                                                             "title": {
                                                                 "type": "string",
-                                                                "example": "Full Stack Web Development"
+                                                                "example": "React Advanced Development"
+                                                            },
+                                                            "image": {
+                                                                "type": "string",
+                                                                "example": "http://127.0.0.1:8000/storage/courses/react-course.jpg"
                                                             },
                                                             "description": {
                                                                 "type": "string",
-                                                                "example": "Comprehensive bootcamp for web development"
+                                                                "example": "Master React with hooks, context, and advanced patterns"
                                                             },
                                                             "type": {
+                                                                "description": "online, offline, bootcamp",
                                                                 "type": "string",
                                                                 "example": "bootcamp"
                                                             },
@@ -6436,48 +6442,103 @@
                                                                 "example": "Web Development"
                                                             },
                                                             "level": {
+                                                                "description": "beginner, intermediate, advanced",
                                                                 "type": "string",
                                                                 "example": "intermediate"
                                                             },
+                                                            "duration": {
+                                                                "type": "string",
+                                                                "example": "8 minggu"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "format": "decimal",
+                                                                "example": 1500000
+                                                            },
                                                             "access_type": {
+                                                                "description": "free, regular, premium",
                                                                 "type": "string",
                                                                 "example": "premium"
                                                             },
+                                                            "instructor": {
+                                                                "type": "string",
+                                                                "example": "Sarah Johnson"
+                                                            },
                                                             "enrollments_count": {
+                                                                "description": "Total number of enrolled students",
                                                                 "type": "integer",
-                                                                "example": 150
+                                                                "example": 245
                                                             },
                                                             "reviews_avg_rating": {
+                                                                "description": "Average rating from reviews",
                                                                 "type": "number",
                                                                 "format": "float",
                                                                 "example": 4.8
                                                             },
-                                                            "relevance_score": {
-                                                                "description": "Only present if user has major specified",
+                                                            "average_rating": {
+                                                                "description": "Average rating (appended attribute)",
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 4.8
+                                                            },
+                                                            "total_reviews": {
+                                                                "description": "Total number of reviews",
                                                                 "type": "integer",
-                                                                "example": 100
+                                                                "example": 89
+                                                            },
+                                                            "total_materials": {
+                                                                "description": "Total curriculum items",
+                                                                "type": "integer",
+                                                                "example": 42
+                                                            },
+                                                            "total_curriculum_duration": {
+                                                                "type": "string",
+                                                                "example": "12 jam 30 menit"
+                                                            },
+                                                            "relevance_score": {
+                                                                "description": "Scoring based on specialization & major matching (0-150). Higher = more relevant. Only present if user has specialization or major.",
+                                                                "type": "integer",
+                                                                "example": 150
                                                             }
                                                         },
                                                         "type": "object"
                                                     }
                                                 },
                                                 "criteria": {
+                                                    "description": "Recommendation algorithm criteria used",
                                                     "properties": {
                                                         "subscription_plan": {
+                                                            "description": "User's current subscription plan",
                                                             "type": "string",
                                                             "example": "premium"
                                                         },
+                                                        "specializations": {
+                                                            "description": "User's interests/specializations used for matching",
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string",
+                                                                "example": "Web Development"
+                                                            },
+                                                            "example": [
+                                                                "Web Development",
+                                                                "React",
+                                                                "UI/UX Design"
+                                                            ]
+                                                        },
                                                         "major": {
+                                                            "description": "User's field of study",
                                                             "type": "string",
                                                             "example": "Teknik Informatika"
                                                         },
                                                         "excluded_enrolled": {
+                                                            "description": "Number of already enrolled courses excluded",
                                                             "type": "integer",
                                                             "example": 3
                                                         },
                                                         "algorithm": {
+                                                            "description": "Algorithm formula used",
                                                             "type": "string",
-                                                            "example": "relevance_score + rating + popularity"
+                                                            "example": "specialization_score + major_score + rating + popularity"
                                                         }
                                                     },
                                                     "type": "object"
@@ -6492,7 +6553,24 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized - Invalid or missing JWT token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
