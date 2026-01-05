@@ -7,18 +7,18 @@
 ```javascript
 // JavaScript/React
 const updateProfile = async () => {
-  const response = await fetch('http://127.0.0.1:8000/api/auth/profile', {
-    method: 'PUT',
+  const response = await fetch("http://127.0.0.1:8000/api/auth/profile", {
+    method: "PUT",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${yourToken}`
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${yourToken}`,
     },
     body: JSON.stringify({
       major: "Teknik Informatika",
-      specialization: ["Web Development", "React", "UI/UX Design"]
-    })
+      specialization: ["Web Development", "React", "UI/UX Design"],
+    }),
   });
-  
+
   const data = await response.json();
   console.log(data);
 };
@@ -29,12 +29,15 @@ const updateProfile = async () => {
 ```javascript
 // JavaScript/React
 const getRecommendations = async () => {
-  const response = await fetch('http://127.0.0.1:8000/api/auth/recommendations?limit=5', {
-    headers: {
-      'Authorization': `Bearer ${yourToken}`
+  const response = await fetch(
+    "http://127.0.0.1:8000/api/auth/recommendations?limit=5",
+    {
+      headers: {
+        Authorization: `Bearer ${yourToken}`,
+      },
     }
-  });
-  
+  );
+
   const data = await response.json();
   console.log(data.data.recommendations);
   console.log(data.data.criteria);
@@ -46,12 +49,12 @@ const getRecommendations = async () => {
 ## 📱 Complete React Component (Copy & Use)
 
 ```jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const CourseRecommendations = () => {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem('token'); // Your JWT token
+  const token = localStorage.getItem("token"); // Your JWT token
 
   useEffect(() => {
     fetchRecommendations();
@@ -59,13 +62,16 @@ const CourseRecommendations = () => {
 
   const fetchRecommendations = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/auth/recommendations?limit=5', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/auth/recommendations?limit=5",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await response.json();
       setRecommendations(data.data.recommendations);
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -77,7 +83,7 @@ const CourseRecommendations = () => {
     <div className="recommendations">
       <h2>🎯 Recommended Courses for You</h2>
       <div className="course-grid">
-        {recommendations.map(course => (
+        {recommendations.map((course) => (
           <div key={course.id} className="course-card">
             {/* Relevance Badge */}
             {course.relevance_score && (
@@ -85,32 +91,36 @@ const CourseRecommendations = () => {
                 Score: {course.relevance_score}
               </div>
             )}
-            
+
             {/* Course Image */}
             <img src={course.image} alt={course.title} />
-            
+
             {/* Course Details */}
             <h3>{course.title}</h3>
             <p>{course.description}</p>
-            
+
             {/* Category & Level */}
             <div className="badges">
               <span className="badge">{course.category}</span>
               <span className="badge">{course.level}</span>
             </div>
-            
+
             {/* Rating */}
             <div className="rating">
-              ⭐ {course.average_rating.toFixed(1)} ({course.total_reviews} reviews)
+              ⭐ {course.average_rating.toFixed(1)} ({course.total_reviews}{" "}
+              reviews)
             </div>
-            
+
             {/* Price & Enroll Button */}
             <div className="footer">
               <span className="price">
-                {course.access_type === 'free' ? 'FREE' : 
-                  `Rp ${course.price.toLocaleString('id-ID')}`}
+                {course.access_type === "free"
+                  ? "FREE"
+                  : `Rp ${course.price.toLocaleString("id-ID")}`}
               </span>
-              <button onClick={() => window.location.href = `/course/${course.id}`}>
+              <button
+                onClick={() => (window.location.href = `/course/${course.id}`)}
+              >
                 View Details
               </button>
             </div>
@@ -150,14 +160,14 @@ export default CourseRecommendations;
 
 .course-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .relevance-badge {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   padding: 5px 10px;
   border-radius: 20px;
@@ -245,55 +255,55 @@ export default CourseRecommendations;
 ## 📋 Profile Update Form (Copy & Use)
 
 ```jsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const ProfileForm = () => {
-  const [major, setMajor] = useState('');
+  const [major, setMajor] = useState("");
   const [specializations, setSpecializations] = useState([]);
-  const [inputValue, setInputValue] = useState('');
-  const token = localStorage.getItem('token');
+  const [inputValue, setInputValue] = useState("");
+  const token = localStorage.getItem("token");
 
   const addSpecialization = () => {
     if (inputValue.trim() && !specializations.includes(inputValue.trim())) {
       setSpecializations([...specializations, inputValue.trim()]);
-      setInputValue('');
+      setInputValue("");
     }
   };
 
   const removeSpecialization = (spec) => {
-    setSpecializations(specializations.filter(s => s !== spec));
+    setSpecializations(specializations.filter((s) => s !== spec));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/auth/profile', {
-        method: 'PUT',
+      const response = await fetch("http://127.0.0.1:8000/api/auth/profile", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           major: major,
-          specialization: specializations
-        })
+          specialization: specializations,
+        }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
-        alert('Profile updated! You will now get better recommendations.');
+        alert("Profile updated! You will now get better recommendations.");
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="profile-form">
       <h2>Update Your Profile</h2>
-      
+
       {/* Major/Jurusan */}
       <div className="form-group">
         <label>Major / Jurusan</label>
@@ -314,7 +324,9 @@ const ProfileForm = () => {
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSpecialization())}
+            onKeyPress={(e) =>
+              e.key === "Enter" && (e.preventDefault(), addSpecialization())
+            }
             placeholder="e.g., Web Development"
             className="form-control"
           />
@@ -355,7 +367,7 @@ export default ProfileForm;
   padding: 20px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .form-group {
@@ -431,7 +443,7 @@ export default ProfileForm;
 .btn-submit {
   width: 100%;
   padding: 14px;
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   border: none;
   border-radius: 6px;
@@ -451,7 +463,9 @@ export default ProfileForm;
 ## 🔑 Important Points
 
 ### 1. **Authentication**
+
 Always include JWT token in headers:
+
 ```javascript
 headers: {
   'Authorization': `Bearer ${yourToken}`
@@ -459,6 +473,7 @@ headers: {
 ```
 
 ### 2. **Response Structure**
+
 ```javascript
 {
   success: true,
@@ -476,6 +491,7 @@ headers: {
 ```
 
 ### 3. **Relevance Score**
+
 - **150+**: Exact match with specialization in title
 - **100-149**: Match in category
 - **80-99**: Match in description
@@ -483,6 +499,7 @@ headers: {
 - **30-59**: Match with major in category/description
 
 ### 4. **Access Types**
+
 - `free`: Available to all users
 - `regular`: Requires regular or premium subscription
 - `premium`: Requires premium subscription only
@@ -492,31 +509,32 @@ headers: {
 ## 🧪 Testing
 
 ### Test in Browser Console:
+
 ```javascript
 // Get token from localStorage
-const token = localStorage.getItem('token');
+const token = localStorage.getItem("token");
 
 // Test update profile
-fetch('http://127.0.0.1:8000/api/auth/profile', {
-  method: 'PUT',
+fetch("http://127.0.0.1:8000/api/auth/profile", {
+  method: "PUT",
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
   },
   body: JSON.stringify({
     major: "Teknik Informatika",
-    specialization: ["Web Development", "React"]
-  })
+    specialization: ["Web Development", "React"],
+  }),
 })
-.then(r => r.json())
-.then(d => console.log('✅ Profile:', d));
+  .then((r) => r.json())
+  .then((d) => console.log("✅ Profile:", d));
 
 // Test get recommendations
-fetch('http://127.0.0.1:8000/api/auth/recommendations?limit=5', {
-  headers: { 'Authorization': `Bearer ${token}` }
+fetch("http://127.0.0.1:8000/api/auth/recommendations?limit=5", {
+  headers: { Authorization: `Bearer ${token}` },
 })
-.then(r => r.json())
-.then(d => console.log('✅ Recommendations:', d));
+  .then((r) => r.json())
+  .then((d) => console.log("✅ Recommendations:", d));
 ```
 
 ---
@@ -563,15 +581,19 @@ fetch('http://127.0.0.1:8000/api/auth/recommendations?limit=5', {
 ## 🐛 Common Issues
 
 **Issue**: Empty recommendations
+
 - **Solution**: User needs to update profile with specialization/major
 
 **Issue**: All courses have low relevance score
+
 - **Solution**: User's interests don't match available courses
 
 **Issue**: No free courses in recommendations
+
 - **Solution**: User has free plan but all matching courses are premium
 
 **Issue**: 401 Unauthorized
+
 - **Solution**: Check if JWT token is valid and included in headers
 
 ---
