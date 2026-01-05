@@ -175,6 +175,52 @@ class ScholarshipController extends Controller
     }
 
     /**
+     * Lihat semua lamaran beasiswa (admin/corporate only)
+     */
+    public function allApplications(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        // Corporate hanya bisa melihat aplikasi dari scholarship milik mereka
+        $filters = $request->all();
+        if ($user->role === 'corporate') {
+            // Ambil ID scholarship milik corporate
+            $scholarshipIds = Scholarship::where('created_by', $user->id)->pluck('id')->toArray();
+            $filters['scholarship_ids'] = $scholarshipIds;
+        }
+
+        $applications = $this->scholarshipService->getAllApplications($filters);
+
+        return $this->paginatedResponse($applications, 'Daftar semua lamaran berhasil diambil');
+    }
+
+    /**
+     * Lihat detail lamaran beasiswa by ID (admin/corporate only)
+     */
+    public function showApplicationDetail(int $id): JsonResponse
+    {
+        $user = Auth::user();
+        $application = $this->scholarshipService->getApplicationById($id);
+
+        if (!$application) {
+            return $this->errorResponse('Lamaran tidak ditemukan', 404);
+        }
+
+        // Corporate hanya bisa melihat aplikasi dari scholarship milik mereka
+        if ($user->role === 'corporate') {
+            $scholarship = Scholarship::where('id', $application->scholarship_id)
+                ->where('created_by', $user->id)
+                ->first();
+            
+            if (!$scholarship) {
+                return $this->errorResponse('Anda tidak memiliki akses ke lamaran ini', 403);
+            }
+        }
+
+        return $this->successResponse($application, 'Detail lamaran berhasil diambil');
+    }
+
+    /**
      * Update status lamaran (admin only)
      */
     public function updateStatus(Request $request, int $id): JsonResponse

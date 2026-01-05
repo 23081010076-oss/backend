@@ -214,12 +214,18 @@ Route::middleware('auth:api')->group(function () {
     // Step 4: Submit application
     Route::post('/scholarship-applications/{id}/submit', [ScholarshipController::class, 'submitApplication'])->name('scholarship-applications.submit');
     
-    // Legacy apply endpoint (direct submit)
     Route::post('/scholarships/{id}/apply', [ScholarshipController::class, 'apply'])->name('scholarships.apply');
     Route::get('/my-applications', [ScholarshipController::class, 'myApplications'])->name('my-applications');
-    Route::put('/scholarship-applications/{id}/status', [ScholarshipController::class, 'updateStatus'])
-        ->middleware('role:admin,corporate')
-        ->name('scholarship-applications.update-status');
+    
+    // Admin/Corporate: Manage all applications
+    Route::middleware('role:admin,corporate')->group(function () {
+        Route::get('/scholarship-applications', [ScholarshipController::class, 'allApplications'])
+            ->name('scholarship-applications.index');
+        Route::get('/scholarship-applications/{id}/detail', [ScholarshipController::class, 'showApplicationDetail'])
+            ->name('scholarship-applications.detail');
+        Route::put('/scholarship-applications/{id}/status', [ScholarshipController::class, 'updateStatus'])
+            ->name('scholarship-applications.update-status');
+    });
 
     
     // MENTORING SESSIONS

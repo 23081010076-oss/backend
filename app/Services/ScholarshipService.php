@@ -179,6 +179,53 @@ class ScholarshipService
     }
 
     /**
+     * Ambil semua lamaran beasiswa (untuk admin/corporate)
+     */
+    public function getAllApplications(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    {
+        $query = ScholarshipApplication::with(['scholarship', 'user']);
+
+        // Filter berdasarkan status
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Filter berdasarkan scholarship_id
+        if (!empty($filters['scholarship_id'])) {
+            $query->where('scholarship_id', $filters['scholarship_id']);
+        }
+
+        // Filter berdasarkan user_id
+        if (!empty($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
+        }
+
+        // Filter berdasarkan array scholarship_ids (untuk corporate)
+        if (!empty($filters['scholarship_ids'])) {
+            $query->whereIn('scholarship_id', $filters['scholarship_ids']);
+        }
+
+        // Pencarian berdasarkan nama user
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+    }
+
+    /**
+     * Ambil detail lamaran by ID (untuk admin/corporate)
+     */
+    public function getApplicationById(int $applicationId): ?ScholarshipApplication
+    {
+        return ScholarshipApplication::with(['scholarship', 'user'])->find($applicationId);
+    }
+
+    /**
      * Update status lamaran
      */
     public function updateApplicationStatus(ScholarshipApplication $application, string $status): ScholarshipApplication

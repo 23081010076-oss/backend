@@ -480,6 +480,139 @@ namespace App\Swagger;
  * @OA\Response(response=403, description="Unauthorized"),
  * @OA\Response(response=422, description="Invalid status")
  * )
+ *
+ * @OA\Get(
+ * path="/api/scholarship-applications",
+ * summary="Get all scholarship applications (Admin/Corporate)",
+ * description="Get list of all scholarship applications. Admin can see all, Corporate can only see applications for their own scholarships.",
+ * operationId="getAllScholarshipApplications",
+ * tags={"Scholarship Applications"},
+ * security={{"bearerAuth":{}}},
+ * @OA\Parameter(
+ * name="status",
+ * in="query",
+ * description="Filter by application status",
+ * required=false,
+ * @OA\Schema(type="string", enum={"draft", "submitted", "review", "accepted", "rejected"})
+ * ),
+ * @OA\Parameter(
+ * name="scholarship_id",
+ * in="query",
+ * description="Filter by scholarship ID",
+ * required=false,
+ * @OA\Schema(type="integer")
+ * ),
+ * @OA\Parameter(
+ * name="user_id",
+ * in="query",
+ * description="Filter by user ID",
+ * required=false,
+ * @OA\Schema(type="integer")
+ * ),
+ * @OA\Parameter(
+ * name="search",
+ * in="query",
+ * description="Search by applicant name or email",
+ * required=false,
+ * @OA\Schema(type="string")
+ * ),
+ * @OA\Parameter(
+ * name="per_page",
+ * in="query",
+ * description="Number of results per page",
+ * required=false,
+ * @OA\Schema(type="integer", default=15)
+ * ),
+ * @OA\Response(
+ * response=200,
+ * description="Applications retrieved successfully",
+ * @OA\JsonContent(
+ * @OA\Property(property="success", type="boolean", example=true),
+ * @OA\Property(property="message", type="string", example="Daftar semua lamaran berhasil diambil"),
+ * @OA\Property(property="data", type="object",
+ * @OA\Property(property="current_page", type="integer", example=1),
+ * @OA\Property(property="data", type="array",
+ * @OA\Items(
+ * @OA\Property(property="id", type="integer", example=1),
+ * @OA\Property(property="user_id", type="integer", example=5),
+ * @OA\Property(property="scholarship_id", type="integer", example=1),
+ * @OA\Property(property="status", type="string", example="submitted"),
+ * @OA\Property(property="gpa", type="number", example=3.75),
+ * @OA\Property(property="university", type="string", example="Universitas Indonesia"),
+ * @OA\Property(property="submitted_at", type="string", format="datetime", example="2024-12-24T12:30:00Z"),
+ * @OA\Property(property="user", type="object",
+ * @OA\Property(property="id", type="integer", example=5),
+ * @OA\Property(property="name", type="string", example="John Doe"),
+ * @OA\Property(property="email", type="string", example="john@example.com")
+ * ),
+ * @OA\Property(property="scholarship", type="object",
+ * @OA\Property(property="id", type="integer", example=1),
+ * @OA\Property(property="name", type="string", example="Beasiswa LPDP")
+ * )
+ * )
+ * ),
+ * @OA\Property(property="per_page", type="integer", example=15),
+ * @OA\Property(property="total", type="integer", example=50)
+ * )
+ * )
+ * ),
+ * @OA\Response(response=401, description="Unauthenticated"),
+ * @OA\Response(response=403, description="Unauthorized - Only admin and corporate can access")
+ * )
+ *
+ * @OA\Get(
+ * path="/api/scholarship-applications/{id}/detail",
+ * summary="Get application detail by ID (Admin/Corporate)",
+ * description="Get detailed scholarship application by ID. Admin can see all, Corporate can only see applications for their own scholarships.",
+ * operationId="getScholarshipApplicationDetail",
+ * tags={"Scholarship Applications"},
+ * security={{"bearerAuth":{}}},
+ * @OA\Parameter(
+ * name="id",
+ * in="path",
+ * description="Application ID",
+ * required=true,
+ * @OA\Schema(type="integer")
+ * ),
+ * @OA\Response(
+ * response=200,
+ * description="Application detail retrieved successfully",
+ * @OA\JsonContent(
+ * @OA\Property(property="success", type="boolean", example=true),
+ * @OA\Property(property="message", type="string", example="Detail lamaran berhasil diambil"),
+ * @OA\Property(property="data", type="object",
+ * @OA\Property(property="id", type="integer", example=1),
+ * @OA\Property(property="user_id", type="integer", example=5),
+ * @OA\Property(property="scholarship_id", type="integer", example=1),
+ * @OA\Property(property="status", type="string", example="submitted"),
+ * @OA\Property(property="cv_path", type="string", example="scholarship-docs/cv.pdf"),
+ * @OA\Property(property="transcript_path", type="string", example="scholarship-docs/transcript.pdf"),
+ * @OA\Property(property="recommendation_path", type="string", example="scholarship-docs/recommendation.pdf"),
+ * @OA\Property(property="motivation_letter", type="string", nullable=true),
+ * @OA\Property(property="motivation_letter_text", type="string", example="Saya sangat tertarik..."),
+ * @OA\Property(property="gpa", type="number", example=3.75),
+ * @OA\Property(property="has_other_scholarship", type="boolean", example=false),
+ * @OA\Property(property="parent_income", type="integer", example=5000000),
+ * @OA\Property(property="university", type="string", example="Universitas Indonesia"),
+ * @OA\Property(property="submitted_at", type="string", format="datetime", example="2024-12-24T12:30:00Z"),
+ * @OA\Property(property="user", type="object",
+ * @OA\Property(property="id", type="integer", example=5),
+ * @OA\Property(property="name", type="string", example="John Doe"),
+ * @OA\Property(property="email", type="string", example="john@example.com"),
+ * @OA\Property(property="phone", type="string", example="081234567890")
+ * ),
+ * @OA\Property(property="scholarship", type="object",
+ * @OA\Property(property="id", type="integer", example=1),
+ * @OA\Property(property="name", type="string", example="Beasiswa LPDP"),
+ * @OA\Property(property="deadline", type="string", format="date", example="2024-06-30")
+ * )
+ * )
+ * )
+ * ),
+ * @OA\Response(response=401, description="Unauthenticated"),
+ * @OA\Response(response=403, description="Unauthorized - Corporate can only view their own scholarship applications"),
+ * @OA\Response(response=404, description="Application not found")
+ * )
  */
 class ScholarshipSwagger {}
 

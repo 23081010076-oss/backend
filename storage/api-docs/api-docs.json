@@ -3706,8 +3706,8 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Lihat daftar mentor",
-                "description": "Student dapat melihat daftar semua mentor yang tersedia untuk dipilih saat booking mentoring.",
+                "summary": "Lihat daftar mentor (Public)",
+                "description": "Endpoint publik untuk melihat daftar mentor di landing page. Tidak memerlukan autentikasi.",
                 "operationId": "listMentors",
                 "parameters": [
                     {
@@ -3724,6 +3724,14 @@
                         "schema": {
                             "type": "integer",
                             "default": 15
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Cari berdasarkan nama mentor",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 ],
@@ -3806,16 +3814,8 @@
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/mentors/{id}": {
@@ -3823,8 +3823,8 @@
                 "tags": [
                     "Mentoring"
                 ],
-                "summary": "Lihat detail mentor",
-                "description": "Student dapat melihat detail profil mentor termasuk bio, pengalaman, dan keahlian sebelum booking.",
+                "summary": "Lihat detail mentor (Public)",
+                "description": "Endpoint publik untuk melihat detail profil mentor di landing page. Tidak memerlukan autentikasi.",
                 "operationId": "showMentor",
                 "parameters": [
                     {
@@ -3914,12 +3914,7 @@
                     "404": {
                         "description": "Mentor tidak ditemukan (user bukan mentor)"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/mentoring-sessions": {
@@ -8126,6 +8121,346 @@
                     },
                     "422": {
                         "description": "Invalid status"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/scholarship-applications": {
+            "get": {
+                "tags": [
+                    "Scholarship Applications"
+                ],
+                "summary": "Get all scholarship applications (Admin/Corporate)",
+                "description": "Get list of all scholarship applications. Admin can see all, Corporate can only see applications for their own scholarships.",
+                "operationId": "getAllScholarshipApplications",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by application status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "submitted",
+                                "review",
+                                "accepted",
+                                "rejected"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "scholarship_id",
+                        "in": "query",
+                        "description": "Filter by scholarship ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "Filter by user ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by applicant name or email",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of results per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Applications retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Daftar semua lamaran berhasil diambil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "user_id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "scholarship_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "submitted"
+                                                            },
+                                                            "gpa": {
+                                                                "type": "number",
+                                                                "example": 3.75
+                                                            },
+                                                            "university": {
+                                                                "type": "string",
+                                                                "example": "Universitas Indonesia"
+                                                            },
+                                                            "submitted_at": {
+                                                                "type": "string",
+                                                                "format": "datetime",
+                                                                "example": "2024-12-24T12:30:00Z"
+                                                            },
+                                                            "user": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 5
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "John Doe"
+                                                                    },
+                                                                    "email": {
+                                                                        "type": "string",
+                                                                        "example": "john@example.com"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "scholarship": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "Beasiswa LPDP"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized - Only admin and corporate can access"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/scholarship-applications/{id}/detail": {
+            "get": {
+                "tags": [
+                    "Scholarship Applications"
+                ],
+                "summary": "Get application detail by ID (Admin/Corporate)",
+                "description": "Get detailed scholarship application by ID. Admin can see all, Corporate can only see applications for their own scholarships.",
+                "operationId": "getScholarshipApplicationDetail",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Application ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Application detail retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Detail lamaran berhasil diambil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "scholarship_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "submitted"
+                                                },
+                                                "cv_path": {
+                                                    "type": "string",
+                                                    "example": "scholarship-docs/cv.pdf"
+                                                },
+                                                "transcript_path": {
+                                                    "type": "string",
+                                                    "example": "scholarship-docs/transcript.pdf"
+                                                },
+                                                "recommendation_path": {
+                                                    "type": "string",
+                                                    "example": "scholarship-docs/recommendation.pdf"
+                                                },
+                                                "motivation_letter": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "motivation_letter_text": {
+                                                    "type": "string",
+                                                    "example": "Saya sangat tertarik..."
+                                                },
+                                                "gpa": {
+                                                    "type": "number",
+                                                    "example": 3.75
+                                                },
+                                                "has_other_scholarship": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "parent_income": {
+                                                    "type": "integer",
+                                                    "example": 5000000
+                                                },
+                                                "university": {
+                                                    "type": "string",
+                                                    "example": "Universitas Indonesia"
+                                                },
+                                                "submitted_at": {
+                                                    "type": "string",
+                                                    "format": "datetime",
+                                                    "example": "2024-12-24T12:30:00Z"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "john@example.com"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "081234567890"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "scholarship": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Beasiswa LPDP"
+                                                        },
+                                                        "deadline": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "2024-06-30"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized - Corporate can only view their own scholarship applications"
+                    },
+                    "404": {
+                        "description": "Application not found"
                     }
                 },
                 "security": [
