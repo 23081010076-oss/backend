@@ -24,9 +24,16 @@ class StoreCurriculumRequest extends FormRequest
             'description' => 'nullable|string',
             'order' => 'nullable|integer|min:0',
             'duration' => 'nullable|string|max:100',
-            'section'=> 'required|string|max:255',
-            'video_url'=> 'required|string|max:255',
-            'section_order'=> 'required|integer|min:0',
+            
+            // Section (optional, auto-generated if not provided)
+            'section' => 'nullable|string|max:50',
+            
+            // Parent section untuk nested structure (optional)
+            // Format: "1" untuk root, "1.1" untuk sub, "1.1.1" untuk sub-sub
+            'parent_section' => 'nullable|string|max:50',
+            
+            'video_url' => 'nullable|url|max:500',
+            'section_order' => 'nullable|integer|min:0',
         ];
     }
 
@@ -40,11 +47,10 @@ class StoreCurriculumRequest extends FormRequest
             'title.max' => 'Judul kurikulum maksimal 255 karakter',
             'order.integer' => 'Urutan harus berupa angka',
             'order.min' => 'Urutan minimal 0',
-            'section.required' => 'Section wajib diisi',
-            'section.max' => 'Section maksimal 255 karakter',
-            'video_url.required' => 'Video URL wajib diisi',
-            'video_url.max' => 'Video URL maksimal 255 karakter',
-            'section_order.required' => 'Section Order wajib diisi',
+            'section.max' => 'Section maksimal 50 karakter',
+            'parent_section.max' => 'Parent section maksimal 50 karakter',
+            'video_url.url' => 'Video URL harus berupa URL yang valid',
+            'video_url.max' => 'Video URL maksimal 500 karakter',
             'section_order.integer' => 'Section Order harus berupa angka',
             'section_order.min' => 'Section Order minimal 0',
         ];

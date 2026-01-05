@@ -2300,30 +2300,43 @@
                     "Curriculum"
                 ],
                 "summary": "List semua kurikulum course",
-                "description": "Menampilkan daftar materi pembelajaran untuk course tertentu, diurutkan berdasarkan section dan order",
+                "description": "Menampilkan daftar materi pembelajaran untuk course tertentu. **Supports nested sub-bab structure**: Use `?nested=true` to get hierarchical tree structure with unlimited depth (Bab > Sub Bab > Sub Sub Bab). Section numbering: '1' (root), '1.1' (sub), '1.1.1' (sub-sub), etc. Default returns flat list sorted by section_order.",
                 "operationId": "getCurriculums",
                 "parameters": [
                     {
                         "name": "courseId",
                         "in": "path",
+                        "description": "ID of the course",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "nested",
+                        "in": "query",
+                        "description": "Return nested tree structure with children. Default is flat list.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false,
+                            "example": false
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Daftar kurikulum berhasil diambil",
+                        "description": "Daftar kurikulum berhasil diambil (Flat or Nested structure)",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "sukses": {
+                                        "success": {
                                             "type": "boolean",
                                             "example": true
                                         },
-                                        "pesan": {
+                                        "message": {
                                             "type": "string",
                                             "example": "Daftar kurikulum berhasil diambil"
                                         },
@@ -2340,12 +2353,14 @@
                                                         "example": 1
                                                     },
                                                     "section": {
+                                                        "description": "Section number: '1' (root), '1.1' (sub), '1.1.1' (sub-sub)",
                                                         "type": "string",
-                                                        "example": "Bab 1: Dasar-dasar Web"
+                                                        "example": "1"
                                                     },
                                                     "section_order": {
+                                                        "description": "Auto-calculated for sorting",
                                                         "type": "integer",
-                                                        "example": 1
+                                                        "example": 1000000
                                                     },
                                                     "title": {
                                                         "type": "string",
@@ -2353,19 +2368,39 @@
                                                     },
                                                     "description": {
                                                         "type": "string",
-                                                        "example": "Memahami dasar-dasar web"
+                                                        "example": "Bab 1: Memahami dasar-dasar web"
                                                     },
                                                     "order": {
+                                                        "description": "Order within same section",
                                                         "type": "integer",
                                                         "example": 1
                                                     },
                                                     "duration": {
                                                         "type": "string",
-                                                        "example": "2 jam"
+                                                        "example": "30 menit"
                                                     },
                                                     "video_url": {
                                                         "type": "string",
-                                                        "example": "https://youtube.com/embed/pengenalan-web"
+                                                        "example": "https://youtube.com/embed/video-id",
+                                                        "nullable": true
+                                                    },
+                                                    "level": {
+                                                        "description": "Depth level: 0=root, 1=sub, 2=sub-sub",
+                                                        "type": "integer",
+                                                        "example": 0
+                                                    },
+                                                    "is_parent": {
+                                                        "description": "Has children or not",
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "children": {
+                                                        "description": "Only present if nested=true",
+                                                        "type": "array",
+                                                        "items": {
+                                                            "description": "Same structure, recursive",
+                                                            "type": "object"
+                                                        }
                                                     }
                                                 },
                                                 "type": "object"
@@ -2376,6 +2411,9 @@
                                 }
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Course not found"
                     }
                 },
                 "security": [
@@ -2388,16 +2426,18 @@
                 "tags": [
                     "Curriculum"
                 ],
-                "summary": "Tambah kurikulum baru",
-                "description": "Menambahkan satu materi pembelajaran baru ke course (Admin only)",
+                "summary": "Tambah kurikulum baru (Support Nested Sub-bab)",
+                "description": "Menambahkan materi pembelajaran baru ke course dengan support **nested structure**. **Auto-generate section number** if not provided. Use `parent_section` to create sub-bab: null/empty = root level ('1','2','3'), '1' = sub of 1 ('1.1','1.2'), '1.1' = sub of 1.1 ('1.1.1','1.1.2'), etc. Unlimited depth supported. (Admin only)",
                 "operationId": "createCurriculum",
                 "parameters": [
                     {
                         "name": "courseId",
                         "in": "path",
+                        "description": "ID of the course",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
@@ -2410,33 +2450,50 @@
                                     "title"
                                 ],
                                 "properties": {
-                                    "section": {
-                                        "type": "string",
-                                        "example": "Bab 1: Pengenalan"
-                                    },
-                                    "section_order": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
                                     "title": {
+                                        "description": "Title of curriculum item (required)",
                                         "type": "string",
-                                        "example": "Materi Baru"
+                                        "example": "Pengenalan HTML"
                                     },
                                     "description": {
                                         "type": "string",
-                                        "example": "Deskripsi materi"
+                                        "example": "Mempelajari dasar-dasar HTML",
+                                        "nullable": true
                                     },
                                     "duration": {
                                         "type": "string",
-                                        "example": "30 menit"
+                                        "example": "30 menit",
+                                        "nullable": true
                                     },
                                     "video_url": {
+                                        "description": "Video URL (optional)",
                                         "type": "string",
-                                        "example": "https://youtube.com/embed/materi-baru"
+                                        "example": "https://youtube.com/embed/video-id",
+                                        "nullable": true
+                                    },
+                                    "parent_section": {
+                                        "description": "Parent section number for nested structure. null=root, '1'=sub of 1, '1.1'=sub of 1.1. Section will be auto-generated.",
+                                        "type": "string",
+                                        "example": "1",
+                                        "nullable": true
+                                    },
+                                    "section": {
+                                        "description": "Custom section number (optional, auto-generated if not provided)",
+                                        "type": "string",
+                                        "example": "1.2",
+                                        "nullable": true
+                                    },
+                                    "section_order": {
+                                        "description": "Auto-calculated if not provided",
+                                        "type": "integer",
+                                        "example": 1002000,
+                                        "nullable": true
                                     },
                                     "order": {
+                                        "description": "Order within same section (auto-generated if not provided)",
                                         "type": "integer",
-                                        "example": 1
+                                        "example": 1,
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -2446,13 +2503,64 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Kurikulum berhasil ditambahkan"
+                        "description": "Kurikulum berhasil ditambahkan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kurikulum berhasil ditambahkan"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "section": {
+                                                    "description": "Auto-generated section number",
+                                                    "type": "string",
+                                                    "example": "1.1"
+                                                },
+                                                "section_order": {
+                                                    "type": "integer",
+                                                    "example": 1001000
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Pengenalan HTML"
+                                                },
+                                                "level": {
+                                                    "description": "Depth: 0=root, 1=sub, 2=sub-sub",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "is_parent": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "Unauthenticated"
                     },
                     "403": {
                         "description": "Forbidden - Admin only"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [

@@ -36,19 +36,32 @@ class CourseCurriculumController extends Controller
 
     /**
      * Tampilkan semua kurikulum untuk course tertentu
+     * 
+     * Query params:
+     * - nested=true : Return nested structure (with children)
+     * - flat=true : Return flat list (default)
      */
-    public function index(int $courseId): JsonResponse
+    public function index(Request $request, int $courseId): JsonResponse
     {
         // Pastikan course ada
         Course::findOrFail($courseId);
 
-        $curriculums = $this->curriculumService->getCurriculumsByCourse($courseId);
+        $nested = $request->boolean('nested', false);
+        $curriculums = $this->curriculumService->getCurriculumsByCourse($courseId, $nested);
 
-        return $this->successResponse($curriculums, 'Daftar kurikulum berhasil diambil');
+        $message = $nested 
+            ? 'Kurikulum dengan struktur nested berhasil diambil'
+            : 'Daftar kurikulum berhasil diambil';
+
+        return $this->successResponse($curriculums, $message);
     }
 
     /**
      * Tambah kurikulum baru
+     * 
+     * Request body dapat include:
+     * - parent_section: "1" atau "1.1" untuk membuat sub-bab
+     * - section: Custom section number (optional, auto-generated if not provided)
      */
     public function store(StoreCurriculumRequest $request, int $courseId): JsonResponse
     {
@@ -58,10 +71,21 @@ class CourseCurriculumController extends Controller
         // Cek akses dengan Policy
         $this->authorize('update', $course);
 
+        $data = $request->validated();
+
+        // Handle parent_section untuk auto-generate section
+        if ($request->has('parent_section') && !isset($data['section'])) {
+            $parentSection = $request->input('parent_section');
+            $data['section'] = $this->curriculumService->generateNextSection($courseId, $parentSection);
+        }
+
         $curriculum = $this->curriculumService->createCurriculum(
             $courseId,
-            $request->validated()
+            $data
         );
+
+        // Load level and is_parent attributes
+        $curriculum = $curriculum->fresh();
 
         return $this->createdResponse($curriculum, 'Kurikulum berhasil ditambahkan');
     }
