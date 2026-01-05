@@ -287,10 +287,18 @@ class ScholarshipService
             'status'         => 'draft',
         ];
 
-        // Handle file uploads
-        if (!empty($files['cv_path'])) {
+        // Handle CV from profile
+        if (!empty($data['cv_from_profile']) && $data['cv_from_profile'] === true || $data['cv_from_profile'] === 'true' || $data['cv_from_profile'] === '1') {
+            if (!empty($user->cv_path)) {
+                $applicationData['cv_path'] = $user->cv_path;
+            } else {
+                throw new \Exception('CV belum tersedia di profil Anda. Silakan upload CV di profil terlebih dahulu.');
+            }
+        } elseif (!empty($files['cv_path'])) {
             $applicationData['cv_path'] = $files['cv_path']->store('scholarship-docs', 'public');
         }
+
+        // Handle file uploads
         if (!empty($files['transcript_path'])) {
             $applicationData['transcript_path'] = $files['transcript_path']->store('scholarship-docs', 'public');
         }
@@ -314,7 +322,7 @@ class ScholarshipService
      *
      * @throws \Exception jika bukan draft
      */
-    public function updateDraft(ScholarshipApplication $application, array $files = [], array $data = []): ScholarshipApplication
+    public function updateDraft(ScholarshipApplication $application, array $files = [], array $data = [], ?User $user = null): ScholarshipApplication
     {
         if ($application->status !== 'draft') {
             throw new \Exception('Hanya draft yang bisa diupdate');
@@ -322,14 +330,24 @@ class ScholarshipService
 
         $updateData = [];
 
-        // Handle file uploads (replace old files)
-        if (!empty($files['cv_path'])) {
-            // Delete old file if exists
-            if ($application->cv_path) {
+        // Handle CV from profile
+        if (!empty($data['cv_from_profile']) && ($data['cv_from_profile'] === true || $data['cv_from_profile'] === 'true' || $data['cv_from_profile'] === '1')) {
+            $user = $user ?? User::find($application->user_id);
+            if (!empty($user->cv_path)) {
+                // Don't delete old file if it's from profile (shared file)
+                $updateData['cv_path'] = $user->cv_path;
+            } else {
+                throw new \Exception('CV belum tersedia di profil Anda. Silakan upload CV di profil terlebih dahulu.');
+            }
+        } elseif (!empty($files['cv_path'])) {
+            // Delete old file if exists and it's not a profile CV
+            if ($application->cv_path && !$this->isProfileCv($application)) {
                 Storage::disk('public')->delete($application->cv_path);
             }
             $updateData['cv_path'] = $files['cv_path']->store('scholarship-docs', 'public');
         }
+
+        // Handle file uploads (replace old files)
         if (!empty($files['transcript_path'])) {
             if ($application->transcript_path) {
                 Storage::disk('public')->delete($application->transcript_path);
@@ -359,6 +377,15 @@ class ScholarshipService
         }
 
         return $application->fresh();
+    }
+
+    /**
+     * Check if application CV is from user profile
+     */
+    private function isProfileCv(ScholarshipApplication $application): bool
+    {
+        $user = User::find($application->user_id);
+        return $user && $user->cv_path === $application->cv_path;
     }
 
     /**

@@ -7530,8 +7530,12 @@
                         "multipart/form-data": {
                             "schema": {
                                 "properties": {
+                                    "cv_from_profile": {
+                                        "description": "Set to true to use CV from user profile instead of uploading",
+                                        "type": "boolean"
+                                    },
                                     "cv_path": {
-                                        "description": "CV file (PDF) - Required for submit",
+                                        "description": "CV file (PDF) - Required if cv_from_profile is false",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -7871,6 +7875,10 @@
                         "multipart/form-data": {
                             "schema": {
                                 "properties": {
+                                    "cv_from_profile": {
+                                        "description": "Set to true to use CV from user profile instead of uploading",
+                                        "type": "boolean"
+                                    },
                                     "cv_path": {
                                         "description": "CV file (PDF)",
                                         "type": "string",

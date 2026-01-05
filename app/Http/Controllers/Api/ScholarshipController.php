@@ -284,7 +284,7 @@ class ScholarshipController extends Controller
                 $scholarship,
                 Auth::user(),
                 $request->allFiles(),
-                $request->only(['motivation_letter_text'])
+                $request->only(['motivation_letter_text', 'cv_from_profile'])
             );
 
             return $this->createdResponse($application, 'Draft lamaran berhasil disimpan');
@@ -356,7 +356,8 @@ class ScholarshipController extends Controller
             $application = $this->scholarshipService->updateDraft(
                 $application,
                 $request->allFiles(),
-                $request->only(['motivation_letter_text'])
+                $request->only(['motivation_letter_text', 'cv_from_profile']),
+                Auth::user()
             );
 
             return $this->successResponse($application, 'Draft lamaran berhasil diupdate');

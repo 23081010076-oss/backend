@@ -246,7 +246,8 @@ namespace App\Swagger;
  * @OA\MediaType(
  * mediaType="multipart/form-data",
  * @OA\Schema(
- * @OA\Property(property="cv_path", type="string", format="binary", description="CV file (PDF) - Required for submit"),
+ * @OA\Property(property="cv_from_profile", type="boolean", description="Set to true to use CV from user profile instead of uploading"),
+ * @OA\Property(property="cv_path", type="string", format="binary", description="CV file (PDF) - Required if cv_from_profile is false"),
  * @OA\Property(property="transcript_path", type="string", format="binary", description="Grade transcript (PDF)"),
  * @OA\Property(property="recommendation_path", type="string", format="binary", description="Recommendation letter (PDF/DOC)"),
  * @OA\Property(property="motivation_letter", type="string", format="binary", description="Motivation letter file (PDF/DOC) - optional if using text"),
@@ -376,6 +377,7 @@ namespace App\Swagger;
  * @OA\MediaType(
  * mediaType="multipart/form-data",
  * @OA\Schema(
+ * @OA\Property(property="cv_from_profile", type="boolean", description="Set to true to use CV from user profile instead of uploading"),
  * @OA\Property(property="cv_path", type="string", format="binary", description="CV file (PDF)"),
  * @OA\Property(property="transcript_path", type="string", format="binary", description="Grade transcript (PDF)"),
  * @OA\Property(property="recommendation_path", type="string", format="binary", description="Recommendation letter (PDF/DOC)"),
