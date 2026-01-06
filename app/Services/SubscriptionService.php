@@ -46,14 +46,25 @@ class SubscriptionService
                 ->first();
 
             if ($existingSubscription) {
-                $planName = ucfirst($existingSubscription->plan);
-                $endDate = \Carbon\Carbon::parse($existingSubscription->end_date)->format('d M Y');
-                
-                // Provide specific message based on current plan
-                if ($existingSubscription->plan === 'premium') {
-                    throw new InvalidArgumentException("Anda sudah berlangganan paket {$planName} (paket tertinggi) hingga {$endDate}. Tidak perlu berlangganan lagi.");
+                // ✅ EXCEPTION: Allow upgrading from Free plan by creating new subscription
+                // Free plan can be replaced because it's a default/trial plan
+                if ($existingSubscription->plan === 'free') {
+                    // Cancel old Free subscription before creating new one
+                    $existingSubscription->update(['status' => 'cancelled']);
+                    Log::info('Free subscription cancelled for upgrade', [
+                        'old_subscription_id' => $existingSubscription->id,
+                        'user_id' => $user->id,
+                    ]);
                 } else {
-                    throw new InvalidArgumentException("Anda sudah berlangganan paket {$planName} hingga {$endDate}. Jika ingin upgrade, gunakan fitur Upgrade Subscription.");
+                    // For paid plans (regular, premium), must use upgrade endpoint
+                    $planName = ucfirst($existingSubscription->plan);
+                    $endDate = \Carbon\Carbon::parse($existingSubscription->end_date)->format('d M Y');
+                    
+                    if ($existingSubscription->plan === 'premium') {
+                        throw new InvalidArgumentException("Anda sudah berlangganan paket {$planName} (paket tertinggi) hingga {$endDate}. Tidak perlu berlangganan lagi.");
+                    } else {
+                        throw new InvalidArgumentException("Anda sudah berlangganan paket {$planName} hingga {$endDate}. Jika ingin upgrade, gunakan fitur Upgrade Subscription.");
+                    }
                 }
             }
 
