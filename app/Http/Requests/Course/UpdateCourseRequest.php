@@ -28,6 +28,14 @@ class UpdateCourseRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Cek apakah image adalah file atau string
+        $imageRules = 'nullable';
+        if ($this->hasFile('image')) {
+            $imageRules .= '|file|mimes:jpeg,jpg,png,webp,gif|max:5120'; // max 5MB
+        } else {
+            $imageRules .= '|string';
+        }
+
         return [
             'title'           => 'sometimes|string|max:255',
             'category'        => 'nullable|string|max:100',
@@ -38,7 +46,7 @@ class UpdateCourseRequest extends FormRequest
             'price'           => 'nullable|numeric|min:0',
             'access_type'     => 'sometimes|in:free,regular,premium',
             'certificate_url' => 'nullable|string',
-            'image'           => 'nullable|string|url',
+            'image'           => $imageRules,
             'video_file'      => 'nullable|file|mimes:mp4,avi,mov,mkv,flv|max:524288',
             'video_url'       => 'nullable|string|url',
             'video_duration'  => 'nullable|string',
@@ -59,6 +67,9 @@ class UpdateCourseRequest extends FormRequest
             'access_type.in'   => 'Tipe akses harus free, regular, atau premium',
             'price.numeric'    => 'Harga harus berupa angka',
             'price.min'        => 'Harga tidak boleh negatif',
+            'image.file'       => 'Gambar harus berupa file',
+            'image.mimes'      => 'Format gambar harus JPG, PNG, WEBP, atau GIF',
+            'image.max'        => 'Ukuran gambar maksimal 5MB',
             'video_file.file'  => 'Video harus berupa file',
             'video_file.mimes' => 'Format video harus mp4, avi, mov, mkv, atau flv',
             'video_file.max'   => 'Ukuran video maksimal 512MB',
