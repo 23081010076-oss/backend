@@ -20,6 +20,134 @@
         }
     ],
     "paths": {
+        "/api/subscription/upgrade": {
+            "post": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Upgrade active subscription (simplified)",
+                "description": "Automatically upgrade your currently active subscription to a new plan. Status will be 'pending' until admin/student activates it.",
+                "operationId": "f19b99ab2edcef1a7724eb861c51f9f0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "plan_id"
+                                ],
+                                "properties": {
+                                    "plan_id": {
+                                        "description": "ID of new plan to upgrade to",
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Upgrade successful, awaiting activation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Upgrade berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengaktifkan paket baru Anda."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "user_id": {
+                                                    "type": "integer"
+                                                },
+                                                "plan_id": {
+                                                    "type": "integer"
+                                                },
+                                                "plan": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "start_date": {
+                                                    "type": "string",
+                                                    "format": "date"
+                                                },
+                                                "end_date": {
+                                                    "type": "string",
+                                                    "format": "date"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No active subscription found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No active subscription found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/articles": {
             "get": {
                 "tags": [

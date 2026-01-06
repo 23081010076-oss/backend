@@ -138,6 +138,11 @@ Route::middleware('auth:api')->group(function () {
     
     Route::get('/my-subscriptions', [SubscriptionController::class, 'mySubscriptions'])->name('my-subscriptions');
     Route::get('/subscription-status', [SubscriptionController::class, 'checkStatus'])->name('subscription-status');
+    
+    // Simplified upgrade endpoint (automatically finds active subscription)
+    Route::post('/subscription/upgrade', [SubscriptionController::class, 'upgradeMySubscription'])
+        ->name('subscription.upgrade-simple');
+    
     Route::apiResource('subscriptions', SubscriptionController::class);
     Route::post('/subscriptions/{id}/upgrade', [SubscriptionController::class, 'upgrade'])
         ->name('subscriptions.upgrade');

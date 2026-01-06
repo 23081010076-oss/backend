@@ -212,6 +212,112 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Upgrade user's active subscription to a new plan (simplified version)
+     * Automatically finds user's active subscription without requiring subscription ID
+     *
+     * @OA\Post(
+     *     path="/api/subscription/upgrade",
+     *     tags={"Subscriptions"},
+     *     summary="Upgrade active subscription (simplified)",
+     *     description="Automatically upgrade your currently active subscription to a new plan. Status will be 'pending' until admin/student activates it.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"plan_id"},
+     *             @OA\Property(property="plan_id", type="integer", example=2, description="ID of new plan to upgrade to")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Upgrade successful, awaiting activation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Upgrade berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengaktifkan paket baru Anda."),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="user_id", type="integer"),
+     *                 @OA\Property(property="plan_id", type="integer"),
+     *                 @OA\Property(property="plan", type="string"),
+     *                 @OA\Property(property="status", type="string"),
+     *                 @OA\Property(property="start_date", type="string", format="date"),
+     *                 @OA\Property(property="end_date", type="string", format="date")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No active subscription found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="No active subscription found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function upgradeMySubscription(Request $request): JsonResponse
+    {
+        try {
+            $user = auth()->user();
+            
+            // Find user's active subscription automatically
+            $activeSubscription = Subscription::where('user_id', $user->id)
+                ->where('status', 'active')
+                ->first();
+            
+            if (!$activeSubscription) {
+                return $this->errorResponse(
+                    'No active subscription found. Please subscribe to a plan first.',
+                    null,
+                    404
+                );
+            }
+            
+            // Validate plan_id
+            $request->validate([
+                'plan_id' => 'required|integer|exists:plans,id'
+            ]);
+            
+            Log::info('User upgrading their active subscription', [
+                'user_id' => $user->id,
+                'active_subscription_id' => $activeSubscription->id,
+                'current_plan' => $activeSubscription->plan,
+                'new_plan_id' => $request->plan_id
+            ]);
+            
+            // Use existing upgrade service method
+            $subscription = $this->subscriptionService->upgradeSubscription(
+                $activeSubscription->id,
+                $request->plan_id
+            );
+
+            return $this->successResponse(
+                $subscription, 
+                'Upgrade berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengaktifkan paket baru Anda.'
+            );
+        } catch (\InvalidArgumentException $e) {
+            return $this->validationErrorResponse(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            Log::error('Subscription upgrade failed', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Failed to upgrade subscription');
+        }
+    }
+
+    /**
      * Check user's current subscription status
      * Returns active subscription info and available upgrade options
      *
