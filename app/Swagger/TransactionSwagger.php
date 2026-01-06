@@ -102,7 +102,7 @@ namespace App\Swagger;
  * @OA\Post(
  *     path="/api/subscriptions",
  *     summary="Create a subscription",
- *     description="Subscribe to a chosen plan with payment method selection (manual, bank_transfer, atau qris). Jika qris, akan generate QR code otomatis.",
+ *     description="Subscribe to a chosen plan with payment method selection (manual, bank_transfer, atau qris). Jika qris, akan generate QR code otomatis. **Important:** Subscription will be created with status 'pending' and requires admin activation via `/api/subscriptions/{id}/activate` endpoint. **Note:** If user already has 'Free' plan, it will be automatically cancelled and replaced with new subscription. For paid plans (Regular/Premium), must use `/api/subscriptions/{id}/upgrade` endpoint instead.",
  *     operationId="createSubscription",
  *     tags={"Subscriptions"},
  *     security={{"bearerAuth":{}}},
@@ -129,14 +129,18 @@ namespace App\Swagger;
  *     ),
  *     @OA\Response(
  *         response=201,
- *         description="Subscription created successfully",
+ *         description="Subscription created successfully with status 'pending'. Admin must activate via activate endpoint.",
  *         @OA\JsonContent(
  *             @OA\Property(property="success", type="boolean", example=true),
  *             @OA\Property(property="message", type="string", example="Subscription created successfully"),
  *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="plan", type="string", example="premium"),
- *                 @OA\Property(property="status", type="string", example="active"),
+ *                 @OA\Property(property="subscription", type="object",
+ *                     @OA\Property(property="id", type="integer", example=1),
+ *                     @OA\Property(property="plan", type="string", example="premium"),
+ *                     @OA\Property(property="status", type="string", example="pending", description="Always 'pending' until admin activates"),
+ *                     @OA\Property(property="start_date", type="string", format="date", example="2025-12-03"),
+ *                     @OA\Property(property="end_date", type="string", format="date", example="2026-12-03")
+ *                 ),
  *                 @OA\Property(property="transaction", type="object",
  *                     @OA\Property(property="id", type="integer", example=123),
  *                     @OA\Property(property="transaction_code", type="string", example="TRX-20251224-XYZ789"),
@@ -147,6 +151,18 @@ namespace App\Swagger;
  *                     @OA\Property(property="qr_string", type="string", nullable=true, example="ID.MERCHANT.TRX-20251224-XYZ789.500000", description="Data QR code (hanya untuk qris)")
  *                 )
  *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Validation error - Already has active paid subscription",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=false),
+ *             @OA\Property(property="pesan", type="string", example="Data tidak valid"),
+ *             @OA\Property(property="errors", type="object",
+ *                 @OA\Property(property="error", type="string", example="Anda sudah berlangganan paket Regular hingga 01 Jan 2027. Jika ingin upgrade, gunakan fitur Upgrade Subscription.")
+ *             ),
+ *             description="This error occurs when user has active Regular/Premium subscription. Free subscriptions are automatically cancelled."
  *         )
  *     )
  * )

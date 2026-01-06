@@ -9206,7 +9206,7 @@
                     "Subscriptions"
                 ],
                 "summary": "Create a subscription",
-                "description": "Subscribe to a chosen plan with payment method selection (manual, bank_transfer, atau qris). Jika qris, akan generate QR code otomatis.",
+                "description": "Subscribe to a chosen plan with payment method selection (manual, bank_transfer, atau qris). Jika qris, akan generate QR code otomatis. **Important:** Subscription will be created with status 'pending' and requires admin activation via `/api/subscriptions/{id}/activate` endpoint. **Note:** If user already has 'Free' plan, it will be automatically cancelled and replaced with new subscription. For paid plans (Regular/Premium), must use `/api/subscriptions/{id}/upgrade` endpoint instead.",
                 "operationId": "createSubscription",
                 "requestBody": {
                     "required": true,
@@ -9294,7 +9294,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Subscription created successfully",
+                        "description": "Subscription created successfully with status 'pending'. Admin must activate via activate endpoint.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -9309,17 +9309,33 @@
                                         },
                                         "data": {
                                             "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "plan": {
-                                                    "type": "string",
-                                                    "example": "premium"
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "active"
+                                                "subscription": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "plan": {
+                                                            "type": "string",
+                                                            "example": "premium"
+                                                        },
+                                                        "status": {
+                                                            "description": "Always 'pending' until admin activates",
+                                                            "type": "string",
+                                                            "example": "pending"
+                                                        },
+                                                        "start_date": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "2025-12-03"
+                                                        },
+                                                        "end_date": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "2026-12-03"
+                                                        }
+                                                    },
+                                                    "type": "object"
                                                 },
                                                 "transaction": {
                                                     "properties": {
@@ -9357,6 +9373,36 @@
                                                         }
                                                     },
                                                     "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error - Already has active paid subscription",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "description": "This error occurs when user has active Regular/Premium subscription. Free subscriptions are automatically cancelled.",
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Data tidak valid"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "error": {
+                                                    "type": "string",
+                                                    "example": "Anda sudah berlangganan paket Regular hingga 01 Jan 2027. Jika ingin upgrade, gunakan fitur Upgrade Subscription."
                                                 }
                                             },
                                             "type": "object"
