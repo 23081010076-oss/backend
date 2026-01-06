@@ -62,7 +62,8 @@ class TransactionService
                     ]);
                 }
             ])
-            ->where('user_id', $userId);
+            ->where('user_id', $userId)
+            ->whereNotNull('payment_proof'); // ✅ FIX: Only show transactions with payment proof uploaded
 
         // Filter berdasarkan tipe
         if (!empty($filters['type'])) {
