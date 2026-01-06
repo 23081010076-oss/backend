@@ -410,4 +410,25 @@ class ScholarshipController extends Controller
             return $this->errorResponse($e->getMessage(), 422);
         }
     }
+
+    /**
+     * Rekomendasi beasiswa berdasarkan specialization user dan yang terbaru
+     * 
+     * Endpoint: GET /api/scholarships/recommendations
+     * 
+     * Algoritma:
+     * 1. Beasiswa yang masih open (status = 'open')
+     * 2. Beasiswa yang terbaru (berdasarkan created_at DESC)
+     * 3. Relevansi dengan specialization user (study_field match)
+     * 4. Exclude beasiswa yang sudah dilamar
+     */
+    public function recommendations(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        $limit = $request->input('limit', 5);
+        
+        $recommendations = $this->scholarshipService->getRecommendations($user, $limit);
+        
+        return $this->successResponse($recommendations, 'Rekomendasi beasiswa berhasil diambil');
+    }
 }

@@ -190,6 +190,9 @@ Route::middleware('auth:api')->group(function () {
     
     // SCHOLARSHIPS
     
+    // Scholarship recommendations (berdasarkan specialization dan terbaru)
+    Route::get('/scholarships/recommendations', [ScholarshipController::class, 'recommendations'])->name('scholarships.recommendations');
+    
     // User's own scholarships (untuk corporate melihat beasiswa sendiri)
     Route::get('/my-scholarships', [ScholarshipController::class, 'myScholarships'])->name('my-scholarships');
     

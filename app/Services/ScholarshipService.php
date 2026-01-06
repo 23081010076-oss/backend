@@ -471,6 +471,125 @@ class ScholarshipService
     }
 
     /**
+     * Dapatkan rekomendasi beasiswa berdasarkan:
+     * 1. Status open (prioritas utama), coming_soon (prioritas terakhir)
+     * 2. Terbaru (created_at DESC)
+     * 3. Relevansi dengan specialization user (match study_field)
+     * 4. Exclude yang sudah dilamar dan yang closed
+     * 
+     * @param User $user
+     * @param int $limit
+     * @return array [scholarships, criteria]
+     */
+    public function getRecommendations(User $user, int $limit = 5): array
+    {
+        // Get scholarship IDs yang sudah dilamar user
+        $appliedScholarshipIds = ScholarshipApplication::where('user_id', $user->id)
+            ->pluck('scholarship_id')
+            ->toArray();
+        
+        // Get user specialization untuk matching
+        $specializations = $user->specialization ?? [];
+        $major = $user->major;
+        
+        // Build query dasar - hanya scholarship yang open atau coming_soon, exclude closed dan yang sudah dilamar
+        $query = Scholarship::with(['organization'])
+            ->withCount('applications')
+            ->whereIn('status', ['open', 'coming_soon'])
+            ->whereNotIn('id', $appliedScholarshipIds);
+        
+        // Jika user punya specialization, gunakan scoring system
+        if (!empty($specializations) || $major) {
+            // Build CASE WHEN untuk scoring
+            $caseClauses = [];
+            $bindings = [];
+            
+            // Specialization matching (prioritas tinggi: 100-80 points)
+            if (!empty($specializations)) {
+                foreach ($specializations as $index => $spec) {
+                    $score = 100 - ($index * 10); // 100, 90, 80, ...
+                    
+                    // Match di study_field (exact atau partial)
+                    $caseClauses[] = "WHEN LOWER(study_field) LIKE ? THEN {$score}";
+                    $bindings[] = '%' . strtolower($spec) . '%';
+                    
+                    // Match di name
+                    $caseClauses[] = "WHEN LOWER(name) LIKE ? THEN " . ($score - 10);
+                    $bindings[] = '%' . strtolower($spec) . '%';
+                    
+                    // Match di description
+                    $caseClauses[] = "WHEN LOWER(description) LIKE ? THEN " . ($score - 20);
+                    $bindings[] = '%' . strtolower($spec) . '%';
+                }
+            }
+            
+            // Major matching (prioritas sedang: 50-30 points)
+            if ($major) {
+                $caseClauses[] = "WHEN LOWER(study_field) LIKE ? THEN 50";
+                $bindings[] = '%' . strtolower($major) . '%';
+                
+                $caseClauses[] = "WHEN LOWER(name) LIKE ? THEN 40";
+                $bindings[] = '%' . strtolower($major) . '%';
+                
+                $caseClauses[] = "WHEN LOWER(description) LIKE ? THEN 30";
+                $bindings[] = '%' . strtolower($major) . '%';
+            }
+            
+            if (!empty($caseClauses)) {
+                $caseStatement = "CASE " . implode(" ", $caseClauses) . " ELSE 0 END";
+                
+                $recommendations = $query
+                    ->selectRaw("scholarships.*, ({$caseStatement}) as relevance_score", $bindings)
+                    ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END") // Open dulu, coming_soon terakhir
+                    ->orderByRaw('relevance_score DESC')
+                    ->orderBy('created_at', 'desc') // Terbaru sebagai prioritas kedua
+                    ->orderBy('applications_count', 'desc') // Popularity sebagai prioritas ketiga
+                    ->limit($limit)
+                    ->get();
+            } else {
+                $recommendations = $query
+                    ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END") // Open dulu, coming_soon terakhir
+                    ->orderBy('created_at', 'desc')
+                    ->orderBy('applications_count', 'desc')
+                    ->limit($limit)
+                    ->get();
+            }
+        } else {
+            // Jika tidak ada specialization/major, urutkan berdasarkan status, terbaru dan popularity
+            $recommendations = $query
+                ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END") // Open dulu, coming_soon terakhir
+                ->orderBy('created_at', 'desc')
+                ->orderBy('applications_count', 'desc')
+                ->limit($limit)
+                ->get();
+        }
+        
+        // Fallback jika tidak ada hasil
+        if ($recommendations->isEmpty()) {
+            $recommendations = Scholarship::with(['organization'])
+                ->withCount('applications')
+                ->whereIn('status', ['open', 'coming_soon'])
+                ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END") // Open dulu, coming_soon terakhir
+                ->orderBy('created_at', 'desc')
+                ->orderBy('applications_count', 'desc')
+                ->limit($limit)
+                ->get();
+        }
+        
+        return [
+            'recommendations' => $recommendations,
+            'criteria' => [
+                'specializations' => $specializations,
+                'major' => $major ?? 'not_specified',
+                'excluded_applied' => count($appliedScholarshipIds),
+                'status_filter' => 'open, coming_soon',
+                'status_priority' => 'open first, coming_soon last',
+                'algorithm' => 'status_priority + specialization_score + recency + popularity',
+            ],
+        ];
+    }
+
+    /**
      * Clear semua cache scholarships
      */
     public function clearCache(): void
