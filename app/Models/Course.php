@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class Course extends Model
 {
@@ -29,6 +30,22 @@ class Course extends Model
     protected $casts = [
         'price' => 'decimal:2',
     ];
+
+    
+    public function getImageAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        // If already a full URL (http or https), return as-is
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        // Otherwise, generate storage URL
+        return url(Storage::url($value));
+    }
 
     /**
      * Append calculated attributes to JSON/array output
