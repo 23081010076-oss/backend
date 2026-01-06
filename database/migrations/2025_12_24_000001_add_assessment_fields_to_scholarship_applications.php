@@ -32,6 +32,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Update draft ke submitted sebelum mengubah ENUM (agar tidak error data truncated)
+        DB::statement("UPDATE scholarship_applications SET status = 'submitted' WHERE status = 'draft'");
+        
         // Kembalikan enum status ke semula
         DB::statement("ALTER TABLE scholarship_applications MODIFY COLUMN status ENUM('submitted','review','accepted','rejected') DEFAULT 'submitted'");
 
