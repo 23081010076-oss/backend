@@ -245,6 +245,15 @@ class UserController extends Controller
         
         $mentorWithDetails = $this->userService->getUserWithDetails($id);
 
-        return $this->successResponse($mentorWithDetails, 'Detail mentor berhasil diambil');
+        // Add mentoring prices to response
+        $mentoringPrices = [
+            'academic'  => 150000,
+            'life_plan' => 200000,
+        ];
+
+        $response = $mentorWithDetails->toArray();
+        $response['mentoring_prices'] = $mentoringPrices;
+
+        return $this->successResponse($response, 'Detail mentor berhasil diambil');
     }
 }

@@ -3932,7 +3932,7 @@
                     "Mentoring"
                 ],
                 "summary": "Lihat detail mentor (Public)",
-                "description": "Endpoint publik untuk melihat detail profil mentor di landing page. Tidak memerlukan autentikasi.",
+                "description": "Endpoint publik untuk melihat detail profil mentor di landing page. Tidak memerlukan autentikasi. Response termasuk harga mentoring untuk setiap tipe.",
                 "operationId": "showMentor",
                 "parameters": [
                     {
@@ -4009,6 +4009,22 @@
                                                     "items": {
                                                         "type": "object"
                                                     }
+                                                },
+                                                "mentoring_prices": {
+                                                    "description": "Harga mentoring per tipe sesi",
+                                                    "properties": {
+                                                        "academic": {
+                                                            "description": "Harga sesi academic (Rp)",
+                                                            "type": "integer",
+                                                            "example": 150000
+                                                        },
+                                                        "life_plan": {
+                                                            "description": "Harga sesi life_plan (Rp)",
+                                                            "type": "integer",
+                                                            "example": 200000
+                                                        }
+                                                    },
+                                                    "type": "object"
                                                 }
                                             },
                                             "type": "object"
@@ -4171,11 +4187,12 @@
                                         "example": "https://zoom.us/j/123456789"
                                     },
                                     "payment_method": {
-                                        "description": "Metode pembayaran",
+                                        "description": "Metode pembayaran: manual (transfer rekening), bank_transfer, qris (QR Code)",
                                         "type": "string",
                                         "enum": [
                                             "manual",
-                                            "bank_transfer"
+                                            "bank_transfer",
+                                            "qris"
                                         ],
                                         "example": "manual"
                                     },

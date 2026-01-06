@@ -95,7 +95,7 @@ namespace App\Swagger;
  * @OA\Get(
  *     path="/api/mentors/{id}",
  *     summary="Lihat detail mentor (Public)",
- *     description="Endpoint publik untuk melihat detail profil mentor di landing page. Tidak memerlukan autentikasi.",
+ *     description="Endpoint publik untuk melihat detail profil mentor di landing page. Tidak memerlukan autentikasi. Response termasuk harga mentoring untuk setiap tipe.",
  *     operationId="showMentor",
  *     tags={"Mentoring"},
  *     @OA\Parameter(name="id", in="path", required=true, description="ID Mentor", @OA\Schema(type="integer")),
@@ -115,7 +115,12 @@ namespace App\Swagger;
  *                 @OA\Property(property="profile_photo", type="string", nullable=true),
  *                 @OA\Property(property="achievements", type="array", @OA\Items(type="object")),
  *                 @OA\Property(property="experiences", type="array", @OA\Items(type="object")),
- *                 @OA\Property(property="organizations", type="array", @OA\Items(type="object"))
+ *                 @OA\Property(property="organizations", type="array", @OA\Items(type="object")),
+ *                 @OA\Property(property="mentoring_prices", type="object",
+ *                     description="Harga mentoring per tipe sesi",
+ *                     @OA\Property(property="academic", type="integer", example=150000, description="Harga sesi academic (Rp)"),
+ *                     @OA\Property(property="life_plan", type="integer", example=200000, description="Harga sesi life_plan (Rp)")
+ *                 )
  *             )
  *         )
  *     ),
@@ -260,8 +265,8 @@ namespace App\Swagger;
  *                 description="Jadwal yang diinginkan (opsional, harus di masa depan)"),
  *             @OA\Property(property="meeting_link", type="string", example="https://zoom.us/j/123456789",
  *                 description="Link meeting (opsional, biasanya diisi mentor)"),
- *             @OA\Property(property="payment_method", type="string", enum={"manual", "bank_transfer"}, example="manual",
- *                 description="Metode pembayaran"),
+ *             @OA\Property(property="payment_method", type="string", enum={"manual", "bank_transfer", "qris"}, example="manual",
+ *                 description="Metode pembayaran: manual (transfer rekening), bank_transfer, qris (QR Code)"),
  *             @OA\Property(property="notes", type="string", example="Saya butuh bimbingan untuk skripsi tentang machine learning",
  *                 description="Catatan/topik yang ingin dibahas (opsional)")
  *         )
