@@ -638,6 +638,7 @@ namespace App\Swagger;
  * @OA\Property(property="pesan", type="string", example="Rekomendasi beasiswa berhasil diambil"),
  * @OA\Property(property="data", type="object",
  * @OA\Property(property="recommendations", type="array",
+ * description="List of recommended scholarships sorted by relevance",
  * @OA\Items(
  * @OA\Property(property="id", type="integer", example=1),
  * @OA\Property(property="organization_id", type="integer", example=1),
@@ -650,31 +651,61 @@ namespace App\Swagger;
  * @OA\Property(property="deadline", type="string", format="date", example="2025-12-31"),
  * @OA\Property(property="funding_amount", type="number", example=50000000),
  * @OA\Property(property="requirements", type="string", example="IPK minimal 3.0, Mahasiswa aktif"),
- * @OA\Property(property="relevance_score", type="integer", example=100, description="Matching score based on user profile (0-100)"),
+ * @OA\Property(property="image", type="string", nullable=true, example="scholarship-images/tech-scholarship.jpg"),
+ * @OA\Property(property="is_recommended", type="boolean", example=false),
+ * @OA\Property(property="relevance_score", type="integer", example=100, description="Matching score based on user profile (0-100). Higher score means better match with user's interests."),
  * @OA\Property(property="applications_count", type="integer", example=15, description="Number of applications received"),
  * @OA\Property(property="created_at", type="string", format="datetime", example="2025-01-01T10:00:00Z"),
+ * @OA\Property(property="updated_at", type="string", format="datetime", example="2025-01-02T10:00:00Z"),
  * @OA\Property(property="organization", type="object",
+ * description="Organization that provides the scholarship",
  * @OA\Property(property="id", type="integer", example=1),
  * @OA\Property(property="name", type="string", example="Tech Foundation"),
- * @OA\Property(property="type", type="string", example="foundation")
+ * @OA\Property(property="type", type="string", example="foundation"),
+ * @OA\Property(property="location", type="string", example="Jakarta"),
+ * @OA\Property(property="website", type="string", example="https://techfoundation.org")
  * )
  * )
  * ),
- * @OA\Property(property="criteria", type="object", description="Recommendation algorithm criteria used",
- * @OA\Property(property="specializations", type="array", description="User's interests/specializations used for matching",
- * @OA\Items(type="string", example="Web Development"),
+ * @OA\Property(property="criteria", type="object", 
+ * description="Recommendation algorithm criteria and information",
+ * @OA\Property(property="specializations", type="array", 
+ * description="User's interests/specializations used for matching",
+ * @OA\Items(type="string"),
  * example={"Web Development", "Artificial Intelligence", "Data Science"}
  * ),
- * @OA\Property(property="major", type="string", description="User's field of study", example="Teknik Informatika"),
- * @OA\Property(property="excluded_applied", type="integer", description="Number of already applied scholarships excluded", example=2),
- * @OA\Property(property="status_filter", type="string", description="Status filter applied", example="open, coming_soon"),
- * @OA\Property(property="status_priority", type="string", description="Status sorting priority", example="open first, coming_soon last"),
- * @OA\Property(property="algorithm", type="string", description="Algorithm formula used", example="status_priority + specialization_score + recency + popularity")
+ * @OA\Property(property="major", type="string", 
+ * description="User's field of study/major", 
+ * example="Teknik Informatika"
+ * ),
+ * @OA\Property(property="excluded_applied", type="integer", 
+ * description="Number of already applied scholarships excluded from recommendations", 
+ * example=2
+ * ),
+ * @OA\Property(property="status_filter", type="string", 
+ * description="Status filter applied to scholarships", 
+ * example="open, coming_soon"
+ * ),
+ * @OA\Property(property="status_priority", type="string", 
+ * description="Status sorting priority rule", 
+ * example="open first, coming_soon last"
+ * ),
+ * @OA\Property(property="algorithm", type="string", 
+ * description="Algorithm formula used for recommendations", 
+ * example="status_priority + specialization_score + recency + popularity"
+ * )
  * )
  * )
  * )
  * ),
- * @OA\Response(response=401, description="Unauthenticated - Login required")
+ * @OA\Response(
+ * response=401,
+ * description="Unauthenticated - Login required",
+ * @OA\JsonContent(
+ * @OA\Property(property="sukses", type="boolean", example=false),
+ * @OA\Property(property="pesan", type="string", example="Unauthenticated")
+ * )
+ * )
  * )
  */
 class ScholarshipSwagger {}

@@ -8681,6 +8681,237 @@
                 ]
             }
         },
+        "/api/scholarships/recommendations": {
+            "get": {
+                "tags": [
+                    "Scholarships"
+                ],
+                "summary": "Get personalized scholarship recommendations",
+                "description": "Get AI-powered scholarship recommendations based on user's specialization (interests), major, and recent scholarships. **Algorithm Priority:** 1) **Status Priority** - 'open' scholarships first, 'coming_soon' last, 'closed' excluded, 2) **Specialization/Interests** (100-80 points) - highest priority matching with user's declared interests in study_field, name, description, 3) **Major/Field of Study** (50-30 points) - matches with user's educational background, 4) **Recency** - newest scholarships prioritized, 5) **Popularity** - considers application count, 6) **Excludes Applied** - automatically excludes scholarships user already applied to",
+                "operationId": "getScholarshipRecommendations",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of scholarship recommendations to return (default: 5, max recommended: 20)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 5,
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recommendations retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Rekomendasi beasiswa berhasil diambil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "recommendations": {
+                                                    "description": "List of recommended scholarships sorted by relevance",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "organization_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Beasiswa Tech for Future 2025"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Beasiswa untuk mahasiswa bidang teknologi dan informatika"
+                                                            },
+                                                            "benefit": {
+                                                                "type": "string",
+                                                                "example": "Full tuition + Living allowance"
+                                                            },
+                                                            "location": {
+                                                                "type": "string",
+                                                                "example": "Indonesia"
+                                                            },
+                                                            "study_field": {
+                                                                "type": "string",
+                                                                "example": "Computer Science, Information Technology"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "open",
+                                                                    "coming_soon"
+                                                                ],
+                                                                "example": "open"
+                                                            },
+                                                            "deadline": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2025-12-31"
+                                                            },
+                                                            "funding_amount": {
+                                                                "type": "number",
+                                                                "example": 50000000
+                                                            },
+                                                            "requirements": {
+                                                                "type": "string",
+                                                                "example": "IPK minimal 3.0, Mahasiswa aktif"
+                                                            },
+                                                            "image": {
+                                                                "type": "string",
+                                                                "example": "scholarship-images/tech-scholarship.jpg",
+                                                                "nullable": true
+                                                            },
+                                                            "is_recommended": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            },
+                                                            "relevance_score": {
+                                                                "description": "Matching score based on user profile (0-100). Higher score means better match with user's interests.",
+                                                                "type": "integer",
+                                                                "example": 100
+                                                            },
+                                                            "applications_count": {
+                                                                "description": "Number of applications received",
+                                                                "type": "integer",
+                                                                "example": 15
+                                                            },
+                                                            "created_at": {
+                                                                "type": "string",
+                                                                "format": "datetime",
+                                                                "example": "2025-01-01T10:00:00Z"
+                                                            },
+                                                            "updated_at": {
+                                                                "type": "string",
+                                                                "format": "datetime",
+                                                                "example": "2025-01-02T10:00:00Z"
+                                                            },
+                                                            "organization": {
+                                                                "description": "Organization that provides the scholarship",
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "Tech Foundation"
+                                                                    },
+                                                                    "type": {
+                                                                        "type": "string",
+                                                                        "example": "foundation"
+                                                                    },
+                                                                    "location": {
+                                                                        "type": "string",
+                                                                        "example": "Jakarta"
+                                                                    },
+                                                                    "website": {
+                                                                        "type": "string",
+                                                                        "example": "https://techfoundation.org"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "criteria": {
+                                                    "description": "Recommendation algorithm criteria and information",
+                                                    "properties": {
+                                                        "specializations": {
+                                                            "description": "User's interests/specializations used for matching",
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "example": [
+                                                                "Web Development",
+                                                                "Artificial Intelligence",
+                                                                "Data Science"
+                                                            ]
+                                                        },
+                                                        "major": {
+                                                            "description": "User's field of study/major",
+                                                            "type": "string",
+                                                            "example": "Teknik Informatika"
+                                                        },
+                                                        "excluded_applied": {
+                                                            "description": "Number of already applied scholarships excluded from recommendations",
+                                                            "type": "integer",
+                                                            "example": 2
+                                                        },
+                                                        "status_filter": {
+                                                            "description": "Status filter applied to scholarships",
+                                                            "type": "string",
+                                                            "example": "open, coming_soon"
+                                                        },
+                                                        "status_priority": {
+                                                            "description": "Status sorting priority rule",
+                                                            "type": "string",
+                                                            "example": "open first, coming_soon last"
+                                                        },
+                                                        "algorithm": {
+                                                            "description": "Algorithm formula used for recommendations",
+                                                            "type": "string",
+                                                            "example": "status_priority + specialization_score + recency + popularity"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated - Login required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/subscription-status": {
             "get": {
                 "tags": [
