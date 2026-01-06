@@ -170,8 +170,24 @@ class SubscriptionController extends Controller
      */
     public function upgrade(Request $request, int $id): JsonResponse
     {
+        $user = auth()->user();
         $subscription = Subscription::findOrFail($id);
-        $this->authorize('upgrade', $subscription);
+        
+        // Debug: Log untuk troubleshooting
+        Log::info('Subscription upgrade attempt', [
+            'logged_in_user_id' => $user->id,
+            'logged_in_user_role' => $user->role,
+            'subscription_id' => $id,
+            'subscription_user_id' => $subscription->user_id,
+        ]);
+        
+        // Manual authorization check with clear error message
+        if ($user->role !== 'admin' && $user->id !== $subscription->user_id) {
+            return $this->forbiddenResponse(
+                'You can only upgrade your own subscription. ' .
+                'Your ID: ' . $user->id . ', Subscription owner ID: ' . $subscription->user_id
+            );
+        }
 
         $validated = $request->validate([
             'plan' => 'required|in:regular,premium',
