@@ -114,11 +114,19 @@ class CourseService
         }
 
         // ✅ FIX: Auto-set access_type based on price
-        // If price > 0, it should be premium, not free
-        if (isset($data['price']) && $data['price'] > 0) {
-            $data['access_type'] = 'premium';
-        } elseif (isset($data['price']) && $data['price'] == 0) {
-            $data['access_type'] = 'free';
+        // If price = 0, force to 'free'
+        // If price > 0 and access_type not set, keep user's choice (regular/premium)
+        if (isset($data['price'])) {
+            if ($data['price'] == 0) {
+                // Force free if price is 0
+                $data['access_type'] = 'free';
+            } elseif ($data['price'] > 0) {
+                // If price > 0 but still marked as 'free', change to 'regular'
+                if (!isset($data['access_type']) || $data['access_type'] === 'free') {
+                    $data['access_type'] = 'regular';
+                }
+                // Otherwise keep user's choice (regular or premium)
+            }
         }
 
         $course = Course::create($data);
@@ -151,11 +159,19 @@ class CourseService
         }
 
         // ✅ FIX: Auto-set access_type based on price
-        // If price > 0, it should be premium, not free
-        if (isset($data['price']) && $data['price'] > 0) {
-            $data['access_type'] = 'premium';
-        } elseif (isset($data['price']) && $data['price'] == 0) {
-            $data['access_type'] = 'free';
+        // If price = 0, force to 'free'
+        // If price > 0 and access_type not set, keep user's choice (regular/premium)
+        if (isset($data['price'])) {
+            if ($data['price'] == 0) {
+                // Force free if price is 0
+                $data['access_type'] = 'free';
+            } elseif ($data['price'] > 0) {
+                // If price > 0 but still marked as 'free', change to 'regular'
+                if (!isset($data['access_type']) || $data['access_type'] === 'free') {
+                    $data['access_type'] = 'regular';
+                }
+                // Otherwise keep user's choice (regular or premium)
+            }
         }
 
         // Filter data yang tidak perlu (hapus fields yang tidak ada di database)
