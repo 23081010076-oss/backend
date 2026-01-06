@@ -161,9 +161,10 @@ class SubscriptionService
             
             $oldPlan = $subscription->plan;
             
+            // ✅ FIX: Status tetap pending sampai admin konfirmasi pembayaran upgrade
             $subscription->update([
                 'plan' => $plan,
-                'status' => 'active',
+                'status' => 'pending',
                 'end_date' => $newEndDate,
             ]);
 
@@ -306,5 +307,70 @@ class SubscriptionService
     {
         $courseCount = Course::whereIn('id', $courseIds)->count();
         return $courseCount === count($courseIds);
+    }
+
+    /**
+     * Activate subscription after admin verifies payment
+     * This method is called by admin after payment verification
+     *
+     * @param Subscription $subscription Subscription to activate
+     * @return Subscription
+     * @throws InvalidArgumentException
+     */
+    public function activateSubscription(Subscription $subscription): Subscription
+    {
+        try {
+            DB::beginTransaction();
+
+            // Validate subscription can be activated
+            if ($subscription->status === 'active') {
+                throw new InvalidArgumentException('Subscription is already active');
+            }
+
+            if ($subscription->status === 'expired') {
+                throw new InvalidArgumentException('Cannot activate expired subscription');
+            }
+
+            if ($subscription->status === 'cancelled') {
+                throw new InvalidArgumentException('Cannot activate cancelled subscription');
+            }
+
+            // Activate subscription
+            $subscription->update([
+                'status' => 'active',
+            ]);
+
+            // Auto-enroll user to courses based on subscription package
+            if ($subscription->package_type === 'all_in_one') {
+                $this->autoEnrollToAllCourses($subscription->user_id, $subscription->plan);
+            } elseif ($subscription->package_type === 'single_course' && !empty($subscription->course_ids)) {
+                $this->autoEnrollToSelectedCourses($subscription->user_id, $subscription->course_ids);
+            }
+
+            DB::commit();
+
+            Log::info('Subscription activated successfully by admin', [
+                'subscription_id' => $subscription->id,
+                'user_id' => $subscription->user_id,
+                'plan' => $subscription->plan,
+                'package_type' => $subscription->package_type,
+            ]);
+
+            return $subscription->fresh();
+        } catch (InvalidArgumentException $e) {
+            DB::rollBack();
+            Log::warning('Subscription activation failed: validation error', [
+                'subscription_id' => $subscription->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Subscription activation failed: unexpected error', [
+                'subscription_id' => $subscription->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \RuntimeException('Failed to activate subscription. Please try again later.');
+        }
     }
 }

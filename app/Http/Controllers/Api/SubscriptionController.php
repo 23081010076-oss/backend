@@ -183,7 +183,7 @@ class SubscriptionController extends Controller
                 $validated['plan']
             );
 
-            return $this->successResponse($subscription, 'Subscription upgraded successfully');
+            return $this->successResponse($subscription, 'Upgrade berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengaktifkan paket baru Anda.');
         } catch (\InvalidArgumentException $e) {
             return $this->validationErrorResponse(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
@@ -273,6 +273,37 @@ class SubscriptionController extends Controller
                 'error' => $e->getMessage(),
             ]);
             return $this->serverErrorResponse('Failed to delete subscription');
+        }
+    }
+
+    /**
+     * Activate subscription after payment verification (Admin only)
+     * 
+     * @param int $id Subscription ID
+     * @return JsonResponse
+     */
+    public function activate(int $id): JsonResponse
+    {
+        // Only admin can activate subscriptions
+        $this->authorize('update', Subscription::findOrFail($id));
+
+        $subscription = Subscription::findOrFail($id);
+
+        try {
+            $subscription = $this->subscriptionService->activateSubscription($subscription);
+
+            return $this->successResponse(
+                $subscription,
+                'Subscription berhasil diaktifkan. User sekarang dapat mengakses kursus sesuai paket langganan.'
+            );
+        } catch (\InvalidArgumentException $e) {
+            return $this->validationErrorResponse(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            Log::error('Subscription activation failed in controller', [
+                'subscription_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Failed to activate subscription');
         }
     }
 }

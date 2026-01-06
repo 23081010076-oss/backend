@@ -140,6 +140,11 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('subscriptions', SubscriptionController::class);
     Route::post('/subscriptions/{id}/upgrade', [SubscriptionController::class, 'upgrade'])
         ->name('subscriptions.upgrade');
+    
+    // Admin only: Activate subscription after payment verification
+    Route::post('/subscriptions/{id}/activate', [SubscriptionController::class, 'activate'])
+        ->middleware('role:admin')
+        ->name('subscriptions.activate');
 
     
     // REVIEWS
