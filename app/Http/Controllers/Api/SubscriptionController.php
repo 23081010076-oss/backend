@@ -205,15 +205,36 @@ class SubscriptionController extends Controller
     {
         $user = auth()->user();
         
+        // Check for active subscription only (pending means waiting for admin activation)
         $activeSubscription = Subscription::where('user_id', $user->id)
             ->where('status', 'active')
             ->where('end_date', '>=', now())
             ->latest()
             ->first();
 
+        // Check if there's a pending subscription (waiting for activation)
+        $pendingSubscription = Subscription::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
         if (!$activeSubscription) {
+            // If there's a pending subscription, inform user to wait for activation
+            if ($pendingSubscription) {
+                return $this->successResponse([
+                    'has_active_subscription' => false,
+                    'has_pending_subscription' => true,
+                    'pending_plan' => $pendingSubscription->plan,
+                    'current_plan' => null,
+                    'can_upgrade' => false,
+                    'available_plans' => [],
+                    'message' => 'Anda memiliki paket ' . ucfirst($pendingSubscription->plan) . ' yang menunggu verifikasi pembayaran oleh admin. Silakan tunggu aktivasi atau hubungi admin.'
+                ], 'Pending subscription awaiting activation');
+            }
+            
             return $this->successResponse([
                 'has_active_subscription' => false,
+                'has_pending_subscription' => false,
                 'current_plan' => null,
                 'can_upgrade' => true,
                 'available_plans' => ['regular', 'premium'],
@@ -282,7 +303,7 @@ class SubscriptionController extends Controller
      * @param int $id Subscription ID
      * @return JsonResponse
      */
-    public function activate(int $id): JsonResponse
+    public function activate($id): JsonResponse
     {
         // Only admin can activate subscriptions
         $this->authorize('update', Subscription::findOrFail($id));

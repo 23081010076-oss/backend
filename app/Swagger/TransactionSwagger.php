@@ -6,13 +6,13 @@ namespace App\Swagger;
  * @OA\Get(
  *     path="/api/subscription-status",
  *     summary="Check subscription status",
- *     description="Check user's current subscription status and available upgrade options. Returns information about active subscription and whether user can upgrade. Response will indicate if user has active subscription (with plan details) or no subscription (can subscribe to any plan).",
+ *     description="Check user's current subscription status and available upgrade options. Returns information about active subscription, pending subscription (awaiting admin activation), or no subscription. Response will indicate if user has active subscription (with plan details), pending subscription (waiting for payment verification), or no subscription (can subscribe to any plan).",
  *     operationId="checkSubscriptionStatus",
  *     tags={"Subscriptions"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Response(
  *         response=200,
- *         description="Subscription status retrieved successfully. has_active_subscription=true means user has active plan, false means user can subscribe.",
+ *         description="Subscription status retrieved successfully. has_active_subscription=true means user has active plan, false means user can subscribe or has pending subscription.",
  *         @OA\JsonContent(
  *             oneOf={
  *                 @OA\Schema(
@@ -36,10 +36,26 @@ namespace App\Swagger;
  *                     )
  *                 ),
  *                 @OA\Schema(
- *                     description="User has no active subscription",
+ *                     description="User has pending subscription (awaiting admin activation)",
  *                     @OA\Property(property="sukses", type="boolean", example=true),
+ *                     @OA\Property(property="pesan", type="string", example="Pending subscription awaiting activation"),
  *                     @OA\Property(property="data", type="object",
  *                         @OA\Property(property="has_active_subscription", type="boolean", example=false),
+ *                         @OA\Property(property="has_pending_subscription", type="boolean", example=true),
+ *                         @OA\Property(property="pending_plan", type="string", example="premium", description="The plan that is awaiting activation"),
+ *                         @OA\Property(property="current_plan", type="string", nullable=true, example=null),
+ *                         @OA\Property(property="can_upgrade", type="boolean", example=false, description="Cannot upgrade while pending"),
+ *                         @OA\Property(property="available_plans", type="array", @OA\Items(type="string"), example={}, description="Empty until pending is activated"),
+ *                         @OA\Property(property="message", type="string", example="Anda memiliki paket Premium yang menunggu verifikasi pembayaran oleh admin. Silakan tunggu aktivasi atau hubungi admin.")
+ *                     )
+ *                 ),
+ *                 @OA\Schema(
+ *                     description="User has no active or pending subscription",
+ *                     @OA\Property(property="sukses", type="boolean", example=true),
+ *                     @OA\Property(property="pesan", type="string", example="No active subscription found"),
+ *                     @OA\Property(property="data", type="object",
+ *                         @OA\Property(property="has_active_subscription", type="boolean", example=false),
+ *                         @OA\Property(property="has_pending_subscription", type="boolean", example=false),
  *                         @OA\Property(property="current_plan", type="string", nullable=true, example=null),
  *                         @OA\Property(property="can_upgrade", type="boolean", example=true),
  *                         @OA\Property(property="available_plans", type="array", @OA\Items(type="string"), example={"regular", "premium"}),
@@ -304,8 +320,78 @@ namespace App\Swagger;
  *         )
  *     )
  * )
- *
- * @OA\Get(
+ * * @OA\Post(
+ *     path="/api/subscriptions/{id}/activate",
+ *     summary="Activate subscription after payment verification (Admin only)",
+ *     description="Admin endpoint to activate a pending subscription after verifying the payment. This will change subscription status from 'pending' to 'active' and automatically enroll the user to courses based on their subscription package (all_in_one or single_course). Only subscriptions with status 'pending' can be activated.",
+ *     operationId="activateSubscription",
+ *     tags={"Subscriptions"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         description="ID of the subscription to activate",
+ *         required=true,
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Subscription activated successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=true),
+ *             @OA\Property(property="pesan", type="string", example="Subscription berhasil diaktifkan. User sekarang dapat mengakses kursus sesuai paket langganan."),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="id", type="integer", example=1),
+ *                 @OA\Property(property="user_id", type="integer", example=5),
+ *                 @OA\Property(property="plan", type="string", example="premium"),
+ *                 @OA\Property(property="package_type", type="string", example="all_in_one"),
+ *                 @OA\Property(property="status", type="string", example="active"),
+ *                 @OA\Property(property="start_date", type="string", format="date", example="2025-12-01"),
+ *                 @OA\Property(property="end_date", type="string", format="date", example="2026-12-01"),
+ *                 @OA\Property(property="duration", type="integer", example=12),
+ *                 @OA\Property(property="duration_unit", type="string", example="months"),
+ *                 @OA\Property(property="price", type="number", example=500000)
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Validation error - Cannot activate subscription",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=false),
+ *             @OA\Property(property="pesan", type="string", example="Validation failed"),
+ *             @OA\Property(property="errors", type="object",
+ *                 @OA\Property(property="error", type="string", example="Subscription is already active")
+ *             ),
+ *             description="Possible error messages: 'Subscription is already active', 'Cannot activate expired subscription', 'Cannot activate cancelled subscription'"
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden - Admin only",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=false),
+ *             @OA\Property(property="pesan", type="string", example="Unauthorized - Admin access required")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Subscription not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=false),
+ *             @OA\Property(property="pesan", type="string", example="No query results for model [App\\Models\\Subscription]")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Server error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="sukses", type="boolean", example=false),
+ *             @OA\Property(property="pesan", type="string", example="Failed to activate subscription")
+ *         )
+ *     )
+ * )
+ * * @OA\Get(
  *     path="/api/transactions/{id}",
  *     summary="Get transaction details",
  *     description="Retrieve details of a single transaction with item information",

@@ -8918,11 +8918,11 @@
                     "Subscriptions"
                 ],
                 "summary": "Check subscription status",
-                "description": "Check user's current subscription status and available upgrade options. Returns information about active subscription and whether user can upgrade. Response will indicate if user has active subscription (with plan details) or no subscription (can subscribe to any plan).",
+                "description": "Check user's current subscription status and available upgrade options. Returns information about active subscription, pending subscription (awaiting admin activation), or no subscription. Response will indicate if user has active subscription (with plan details), pending subscription (waiting for payment verification), or no subscription (can subscribe to any plan).",
                 "operationId": "checkSubscriptionStatus",
                 "responses": {
                     "200": {
-                        "description": "Subscription status retrieved successfully. has_active_subscription=true means user has active plan, false means user can subscribe.",
+                        "description": "Subscription status retrieved successfully. has_active_subscription=true means user has active plan, false means user can subscribe or has pending subscription.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -9003,15 +9003,77 @@
                                             "type": "object"
                                         },
                                         {
-                                            "description": "User has no active subscription",
+                                            "description": "User has pending subscription (awaiting admin activation)",
                                             "properties": {
                                                 "sukses": {
                                                     "type": "boolean",
                                                     "example": true
                                                 },
+                                                "pesan": {
+                                                    "type": "string",
+                                                    "example": "Pending subscription awaiting activation"
+                                                },
                                                 "data": {
                                                     "properties": {
                                                         "has_active_subscription": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        },
+                                                        "has_pending_subscription": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "pending_plan": {
+                                                            "description": "The plan that is awaiting activation",
+                                                            "type": "string",
+                                                            "example": "premium"
+                                                        },
+                                                        "current_plan": {
+                                                            "type": "string",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        },
+                                                        "can_upgrade": {
+                                                            "description": "Cannot upgrade while pending",
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        },
+                                                        "available_plans": {
+                                                            "description": "Empty until pending is activated",
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "example": []
+                                                        },
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Anda memiliki paket Premium yang menunggu verifikasi pembayaran oleh admin. Silakan tunggu aktivasi atau hubungi admin."
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "description": "User has no active or pending subscription",
+                                            "properties": {
+                                                "sukses": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "pesan": {
+                                                    "type": "string",
+                                                    "example": "No active subscription found"
+                                                },
+                                                "data": {
+                                                    "properties": {
+                                                        "has_active_subscription": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        },
+                                                        "has_pending_subscription": {
                                                             "type": "boolean",
                                                             "example": false
                                                         },
@@ -9720,6 +9782,192 @@
                                                 }
                                             },
                                             "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/subscriptions/{id}/activate": {
+            "post": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Activate subscription after payment verification (Admin only)",
+                "description": "Admin endpoint to activate a pending subscription after verifying the payment. This will change subscription status from 'pending' to 'active' and automatically enroll the user to courses based on their subscription package (all_in_one or single_course). Only subscriptions with status 'pending' can be activated.",
+                "operationId": "activateSubscription",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the subscription to activate",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription activated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Subscription berhasil diaktifkan. User sekarang dapat mengakses kursus sesuai paket langganan."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "plan": {
+                                                    "type": "string",
+                                                    "example": "premium"
+                                                },
+                                                "package_type": {
+                                                    "type": "string",
+                                                    "example": "all_in_one"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "active"
+                                                },
+                                                "start_date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-01"
+                                                },
+                                                "end_date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2026-12-01"
+                                                },
+                                                "duration": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "duration_unit": {
+                                                    "type": "string",
+                                                    "example": "months"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "example": 500000
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error - Cannot activate subscription",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "description": "Possible error messages: 'Subscription is already active', 'Cannot activate expired subscription', 'Cannot activate cancelled subscription'",
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "error": {
+                                                    "type": "string",
+                                                    "example": "Subscription is already active"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Unauthorized - Admin access required"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subscription not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Subscription]"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sukses": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "pesan": {
+                                            "type": "string",
+                                            "example": "Failed to activate subscription"
                                         }
                                     },
                                     "type": "object"
