@@ -305,10 +305,13 @@ class SubscriptionController extends Controller
      */
     public function activate($id): JsonResponse
     {
-        // Only admin can activate subscriptions
-        $this->authorize('update', Subscription::findOrFail($id));
-
+        $user = auth()->user();
         $subscription = Subscription::findOrFail($id);
+        
+        // Student can activate their own subscription, Admin can activate any
+        if ($user->role !== 'admin' && $user->id !== $subscription->user_id) {
+            return $this->forbiddenResponse('You can only activate your own subscription');
+        }
 
         try {
             $subscription = $this->subscriptionService->activateSubscription($subscription);

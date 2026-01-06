@@ -113,6 +113,14 @@ class CourseService
             $data['image'] = $this->handleImage($data['image']);
         }
 
+        // ✅ FIX: Auto-set access_type based on price
+        // If price > 0, it should be premium, not free
+        if (isset($data['price']) && $data['price'] > 0) {
+            $data['access_type'] = 'premium';
+        } elseif (isset($data['price']) && $data['price'] == 0) {
+            $data['access_type'] = 'free';
+        }
+
         $course = Course::create($data);
         
         // Clear cache setelah create
@@ -140,6 +148,14 @@ class CourseService
             // Hapus image lama jika ada dan bukan URL eksternal
             $this->deleteImage($course->image);
             $data['image'] = $this->handleImage($data['image']);
+        }
+
+        // ✅ FIX: Auto-set access_type based on price
+        // If price > 0, it should be premium, not free
+        if (isset($data['price']) && $data['price'] > 0) {
+            $data['access_type'] = 'premium';
+        } elseif (isset($data['price']) && $data['price'] == 0) {
+            $data['access_type'] = 'free';
         }
 
         // Filter data yang tidak perlu (hapus fields yang tidak ada di database)

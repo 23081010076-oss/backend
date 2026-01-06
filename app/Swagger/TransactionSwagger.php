@@ -338,8 +338,8 @@ namespace App\Swagger;
  * )
  * * @OA\Post(
  *     path="/api/subscriptions/{id}/activate",
- *     summary="Activate subscription after payment verification (Admin only)",
- *     description="Admin endpoint to activate a pending subscription after verifying the payment. This will change subscription status from 'pending' to 'active' and automatically enroll the user to courses based on their subscription package (all_in_one or single_course). Only subscriptions with status 'pending' can be activated.",
+ *     summary="Activate subscription after payment",
+ *     description="Activate a pending subscription after payment. Students can activate their own subscription, Admin can activate any subscription. This will change subscription status from 'pending' to 'active' and automatically enroll the user to courses based on their subscription package (all_in_one or single_course). Only subscriptions with status 'pending' can be activated.",
  *     operationId="activateSubscription",
  *     tags={"Subscriptions"},
  *     security={{"bearerAuth":{}}},
@@ -384,10 +384,10 @@ namespace App\Swagger;
  *     ),
  *     @OA\Response(
  *         response=403,
- *         description="Forbidden - Admin only",
+ *         description="Forbidden - Cannot activate other user's subscription",
  *         @OA\JsonContent(
  *             @OA\Property(property="sukses", type="boolean", example=false),
- *             @OA\Property(property="pesan", type="string", example="Unauthorized - Admin access required")
+ *             @OA\Property(property="pesan", type="string", example="You can only activate your own subscription")
  *         )
  *     ),
  *     @OA\Response(
