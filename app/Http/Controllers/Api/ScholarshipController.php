@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Scholarship;
 use App\Models\ScholarshipApplication;
+use App\Models\Organization;
 use App\Services\ScholarshipService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -90,7 +91,21 @@ class ScholarshipController extends Controller
         // Cek akses dengan Policy
         $this->authorize('create', Scholarship::class);
 
-        $scholarship = $this->scholarshipService->createScholarship($request->validated());
+        $data = $request->validated();
+        
+        // Jika user adalah corporate dan tidak ada organization_id, set otomatis
+        if (Auth::user()->role === 'corporate' && empty($data['organization_id'])) {
+            // Ambil organization pertama milik user (corporate pasti punya organization dari register)
+            $organization = Organization::where('user_id', Auth::id())->first();
+            
+            if (!$organization) {
+                return $this->errorResponse('Corporate user harus memiliki organization terlebih dahulu', 400);
+            }
+            
+            $data['organization_id'] = $organization->id;
+        }
+
+        $scholarship = $this->scholarshipService->createScholarship($data);
 
         return $this->createdResponse(
             $scholarship->load('organization'),
@@ -184,8 +199,11 @@ class ScholarshipController extends Controller
         // Corporate hanya bisa melihat aplikasi dari scholarship milik mereka
         $filters = $request->all();
         if ($user->role === 'corporate') {
-            // Ambil ID scholarship milik corporate
-            $scholarshipIds = Scholarship::where('created_by', $user->id)->pluck('id')->toArray();
+            // Ambil ID organization milik corporate user
+            $organizationIds = Organization::where('user_id', $user->id)->pluck('id')->toArray();
+            
+            // Ambil ID scholarship yang terkait dengan organization tersebut
+            $scholarshipIds = Scholarship::whereIn('organization_id', $organizationIds)->pluck('id')->toArray();
             $filters['scholarship_ids'] = $scholarshipIds;
         }
 
@@ -208,8 +226,12 @@ class ScholarshipController extends Controller
 
         // Corporate hanya bisa melihat aplikasi dari scholarship milik mereka
         if ($user->role === 'corporate') {
+            // Ambil ID organization milik corporate user
+            $organizationIds = Organization::where('user_id', $user->id)->pluck('id')->toArray();
+            
+            // Cek apakah scholarship terkait dengan organization milik corporate
             $scholarship = Scholarship::where('id', $application->scholarship_id)
-                ->where('created_by', $user->id)
+                ->whereIn('organization_id', $organizationIds)
                 ->first();
             
             if (!$scholarship) {
@@ -255,7 +277,10 @@ class ScholarshipController extends Controller
             return $this->errorResponse('Hanya corporate yang memiliki beasiswa', 403);
         }
 
-        $scholarships = Scholarship::where('created_by', Auth::id())
+        // Ambil ID organization milik corporate user
+        $organizationIds = Organization::where('user_id', Auth::id())->pluck('id')->toArray();
+        
+        $scholarships = Scholarship::whereIn('organization_id', $organizationIds)
             ->withCount('applications')
             ->orderBy('created_at', 'desc')
             ->paginate($request->get('per_page', 15));

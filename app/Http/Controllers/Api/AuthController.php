@@ -24,6 +24,7 @@ use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Jobs\SendWelcomeEmail;
 use App\Models\Subscription;
+use App\Models\Organization;
 use Carbon\Carbon;
 
 /**
@@ -114,6 +115,26 @@ class AuthController extends Controller
                     'user_id' => $user->id,
                     'error' => $e->getMessage(),
                 ]);
+            }
+
+            // Jika user adalah corporate, buatkan Organization otomatis
+            if ($user->role === 'corporate') {
+                try {
+                    Organization::create([
+                        'user_id' => $user->id,
+                        'name' => $validated['name'] . ' Organization',
+                        'type' => 'company',
+                        'description' => 'Organization for ' . $validated['name'],
+                        'contact_email' => $user->email,
+                        'phone' => $validated['phone'] ?? null,
+                    ]);
+                } catch (\Exception $e) {
+                    // Log error namun jangan gagalkan pendaftaran
+                    \Illuminate\Support\Facades\Log::error('Failed to create organization for corporate user', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
 
             // Return response dengan UserResource
