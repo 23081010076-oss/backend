@@ -66,7 +66,7 @@ class ScholarshipController extends Controller
     /**
      * Tampilkan detail beasiswa
      */
-    public function show(int $id): JsonResponse
+    public function show($id): JsonResponse
     {
         $scholarship = Scholarship::with(['organization'])
             ->withCount('applications')
