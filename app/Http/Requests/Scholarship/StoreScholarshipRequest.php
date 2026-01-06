@@ -52,6 +52,7 @@ class StoreScholarshipRequest extends FormRequest
             'study_field'     => 'nullable|string|max:255',
             'funding_amount'  => 'nullable|numeric|min:0',
             'requirements'    => 'nullable|string',
+            'image'           => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
         ];
     }
 

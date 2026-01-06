@@ -88,6 +88,11 @@ class ScholarshipService
      */
     public function createScholarship(array $data): Scholarship
     {
+        // Handle image upload if exists
+        if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
+            $data['image'] = $data['image']->store('scholarship-images', 'public');
+        }
+
         $scholarship = Scholarship::create($data);
 
         // Clear cache setelah create
@@ -101,6 +106,15 @@ class ScholarshipService
      */
     public function updateScholarship(Scholarship $scholarship, array $data): Scholarship
     {
+        // Handle image upload if exists
+        if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
+            // Delete old image if exists
+            if ($scholarship->image) {
+                Storage::disk('public')->delete($scholarship->image);
+            }
+            $data['image'] = $data['image']->store('scholarship-images', 'public');
+        }
+
         $scholarship->update($data);
 
         // Clear cache setelah update
