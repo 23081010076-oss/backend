@@ -43,6 +43,7 @@ Route::get('/courses', [CourseController::class, 'index'])->name('courses.index'
 Route::get('/courses/{id}', [CourseController::class, 'show'])->name('courses.show');
 
 Route::get('/scholarships', [ScholarshipController::class, 'index'])->name('scholarships.index');
+Route::get('/scholarships/recommendations', [ScholarshipController::class, 'recommendations'])->middleware('auth:api')->name('scholarships.recommendations');
 Route::get('/scholarships/{id}', [ScholarshipController::class, 'show'])->name('scholarships.show');
 
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
@@ -194,9 +195,6 @@ Route::middleware('auth:api')->group(function () {
 
     
     // SCHOLARSHIPS
-    
-    // Scholarship recommendations (berdasarkan specialization dan terbaru)
-    Route::get('/scholarships/recommendations', [ScholarshipController::class, 'recommendations'])->name('scholarships.recommendations');
     
     // User's own scholarships (untuk corporate melihat beasiswa sendiri)
     Route::get('/my-scholarships', [ScholarshipController::class, 'myScholarships'])->name('my-scholarships');
