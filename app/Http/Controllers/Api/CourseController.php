@@ -97,6 +97,13 @@ class CourseController extends Controller
         // Cek akses dengan Policy
         $this->authorize('update', $course);
 
+        // Log data yang diterima untuk debugging
+        \Log::info('Update Course Request', [
+            'course_id' => $id,
+            'validated_data' => $request->validated(),
+            'has_video_file' => $request->hasFile('video_file')
+        ]);
+
         $course = $this->courseService->updateCourse(
             $course,
             $request->validated(),

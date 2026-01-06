@@ -142,11 +142,23 @@ class CourseService
             $data['image'] = $this->handleImage($data['image']);
         }
 
-        $course->update($data);
+        // Filter data yang tidak perlu (hapus fields yang tidak ada di database)
+        $fillableFields = [
+            'title', 'category', 'description', 'type', 'level', 
+            'duration', 'price', 'access_type', 'certificate_url', 
+            'video_url', 'video_duration', 'image', 'is_visible',
+            'instructor', 'total_videos'
+        ];
+        
+        $updateData = array_intersect_key($data, array_flip($fillableFields));
+        
+        // Update course dengan data yang sudah difilter
+        $course->update($updateData);
         
         // Clear cache setelah update
         $this->clearCache();
 
+        // Refresh model dari database untuk dapat data terbaru
         return $course->fresh();
     }
 

@@ -38,9 +38,12 @@ class UpdateCourseRequest extends FormRequest
             'price'           => 'nullable|numeric|min:0',
             'access_type'     => 'sometimes|in:free,regular,premium',
             'certificate_url' => 'nullable|string',
+            'image'           => 'nullable|string|url',
             'video_file'      => 'nullable|file|mimes:mp4,avi,mov,mkv,flv|max:524288',
             'video_url'       => 'nullable|string|url',
             'video_duration'  => 'nullable|string',
+            'instructor'      => 'nullable|string|max:255',
+            'total_videos'    => 'nullable|integer|min:0',
         ];
     }
 
