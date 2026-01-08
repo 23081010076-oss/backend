@@ -103,13 +103,22 @@ class EnrollmentController extends Controller
     /**
      * Lihat kursus yang diikuti user
      */
-    public function myCourses(): JsonResponse
+    public function myCourses(Request $request): JsonResponse
     {
         $user = Auth::user();
-        $enrollments = Enrollment::with('course')
-            ->where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+
+        $query = Enrollment::with('course')
+            ->where('user_id', $user->id);
+
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->whereHas('course', function ($q) use ($searchTerm) {
+                $q->where('title', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        $enrollments = $query->orderBy('created_at', 'desc')
+            ->paginate(4);
 
         return $this->paginatedResponse($enrollments, 'Kursus Anda berhasil diambil');
     }
@@ -204,7 +213,7 @@ class EnrollmentController extends Controller
     public function markCurriculumCompleted(int $enrollmentId, int $curriculumId): JsonResponse
     {
         $enrollment = Enrollment::findOrFail($enrollmentId);
-        
+
         // Ensure user owns this enrollment
         if ($enrollment->user_id !== Auth::id()) {
             return $this->forbiddenResponse('Anda tidak memiliki akses ke enrollment ini');
@@ -213,7 +222,7 @@ class EnrollmentController extends Controller
         // Verify curriculum belongs to the course
         $course = $enrollment->course;
         $curriculumExists = $course->curriculums()->where('id', $curriculumId)->exists();
-        
+
         if (!$curriculumExists) {
             return $this->notFoundResponse('Materi tidak ditemukan dalam kursus ini');
         }
