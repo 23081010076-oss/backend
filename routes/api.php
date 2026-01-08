@@ -227,6 +227,7 @@ Route::middleware('auth:api')->group(function () {
     
     Route::post('/scholarships/{id}/apply', [ScholarshipController::class, 'apply'])->name('scholarships.apply');
     Route::get('/my-applications', [ScholarshipController::class, 'myApplications'])->name('my-applications');
+    Route::get('/scholarships/{id}/my-application', [ScholarshipController::class, 'myApplicationForScholarship'])->name('scholarships.my-application');
     
     // Admin/Corporate: Manage all applications
     Route::middleware('role:admin,corporate')->group(function () {

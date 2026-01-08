@@ -447,6 +447,18 @@ class ScholarshipService
     }
 
     /**
+     * Get user's application for a specific scholarship
+     * Used for checking existing application and determining current step
+     */
+    public function getUserApplicationForScholarship(int $scholarshipId, int $userId): ?ScholarshipApplication
+    {
+        return ScholarshipApplication::with('scholarship')
+            ->where('scholarship_id', $scholarshipId)
+            ->where('user_id', $userId)
+            ->first();
+    }
+
+    /**
      * Step 4: Submit draft menjadi lamaran resmi
      *
      * @throws \Exception jika bukan draft atau dokumen belum lengkap

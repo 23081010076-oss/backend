@@ -190,6 +190,58 @@ class ScholarshipController extends Controller
     }
 
     /**
+     * Get user's application for a specific scholarship
+     * 
+     * Endpoint: GET /api/scholarships/{id}/my-application
+     * 
+     * Digunakan untuk:
+     * - Mengecek apakah user sudah memiliki application untuk scholarship tertentu
+     * - Menentukan step mana yang harus ditampilkan di frontend
+     * 
+     * Response includes currentStep:
+     * - 2: Draft tanpa assessment data → redirect ke Step 2 (Pre-Assessment)
+     * - 3: Draft dengan assessment data → redirect ke Step 3 (Review)
+     * - 4: Submitted → redirect ke Step 4 (Success)
+     */
+    public function myApplicationForScholarship(int $id): JsonResponse
+    {
+        $scholarship = Scholarship::find($id);
+        
+        if (!$scholarship) {
+            return $this->errorResponse('Beasiswa tidak ditemukan', 404);
+        }
+
+        $application = $this->scholarshipService->getUserApplicationForScholarship($id, Auth::id());
+
+        if (!$application) {
+            return $this->successResponse(null, 'Belum ada lamaran untuk beasiswa ini');
+        }
+
+        // Determine current step based on application status and data
+        $currentStep = 2; // Default: Step 2 (Pre-Assessment)
+        
+        if ($application->status === 'submitted' || 
+            $application->status === 'review' || 
+            $application->status === 'accepted' || 
+            $application->status === 'rejected') {
+            $currentStep = 4; // Step 4 (Success/Status)
+        } elseif ($application->status === 'draft') {
+            // Check if assessment data exists
+            $hasAssessmentData = $application->gpa !== null || 
+                                 $application->has_other_scholarship !== null || 
+                                 $application->parent_income !== null || 
+                                 $application->university !== null;
+            
+            $currentStep = $hasAssessmentData ? 3 : 2; // Step 3 (Review) or Step 2 (Pre-Assessment)
+        }
+
+        return $this->successResponse([
+            'application' => $application,
+            'currentStep' => $currentStep,
+        ], 'Data lamaran berhasil diambil');
+    }
+
+    /**
      * Lihat semua lamaran beasiswa (admin/corporate only)
      */
     public function allApplications(Request $request): JsonResponse
