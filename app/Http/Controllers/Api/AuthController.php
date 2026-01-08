@@ -462,7 +462,7 @@ class AuthController extends Controller
     public function recommendations(Request $request): JsonResponse
     {
         $user = $request->user();
-        $limit = $request->input('limit', 5);
+        $limit = $request->input('limit', 4);
         
         // Get user's active subscription to determine accessible courses
         $subscription = $user->activeSubscription();

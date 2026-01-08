@@ -28,7 +28,7 @@ class CourseService
      * 
      * CACHING: Data di-cache selama 10 detik untuk performa lebih baik
      */
-    public function getCourses(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function getCourses(array $filters = [], int $perPage = 8): LengthAwarePaginator
     {
         // Generate cache key berdasarkan filter
         $cacheKey = 'courses:' . md5(json_encode($filters) . $perPage . request('page', 1));
