@@ -111,14 +111,13 @@ class EnrollmentController extends Controller
             ->where('user_id', $user->id);
 
         if ($request->has('search') && $request->search != '') {
-            $query->whereHas('course', function ($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->search . '%');
+            $searchTerm = $request->search;
+            $query->whereHas('course', function ($q) use ($searchTerm) {
+                $q->where('title', 'like', '%' . $searchTerm . '%');
             });
         }
 
-        $enrollments = Enrollment::with('course')
-            ->where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
+        $enrollments = $query->orderBy('created_at', 'desc')
             ->paginate(4);
 
         return $this->paginatedResponse($enrollments, 'Kursus Anda berhasil diambil');
