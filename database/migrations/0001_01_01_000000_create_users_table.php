@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('institution')->nullable();
             $table->string('major')->nullable();
             $table->string('education_level')->nullable();
+            $table->json('specialization')->nullable(); // Added specialization column
             $table->text('bio')->nullable();
             $table->string('profile_photo')->nullable();
             $table->timestamp('email_verified_at')->nullable();

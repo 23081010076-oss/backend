@@ -26,20 +26,33 @@ class CourseService
     /**
      * Ambil daftar kursus dengan filter
      * 
-     * CACHING: Data di-cache selama 10 menit untuk performa lebih baik
+     * CACHING: Data di-cache selama 10 detik untuk performa lebih baik
      */
-    public function getCourses(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function getCourses(array $filters = [], int $perPage = 8): LengthAwarePaginator
     {
         // Generate cache key berdasarkan filter
         $cacheKey = 'courses:' . md5(json_encode($filters) . $perPage . request('page', 1));
         
-        // Cache selama 10 menit (600 detik)
-        return Cache::remember($cacheKey, 600, function () use ($filters, $perPage) {
-            $query = Course::query();
+        // Track cache key untuk bisa di-clear nanti
+        $cacheKeys = Cache::get('courses:cache_keys', []);
+        if (!in_array($cacheKey, $cacheKeys)) {
+            $cacheKeys[] = $cacheKey;
+            Cache::put('courses:cache_keys', $cacheKeys, 86400); // 24 jam
+        }
+        
+        // Cache selama 10 detik
+        return Cache::remember($cacheKey, 10, function () use ($filters, $perPage) {
+            $query = Course::withCount('enrollments') // Hitung jumlah enrollment untuk popularity
+                ->withAvg('reviews', 'rating'); // Hitung rata-rata rating
 
             // Filter berdasarkan tipe
             if (!empty($filters['type'])) {
                 $query->where('type', $filters['type']);
+            }
+
+            // Filter berdasarkan kategori
+            if (!empty($filters['category'])) {
+                $query->where('category', $filters['category']);
             }
 
             // Filter berdasarkan level
@@ -61,6 +74,14 @@ class CourseService
                 });
             }
 
+            // Sorting berdasarkan parameter
+            $sort = $filters['sort'] ?? 'latest';
+            match ($sort) {
+                'popular' => $query->orderByDesc('enrollments_count'),
+                'rating'  => $query->orderByDesc('reviews_avg_rating'),
+                default   => $query->latest(),
+            };
+
             return $query->paginate($perPage);
         });
     }
@@ -70,7 +91,11 @@ class CourseService
      */
     public function getCourseWithDetails(int $id): Course
     {
-        return Course::with(['enrollments', 'reviews'])->findOrFail($id);
+        return Course::with([
+            'enrollments', 
+            'reviews.user:id,name,profile_photo,bio', // Include user data in reviews
+            'curriculums'
+        ])->findOrFail($id);
     }
 
     /**
@@ -81,6 +106,27 @@ class CourseService
         // Handle upload video
         if ($videoFile) {
             $data['video_url'] = $videoFile->store('course-videos', 'public');
+        }
+
+        // Handle image (file upload atau URL)
+        if (isset($data['image'])) {
+            $data['image'] = $this->handleImage($data['image']);
+        }
+
+        // ✅ FIX: Auto-set access_type based on price
+        // If price = 0, force to 'free'
+        // If price > 0 and access_type not set, keep user's choice (regular/premium)
+        if (isset($data['price'])) {
+            if ($data['price'] == 0) {
+                // Force free if price is 0
+                $data['access_type'] = 'free';
+            } elseif ($data['price'] > 0) {
+                // If price > 0 but still marked as 'free', change to 'regular'
+                if (!isset($data['access_type']) || $data['access_type'] === 'free') {
+                    $data['access_type'] = 'regular';
+                }
+                // Otherwise keep user's choice (regular or premium)
+            }
         }
 
         $course = Course::create($data);
@@ -105,11 +151,46 @@ class CourseService
             $data['video_url'] = $videoFile->store('course-videos', 'public');
         }
 
-        $course->update($data);
+        // Handle image (file upload atau URL)
+        if (isset($data['image'])) {
+            // Hapus image lama jika ada dan bukan URL eksternal
+            $this->deleteImage($course->image);
+            $data['image'] = $this->handleImage($data['image']);
+        }
+
+        // ✅ FIX: Auto-set access_type based on price
+        // If price = 0, force to 'free'
+        // If price > 0 and access_type not set, keep user's choice (regular/premium)
+        if (isset($data['price'])) {
+            if ($data['price'] == 0) {
+                // Force free if price is 0
+                $data['access_type'] = 'free';
+            } elseif ($data['price'] > 0) {
+                // If price > 0 but still marked as 'free', change to 'regular'
+                if (!isset($data['access_type']) || $data['access_type'] === 'free') {
+                    $data['access_type'] = 'regular';
+                }
+                // Otherwise keep user's choice (regular or premium)
+            }
+        }
+
+        // Filter data yang tidak perlu (hapus fields yang tidak ada di database)
+        $fillableFields = [
+            'title', 'category', 'description', 'type', 'level', 
+            'duration', 'price', 'access_type', 'certificate_url', 
+            'video_url', 'video_duration', 'image', 'is_visible',
+            'instructor', 'total_videos'
+        ];
+        
+        $updateData = array_intersect_key($data, array_flip($fillableFields));
+        
+        // Update course dengan data yang sudah difilter
+        $course->update($updateData);
         
         // Clear cache setelah update
         $this->clearCache();
 
+        // Refresh model dari database untuk dapat data terbaru
         return $course->fresh();
     }
 
@@ -167,6 +248,15 @@ class CourseService
             return true;
         }
 
+        // ✅ FIX: Cek apakah user punya enrollment untuk course ini (beli satuan)
+        $hasEnrollment = $user->enrollments()
+            ->where('course_id', $course->id)
+            ->exists();
+
+        if ($hasEnrollment) {
+            return true; // User sudah beli course ini secara terpisah
+        }
+
         // Cek subscription user
         $subscription = $user->subscriptions()
             ->where('status', 'active')
@@ -201,6 +291,59 @@ class CourseService
     }
 
     /**
+     * Handle image upload atau URL
+     * 
+     * @param mixed $image File upload atau string URL
+     * @return string Path file atau URL
+     */
+    private function handleImage($image): string
+    {
+        // Jika sudah string URL, langsung return
+        if (is_string($image)) {
+            // Validasi URL jika diawali http
+            if (str_starts_with($image, 'http')) {
+                return $image;
+            }
+            return $image;
+        }
+
+        // Jika file upload
+        if ($image instanceof \Illuminate\Http\UploadedFile) {
+            // Validasi tipe file
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            if (!in_array($image->getMimeType(), $allowedMimes)) {
+                throw new \InvalidArgumentException('Format gambar harus JPG, PNG, WEBP, atau GIF');
+            }
+
+            // Validasi ukuran (max 5MB)
+            if ($image->getSize() > 5 * 1024 * 1024) {
+                throw new \InvalidArgumentException('Ukuran gambar maksimal 5MB');
+            }
+
+            // Simpan file
+            return $image->store('course-images', 'public');
+        }
+
+        return '';
+    }
+
+    /**
+     * Hapus file image jika bukan URL eksternal
+     */
+    private function deleteImage(?string $imagePath): void
+    {
+        // Skip jika null atau URL eksternal
+        if (!$imagePath || str_starts_with($imagePath, 'http')) {
+            return;
+        }
+
+        // Hapus file lokal
+        if (Storage::disk('public')->exists($imagePath)) {
+            Storage::disk('public')->delete($imagePath);
+        }
+    }
+
+    /**
      * Ambil statistik kursus (cached 30 menit)
      */
     public function getStatistics(): array
@@ -225,11 +368,17 @@ class CourseService
      */
     public function clearCache(): void
     {
-        // Clear cache dengan pattern 'courses:*'
-        // Untuk production, gunakan Redis dengan tags
+        // Clear statistics cache
         Cache::forget('courses:statistics');
         
-        // Clear cache list (simplified - di production gunakan cache tags)
-        // Cache::tags(['courses'])->flush();
+        // Clear all course list caches (with different filters and pages)
+        // Karena cache key menggunakan md5 hash dari filters, kita perlu clear semua
+        // yang dimulai dengan 'courses:'
+        $cacheKeys = Cache::get('courses:cache_keys', []);
+        foreach ($cacheKeys as $key) {
+            Cache::forget($key);
+        }
+        Cache::forget('courses:cache_keys');
     }
 }
+

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Review\StoreReviewRequest;
 use App\Http\Requests\Review\UpdateReviewRequest;
+use App\Http\Resources\ReviewResource;
 use App\Models\Review;
 use App\Services\ReviewService;
 use App\Traits\ApiResponse;
@@ -52,7 +53,7 @@ class ReviewController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Review::with(['user', 'reviewable']);
+        $query = Review::with(['user:id,name,profile_photo,bio', 'reviewable']);
 
         // Filter by reviewable
         if ($request->has('reviewable_id') && $request->has('reviewable_type')) {
@@ -66,12 +67,21 @@ class ReviewController extends Controller
         }
 
         $reviews = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // Transform items with ReviewResource
+        $reviews->getCollection()->transform(function ($review) {
+            return new ReviewResource($review);
+        });
         
-        return $this->paginatedResponse($reviews, 'Reviews retrieved successfully');
+        return $this->paginatedResponse(
+            $reviews,
+            'Reviews retrieved successfully'
+        );
     }
 
     /**
      * Store a new review
+     * User must have enrolled or have active subscription to review a course
      *
      * @param StoreReviewRequest $request
      * @return JsonResponse

@@ -22,6 +22,15 @@ class Enrollment extends Model
         'progress' => 'integer',
     ];
 
+    /**
+     * Append calculated attributes
+     */
+    protected $appends = [
+        'calculated_progress',
+        'completed_materials',
+        'total_materials',
+    ];
+
     // Relationships
     public function user()
     {
@@ -37,4 +46,74 @@ class Enrollment extends Model
     {
         return $this->morphMany(Transaction::class, 'transactionable');
     }
+
+    /**
+     * Get curriculum progress records for this enrollment
+     */
+    public function curriculumProgress()
+    {
+        return $this->hasMany(CurriculumProgress::class);
+    }
+
+    // ==========================================================================
+    // AUTO-CALCULATED PROGRESS ATTRIBUTES
+    // ==========================================================================
+
+    /**
+     * Get total materials in this course
+     */
+    public function getTotalMaterialsAttribute(): int
+    {
+        return $this->course->curriculums()->count();
+    }
+
+    /**
+     * Get number of completed materials
+     */
+    public function getCompletedMaterialsAttribute(): int
+    {
+        return $this->curriculumProgress()->where('completed', true)->count();
+    }
+
+    /**
+     * Calculate progress percentage automatically from completed materials
+     */
+    public function getCalculatedProgressAttribute(): int
+    {
+        $total = $this->total_materials;
+        
+        if ($total === 0) {
+            return 0;
+        }
+
+        return (int) round(($this->completed_materials / $total) * 100);
+    }
+
+    /**
+     * Mark a curriculum item as completed
+     */
+    public function markCurriculumCompleted(int $curriculumId): CurriculumProgress
+    {
+        $progress = CurriculumProgress::updateOrCreate(
+            [
+                'enrollment_id' => $this->id,
+                'curriculum_id' => $curriculumId,
+            ],
+            [
+                'completed' => true,
+                'completed_at' => now(),
+            ]
+        );
+
+        // Auto-update the progress field
+        $this->update(['progress' => $this->calculated_progress]);
+
+        // Check if all materials completed
+        if ($this->calculated_progress >= 100) {
+            $this->update(['completed' => true]);
+        }
+
+        return $progress;
+    }
 }
+

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class Course extends Model
 {
@@ -11,7 +12,9 @@ class Course extends Model
 
     protected $fillable = [
         'title',
+        'image',
         'description',
+        'category',
         'type',
         'level',
         'duration',
@@ -26,6 +29,33 @@ class Course extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+    ];
+
+    
+    public function getImageAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        // If already a full URL (http or https), return as-is
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        // Otherwise, generate storage URL
+        return url(Storage::url($value));
+    }
+
+    /**
+     * Append calculated attributes to JSON/array output
+     */
+    protected $appends = [
+        'total_materials',
+        'total_curriculum_duration',
+        'summary',
+        'average_rating',
+        'total_reviews',
     ];
 
     // Relationships
@@ -50,4 +80,96 @@ class Course extends Model
     {
         return $this->morphMany(Transaction::class, 'transactionable');
     }
+
+    /**
+     * Get the curriculums/materials for this course (grouped by section)
+     */
+    public function curriculums()
+    {
+        return $this->hasMany(CourseCurriculum::class)->orderBy('section_order')->orderBy('order');
+    }
+
+    // ==========================================================================
+    // CALCULATED ATTRIBUTES (Auto-kalkulasi dari kurikulum)
+    // ==========================================================================
+
+    /**
+     * Get total number of materials/curriculums
+     * Auto-calculated from curriculum count
+     */
+    public function getTotalMaterialsAttribute(): int
+    {
+        return $this->curriculums()->count();
+    }
+
+    /**
+     * Get total duration from all curriculum items
+     * Parses duration strings like "2 jam", "30 menit" and sums them
+     */
+    public function getTotalCurriculumDurationAttribute(): string
+    {
+        $curriculums = $this->curriculums()->pluck('duration');
+        
+        $totalMinutes = 0;
+        
+        foreach ($curriculums as $duration) {
+            if (!$duration) continue;
+            
+            // Parse "X jam" format
+            if (preg_match('/(\d+)\s*jam/i', $duration, $matches)) {
+                $totalMinutes += (int)$matches[1] * 60;
+            }
+            
+            // Parse "X menit" format
+            if (preg_match('/(\d+)\s*menit/i', $duration, $matches)) {
+                $totalMinutes += (int)$matches[1];
+            }
+        }
+        
+        if ($totalMinutes === 0) {
+            return '0 menit';
+        }
+        
+        $hours = floor($totalMinutes / 60);
+        $minutes = $totalMinutes % 60;
+        
+        if ($hours > 0 && $minutes > 0) {
+            return "{$hours} jam {$minutes} menit";
+        } elseif ($hours > 0) {
+            return "{$hours} jam";
+        } else {
+            return "{$minutes} menit";
+        }
+    }
+
+    /**
+     * Get summary/overview untuk tab "Kilasan"
+     * Mengembalikan object dengan video dan deskripsi lengkap
+     */
+    public function getSummaryAttribute(): array
+    {
+        return [
+            'video_url' => $this->video_url,
+            'video_duration' => $this->video_duration,
+            'description' => $this->description,
+        ];
+    }
+
+    /**
+     * Get average rating dari semua reviews
+     */
+    public function getAverageRatingAttribute(): float
+    {
+        return round($this->reviews()->avg('rating') ?? 0, 1);
+    }
+
+    /**
+     * Get total jumlah reviews
+     */
+    public function getTotalReviewsAttribute(): int
+    {
+        return $this->reviews()->count();
+    }
 }
+
+

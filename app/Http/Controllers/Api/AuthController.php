@@ -23,21 +23,24 @@ use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Jobs\SendWelcomeEmail;
+use App\Models\Subscription;
+use App\Models\Organization;
+use Carbon\Carbon;
 
 /**
  * ==========================================================================
  * AUTH CONTROLLER (Controller untuk Autentikasi)
  * ==========================================================================
- * 
+ *
  * FUNGSI: Menangani semua hal tentang akun pengguna:
  * - Daftar akun baru (register)
  * - Masuk/Login
- * - Keluar/Logout  
+ * - Keluar/Logout
  * - Ganti password
  * - Kelola profil pengguna
  * - Upload foto dan CV
  * - Melihat portofolio
- * 
+ *
  * CATATAN PENTING:
  * - Validasi input sudah dipindahkan ke folder app/Http/Requests
  * - Format output sudah dipindahkan ke folder app/Http/Resources
@@ -55,18 +58,18 @@ class AuthController extends Controller
 
     /**
      * DAFTAR AKUN BARU
-     * 
+     *
      * Endpoint: POST /api/auth/register
-     * 
+     *
      * PERHATIKAN:
      * - Sebelum: public function register(Request $request)
      * - Sesudah: public function register(RegisterRequest $request)
-     * 
+     *
      * Dengan pakai RegisterRequest:
      * - Validasi otomatis dijalankan SEBELUM masuk ke function ini
      * - Jika validasi gagal, langsung return error 422
      * - Kita tidak perlu tulis $request->validate([...]) lagi
-     * 
+     *
      * Lihat validasinya di: app/Http/Requests/RegisterRequest.php
      */
     public function register(RegisterRequest $request): JsonResponse
@@ -75,13 +78,13 @@ class AuthController extends Controller
             // $request->validated() = ambil data yang sudah lolos validasi
             // Data yang tidak ada di rules() akan dibuang
             $validated = $request->validated();
-            
+
             // Buat user baru di database
             $user = User::create([
                 'name'       => $validated['name'],
                 'email'      => $validated['email'],
                 'password'   => Hash::make($validated['password']),  // Enkripsi password
-                'role'       => $validated['role'],
+                'role'       => $validated['role'] ?? 'student',  // Default role = student
                 'phone'      => $validated['phone'] ?? null,
                 'gender'     => $validated['gender'] ?? null,
                 'birth_date' => $validated['birth_date'] ?? null,
@@ -89,6 +92,50 @@ class AuthController extends Controller
 
             // Kirim welcome email via queue (background)
             SendWelcomeEmail::dispatch($user);
+
+            // Berikan subscription gratis otomatis untuk akun baru
+            try {
+                $now = Carbon::now();
+                Subscription::create([
+                    'user_id' => $user->id,
+                    'plan' => 'free',
+                    'status' => 'active',
+                    'start_date' => $now,
+                    // set end_date jauh di masa depan agar dianggap aktif oleh cek durasi
+                    'end_date' => $now->copy()->addYears(100),
+                    'package_type' => 'all_in_one',
+                    'duration' => 100,
+                    'duration_unit' => 'years',
+                    'price' => 0,
+                    'auto_renew' => false,
+                ]);
+            } catch (\Exception $e) {
+                // Log error namun jangan gagalkan pendaftaran
+                \Illuminate\Support\Facades\Log::error('Failed to assign free subscription on register', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            // Jika user adalah corporate, buatkan Organization otomatis
+            if ($user->role === 'corporate') {
+                try {
+                    Organization::create([
+                        'user_id' => $user->id,
+                        'name' => $validated['name'] . ' Organization',
+                        'type' => 'company',
+                        'description' => 'Organization for ' . $validated['name'],
+                        'contact_email' => $user->email,
+                        'phone' => $validated['phone'] ?? null,
+                    ]);
+                } catch (\Exception $e) {
+                    // Log error namun jangan gagalkan pendaftaran
+                    \Illuminate\Support\Facades\Log::error('Failed to create organization for corporate user', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
 
             // Return response dengan UserResource
             // UserResource akan format data user secara konsisten
@@ -104,9 +151,9 @@ class AuthController extends Controller
 
     /**
      * LOGIN / MASUK
-     * 
+     *
      * Endpoint: POST /api/auth/login
-     * 
+     *
      * PERHATIKAN:
      * - Pakai LoginRequest untuk validasi
      * - Validasinya ada di: app/Http/Requests/LoginRequest.php
@@ -142,9 +189,9 @@ class AuthController extends Controller
 
     /**
      * LOGOUT / KELUAR
-     * 
+     *
      * Endpoint: POST /api/auth/logout
-     * 
+     *
      * Header: Authorization: Bearer {token}
      */
     public function logout(): JsonResponse
@@ -159,9 +206,9 @@ class AuthController extends Controller
 
     /**
      * PERBARUI TOKEN
-     * 
+     *
      * Endpoint: POST /api/auth/refresh
-     * 
+     *
      * Gunakan ketika token hampir expired
      */
     public function refresh(): JsonResponse
@@ -189,9 +236,9 @@ class AuthController extends Controller
 
     /**
      * LIHAT DATA SAYA (User yang sedang login)
-     * 
+     *
      * Endpoint: GET /api/auth/me
-     * 
+     *
      * PERHATIKAN: Pakai UserResource untuk format output
      */
     public function me(Request $request): JsonResponse
@@ -205,7 +252,7 @@ class AuthController extends Controller
 
     /**
      * LIHAT PROFIL LENGKAP (dengan achievement, pengalaman, dll)
-     * 
+     *
      * Endpoint: GET /api/auth/profile
      */
     public function profile(Request $request): JsonResponse
@@ -223,9 +270,9 @@ class AuthController extends Controller
 
     /**
      * UPDATE PROFIL
-     * 
+     *
      * Endpoint: PUT /api/auth/profile
-     * 
+     *
      * Validasi di: app/Http/Requests/UpdateProfileRequest.php
      */
     public function updateProfile(UpdateProfileRequest $request): JsonResponse
@@ -242,9 +289,9 @@ class AuthController extends Controller
 
     /**
      * GANTI PASSWORD
-     * 
+     *
      * Endpoint: PUT /api/auth/change-password
-     * 
+     *
      * PERHATIKAN:
      * - Pakai ChangePasswordRequest untuk validasi
      * - Validasinya ada di: app/Http/Requests/ChangePasswordRequest.php
@@ -274,15 +321,27 @@ class AuthController extends Controller
 
     /**
      * UPLOAD FOTO PROFIL
-     * 
+     *
      * Endpoint: POST /api/auth/profile/photo
-     * 
+     *
      * Data: photo (jpeg, png, jpg, gif) max 2MB
      */
     public function uploadProfilePhoto(Request $request): JsonResponse
     {
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'photo' => [
+                'required',
+                'file',
+                'image',
+                'mimes:jpeg,png,jpg,gif',
+                'max:2048',
+                function ($attribute, $value, $fail) {
+                    $blocked = ['php', 'phtml', 'phar', 'cgi', 'pl', 'exe', 'js', 'sh'];
+                    if (in_array(strtolower($value->getClientOriginalExtension()), $blocked, true)) {
+                        $fail('File tidak diizinkan.');
+                    }
+                },
+            ],
         ]);
 
         $user = $request->user();
@@ -307,15 +366,26 @@ class AuthController extends Controller
 
     /**
      * UPLOAD CV (Curriculum Vitae)
-     * 
+     *
      * Endpoint: POST /api/auth/profile/cv
-     * 
+     *
      * Data: cv (pdf, doc, docx) max 2MB
      */
     public function uploadCv(Request $request): JsonResponse
     {
         $request->validate([
-            'cv' => 'required|file|mimes:pdf,doc,docx|max:2048',
+            'cv' => [
+                'required',
+                'file',
+                'mimes:pdf,doc,docx',
+                'max:2048',
+                function ($attribute, $value, $fail) {
+                    $blocked = ['php', 'phtml', 'phar', 'cgi', 'pl', 'exe', 'js', 'sh'];
+                    if (in_array(strtolower($value->getClientOriginalExtension()), $blocked, true)) {
+                        $fail('File tidak diizinkan.');
+                    }
+                },
+            ],
         ]);
 
         $user = $request->user();
@@ -338,6 +408,38 @@ class AuthController extends Controller
         ], 'CV berhasil diupload');
     }
 
+    /**
+     * GET CV (Curriculum Vitae)
+     *
+     * Endpoint: GET /api/auth/profile/cv
+     *
+     * Menampilkan informasi CV atau download CV user
+     */
+    public function getCv(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user->cv_path) {
+            return $this->errorResponse('CV tidak ditemukan', 404);
+        }
+
+        if (!Storage::disk('public')->exists($user->cv_path)) {
+            return $this->errorResponse('File CV tidak ditemukan', 404);
+        }
+
+        // Jika parameter download=true, return file untuk di-download
+        if ($request->query('download') === 'true') {
+            return Storage::disk('public')->download($user->cv_path);
+        }
+
+        // Jika tidak, return informasi CV
+        return $this->successResponse([
+            'cv_path' => $user->cv_path,
+            'cv_url'  => asset('storage/' . $user->cv_path),
+            'cv_name' => basename($user->cv_path),
+        ], 'CV berhasil diambil');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | BAGIAN 4: DASHBOARD & PORTOFOLIO
@@ -346,36 +448,136 @@ class AuthController extends Controller
 
     /**
      * REKOMENDASI KURSUS
-     * 
+     *
      * Endpoint: GET /api/auth/recommendations
+     * 
+     * Algoritma rekomendasi berdasarkan:
+     * 1. Subscription plan user (hanya tampilkan course yang bisa diakses)
+     * 2. Course yang belum di-enroll
+     * 3. Relevansi dengan specialization/minat (prioritas tertinggi)
+     * 4. Relevansi dengan major/jurusan
+     * 5. Popularity (jumlah enrollment)
+     * 6. Rating tertinggi
      */
     public function recommendations(Request $request): JsonResponse
     {
         $user = $request->user();
+        $limit = $request->input('limit', 4);
+        
+        // Get user's active subscription to determine accessible courses
+        $subscription = $user->activeSubscription();
+        $plan = $subscription ? $subscription->plan : 'free';
+        
+        // Get courses user is already enrolled in
+        $enrolledCourseIds = $user->enrollments()->pluck('course_id')->toArray();
+        
+        // Build base query
+        $query = \App\Models\Course::query()
+            ->withCount('enrollments')
+            ->withAvg('reviews', 'rating')
+            ->whereNotIn('id', $enrolledCourseIds); // Exclude already enrolled courses
+        
+        // Filter by accessible courses based on subscription plan
+        if ($plan === 'free') {
+            $query->where('access_type', 'free');
+        } elseif ($plan === 'regular') {
+            $query->whereIn('access_type', ['free', 'regular']);
+        }
+        // Premium users can see all courses
+        
+        // Get user's specialization (minat) and major for recommendation
+        $specializations = $user->specialization ?? [];
         $major = $user->major;
-
-        $recommendedCourses = \App\Models\Course::query();
-
-        if ($major) {
-            $recommendedCourses->where(function ($query) use ($major) {
-                $query->where('title', 'like', '%' . $major . '%')
-                      ->orWhere('description', 'like', '%' . $major . '%');
-            });
-            $recommendations = $recommendedCourses->limit(5)->get();
+        
+        // Score-based recommendation using SELECT with scoring
+        if (!empty($specializations) || $major) {
+            // Build dynamic CASE WHEN for specializations and major
+            $caseClauses = [];
+            $bindings = [];
+            
+            // Specialization matching (highest priority: 150-80 points)
+            if (!empty($specializations)) {
+                foreach ($specializations as $index => $spec) {
+                    $specLower = strtolower($spec);
+                    // Exact match in title gets highest score
+                    $caseClauses[] = "WHEN LOWER(title) LIKE ? THEN " . (150 - ($index * 10));
+                    $bindings[] = '%' . $specLower . '%';
+                    // Match in category gets medium score
+                    $caseClauses[] = "WHEN LOWER(category) LIKE ? THEN " . (100 - ($index * 10));
+                    $bindings[] = '%' . $specLower . '%';
+                    // Match in description gets lower score
+                    $caseClauses[] = "WHEN LOWER(description) LIKE ? THEN " . (80 - ($index * 10));
+                    $bindings[] = '%' . $specLower . '%';
+                }
+            }
+            
+            // Major matching (medium priority: 60-30 points)
+            if ($major) {
+                $majorLower = strtolower($major);
+                $caseClauses[] = "WHEN LOWER(title) LIKE ? THEN 60";
+                $bindings[] = '%' . $majorLower . '%';
+                $caseClauses[] = "WHEN LOWER(description) LIKE ? THEN 40";
+                $bindings[] = '%' . $majorLower . '%';
+                $caseClauses[] = "WHEN LOWER(category) LIKE ? THEN 30";
+                $bindings[] = '%' . $majorLower . '%';
+            }
+            
+            $caseClauses[] = "ELSE 0";
+            $caseStatement = implode(" ", $caseClauses);
+            
+            $query->selectRaw("
+                courses.*,
+                (
+                    CASE 
+                        {$caseStatement}
+                    END
+                ) as relevance_score
+            ", $bindings)
+            ->orderByDesc('relevance_score')
+            ->orderByDesc('reviews_avg_rating')
+            ->orderByDesc('enrollments_count');
         } else {
-            $recommendations = collect();
+            // No specialization or major: sort by rating and popularity
+            $query->orderByDesc('reviews_avg_rating')
+                  ->orderByDesc('enrollments_count');
         }
-
+        
+        $recommendations = $query->limit($limit)->get();
+        
+        // If no recommendations found (e.g., all courses enrolled), show top-rated accessible courses
         if ($recommendations->isEmpty()) {
-            $recommendations = \App\Models\Course::inRandomOrder()->limit(5)->get();
+            $fallbackQuery = \App\Models\Course::query()
+                ->withCount('enrollments')
+                ->withAvg('reviews', 'rating');
+                
+            if ($plan === 'free') {
+                $fallbackQuery->where('access_type', 'free');
+            } elseif ($plan === 'regular') {
+                $fallbackQuery->whereIn('access_type', ['free', 'regular']);
+            }
+            
+            $recommendations = $fallbackQuery
+                ->orderByDesc('reviews_avg_rating')
+                ->orderByDesc('enrollments_count')
+                ->limit($limit)
+                ->get();
         }
-
-        return $this->successResponse($recommendations, 'Rekomendasi kursus berhasil diambil');
+        
+        return $this->successResponse([
+            'recommendations' => $recommendations,
+            'criteria' => [
+                'subscription_plan' => $plan,
+                'specializations' => $specializations ?? [],
+                'major' => $user->major ?? 'not_specified',
+                'excluded_enrolled' => count($enrolledCourseIds),
+                'algorithm' => 'specialization_score + major_score + rating + popularity',
+            ],
+        ], 'Rekomendasi kursus berhasil diambil');
     }
 
     /**
      * LIHAT PORTOFOLIO LENGKAP
-     * 
+     *
      * Endpoint: GET /api/auth/portfolio
      */
     public function portfolio(Request $request): JsonResponse
@@ -408,7 +610,7 @@ class AuthController extends Controller
 
     /**
      * RIWAYAT AKTIVITAS
-     * 
+     *
      * Endpoint: GET /api/auth/activity-history
      */
     public function activityHistory(Request $request): JsonResponse

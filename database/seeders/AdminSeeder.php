@@ -20,7 +20,7 @@ class AdminSeeder extends Seeder
             [
                 'name' => 'Admin Platform',
                 'email' => 'admin@learningplatform.com',
-                'password' => 'AdminPassword123!',
+                'password' => Hash::make('AdminPassword123!'),
                 'role' => 'admin',
                 'phone' => '08123456789',
                 'gender' => 'male',
@@ -34,7 +34,7 @@ class AdminSeeder extends Seeder
             [
                 'name' => 'Super Admin',
                 'email' => 'superadmin@learningplatform.com',
-                'password' => 'SuperAdminPass123!',
+                'password' => Hash::make('SuperAdminPass123!'),
                 'role' => 'admin',
                 'phone' => '08234567890',
                 'gender' => 'female',

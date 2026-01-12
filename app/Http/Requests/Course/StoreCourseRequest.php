@@ -43,11 +43,13 @@ class StoreCourseRequest extends FormRequest
         return [
             // FIELD WAJIB
             'title'       => 'required|string|max:255',
+            'category'    => 'nullable|string|max:100',
             'type'        => 'required|in:bootcamp,course',
             'level'       => 'required|in:beginner,intermediate,advanced',
             'access_type' => 'required|in:free,regular,premium',
             
             // FIELD OPSIONAL
+            'image'           => 'nullable', // Bisa file atau URL, validasi di controller
             'description'     => 'nullable|string',
             'duration'        => 'nullable|string',
             'price'           => 'nullable|numeric|min:0',

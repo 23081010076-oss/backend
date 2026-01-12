@@ -20,7 +20,26 @@ class Article extends Model
         'content',
         'category',
         'author', // author name as string
+        'image',
     ];
+
+    protected $appends = ['image_url'];
+
+    // Accessor untuk image URL
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        // Jika sudah URL lengkap, return as is
+        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+            return $this->image;
+        }
+
+        // Generate URL dari storage
+        return asset('storage/' . $this->image);
+    }
 
     // Relationships
     public function authorUser()

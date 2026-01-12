@@ -37,6 +37,8 @@ class UpdateScholarshipRequest extends FormRequest
             'location'        => 'nullable|string',
             'status'          => 'sometimes|in:open,coming_soon,closed',
             'deadline'        => 'nullable|date',
+            'study_field'     => 'nullable|string|max:255',
+            'image'           => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
         ];
     }
 

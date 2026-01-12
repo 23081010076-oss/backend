@@ -74,6 +74,7 @@ class NeedAssessmentController extends Controller
                 'id'                   => $assessment->id,
                 'mentoring_session_id' => $assessment->mentoring_session_id,
                 'form_data'            => $assessment->form_data,
+                'mentor_notes'         => $assessment->mentor_notes,
                 'is_completed'         => $assessment->isCompleted(),
                 'completed_at'         => $assessment->completed_at,
                 'created_at'           => $assessment->created_at,
@@ -107,12 +108,16 @@ class NeedAssessmentController extends Controller
     {
         $mentoringSession = MentoringSession::findOrFail($mentoringSessionId);
         
-        // Cek akses - hanya member terkait atau admin
+        // Cek akses - member bisa isi form_data, mentor bisa isi mentor_notes
         $user = Auth::user();
-        if ($user->role !== 'admin' && $mentoringSession->member_id !== $user->id) {
+        $isMember = $mentoringSession->member_id === $user->id;
+        $isMentor = $mentoringSession->mentor_id === $user->id;
+        $isAdmin = $user->role === 'admin';
+        
+        if (!$isAdmin && !$isMember && !$isMentor) {
             return response()->json([
                 'sukses' => false,
-                'pesan'  => 'Hanya member yang terlibat yang bisa mengisi assessment',
+                'pesan'  => 'Anda tidak memiliki akses ke sesi ini',
                 'data'   => null
             ], 403);
         }
@@ -131,19 +136,32 @@ class NeedAssessmentController extends Controller
             ], 409);
         }
 
-        // Validasi
-        $validated = $request->validate([
-            'form_data' => 'required|array',
-        ], [
+        // Validasi - member submit form_data, mentor submit mentor_notes
+        $rules = [];
+        if ($isMember || $isAdmin) {
+            $rules['form_data'] = 'required|array';
+        }
+        if ($isMentor || $isAdmin) {
+            $rules['mentor_notes'] = 'required|array';
+        }
+        
+        $validated = $request->validate($rules, [
             'form_data.required' => 'Data assessment wajib diisi',
             'form_data.array'    => 'Format data assessment tidak valid',
+            'mentor_notes.required' => 'Catatan mentor wajib diisi',
+            'mentor_notes.array'    => 'Format catatan mentor tidak valid',
         ]);
 
         // Create assessment
-        $assessment = NeedAssessment::create([
-            'mentoring_session_id' => $mentoringSessionId,
-            'form_data'            => $validated['form_data'],
-        ]);
+        $data = ['mentoring_session_id' => $mentoringSessionId];
+        if (isset($validated['form_data'])) {
+            $data['form_data'] = $validated['form_data'];
+        }
+        if (isset($validated['mentor_notes'])) {
+            $data['mentor_notes'] = $validated['mentor_notes'];
+        }
+        
+        $assessment = NeedAssessment::create($data);
 
         return response()->json([
             'sukses' => true,
@@ -152,6 +170,7 @@ class NeedAssessmentController extends Controller
                 'id'                   => $assessment->id,
                 'mentoring_session_id' => $assessment->mentoring_session_id,
                 'form_data'            => $assessment->form_data,
+                'mentor_notes'         => $assessment->mentor_notes,
                 'is_completed'         => $assessment->isCompleted(),
                 'completed_at'         => $assessment->completed_at,
                 'created_at'           => $assessment->created_at,
@@ -166,18 +185,23 @@ class NeedAssessmentController extends Controller
      * PUT /mentoring-sessions/{mentoringSessionId}/need-assessments
      * 
      * Update need assessment yang sudah ada.
+     * Member update form_data, Mentor update mentor_notes.
      * Tidak bisa update jika sudah completed.
      */
     public function update(Request $request, int $mentoringSessionId): JsonResponse
     {
         $mentoringSession = MentoringSession::findOrFail($mentoringSessionId);
         
-        // Cek akses - hanya member terkait atau admin
+        // Cek akses
         $user = Auth::user();
-        if ($user->role !== 'admin' && $mentoringSession->member_id !== $user->id) {
+        $isMember = $mentoringSession->member_id === $user->id;
+        $isMentor = $mentoringSession->mentor_id === $user->id;
+        $isAdmin = $user->role === 'admin';
+        
+        if (!$isAdmin && !$isMember && !$isMentor) {
             return response()->json([
                 'sukses' => false,
-                'pesan'  => 'Hanya member yang terlibat yang bisa mengupdate assessment',
+                'pesan'  => 'Anda tidak memiliki akses ke sesi ini',
                 'data'   => null
             ], 403);
         }
@@ -201,15 +225,27 @@ class NeedAssessmentController extends Controller
             ], 422);
         }
 
-        // Validasi
-        $validated = $request->validate([
-            'form_data' => 'required|array',
-        ]);
+        // Validasi - member update form_data, mentor update mentor_notes
+        $rules = [];
+        if ($isMember || $isAdmin) {
+            $rules['form_data'] = 'nullable|array';
+        }
+        if ($isMentor || $isAdmin) {
+            $rules['mentor_notes'] = 'nullable|array';
+        }
+        
+        $validated = $request->validate($rules);
 
         // Update
-        $assessment->update([
-            'form_data' => $validated['form_data'],
-        ]);
+        $updateData = [];
+        if (isset($validated['form_data'])) {
+            $updateData['form_data'] = $validated['form_data'];
+        }
+        if (isset($validated['mentor_notes'])) {
+            $updateData['mentor_notes'] = $validated['mentor_notes'];
+        }
+        
+        $assessment->update($updateData);
 
         return response()->json([
             'sukses' => true,
@@ -218,6 +254,7 @@ class NeedAssessmentController extends Controller
                 'id'                   => $assessment->id,
                 'mentoring_session_id' => $assessment->mentoring_session_id,
                 'form_data'            => $assessment->form_data,
+                'mentor_notes'         => $assessment->mentor_notes,
                 'is_completed'         => $assessment->isCompleted(),
                 'updated_at'           => $assessment->updated_at,
             ]

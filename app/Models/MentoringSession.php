@@ -19,6 +19,7 @@ class MentoringSession extends Model
         'schedule',
         'meeting_link',
         'payment_method',
+        'notes',
         'status',
         'need_assessment_status',
     ];
@@ -56,5 +57,10 @@ class MentoringSession extends Model
     public function coachingFiles()
     {
         return $this->hasMany(CoachingFile::class);
+    }
+
+    public function reviews()
+    {
+        return $this->morphMany(Review::class, 'reviewable');
     }
 }

@@ -21,47 +21,93 @@ use InvalidArgumentException;
  */
 class EnrollmentService
 {
+    protected TransactionService $transactionService;
+
+    public function __construct(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
+
     /**
      * Enroll a user to a course
      *
      * @param User $user User to enroll
      * @param Course $course Course to enroll in
-     * @return Enrollment
+     * @param string $paymentMethod Payment method (manual, bank_transfer, qris)
+     * @return array
      * @throws InvalidArgumentException
      */
-    public function enrollUserToCourse(User $user, Course $course): Enrollment
+    public function enrollUserToCourse(User $user, Course $course, string $paymentMethod = 'manual'): array
     {
         try {
             DB::beginTransaction();
 
             // Check if already enrolled
             if ($this->isUserEnrolled($user, $course)) {
-                throw new InvalidArgumentException('You are already enrolled in this course');
+                throw new InvalidArgumentException('Anda sudah terdaftar di kursus ini');
             }
             
+            // ✅ FREE COURSE: Langsung enroll tanpa transaksi dan tanpa cek subscription
+            if ($course->access_type === 'free') {
+                $enrollment = Enrollment::create([
+                    'user_id' => $user->id,
+                    'course_id' => $course->id,
+                    'progress' => 0,
+                    'completed' => false,
+                ]);
+
+                DB::commit();
+
+                Log::info('Free course enrollment created immediately', [
+                    'user_id' => $user->id,
+                    'course_id' => $course->id,
+                    'course_title' => $course->title,
+                    'enrollment_id' => $enrollment->id,
+                    'access_type' => 'free',
+                ]);
+
+                return [
+                    'enrollment' => $enrollment,
+                    'course' => $course,
+                    'is_free' => true,
+                ];
+            }
+            
+            // ⚠️ PAID COURSE: Cek subscription access dulu
             // Check access permission based on subscription
             if (!$this->checkEnrollmentAccess($user, $course)) {
-                $requiredPlan = $course->access_type === 'premium' ? 'Premium' : 'Regular or Premium';
-                throw new InvalidArgumentException("{$requiredPlan} subscription required for this course");
+                $requiredPlan = $course->access_type === 'premium' ? 'Premium' : 'Regular atau Premium';
+                throw new InvalidArgumentException("Perlu subscription {$requiredPlan} untuk mengakses kursus ini");
             }
             
-            $enrollment = Enrollment::create([
-                'user_id' => $user->id,
-                'course_id' => $course->id,
-                'progress' => 0,
-                'completed' => false,
-            ]);
+            // ⚠️ PAID COURSE: Buat transaksi, enrollment dibuat setelah payment confirmed
+            // Enrollment akan dibuat di TransactionService->confirmPayment()
+            // setelah admin mengkonfirmasi pembayaran
+            
+            // Create transaction ONLY (linked to Course, not Enrollment yet)
+            $transaction = $this->transactionService->createCourseTransaction(
+                $course,
+                $user,
+                $paymentMethod
+            );
 
             DB::commit();
 
-            Log::info('User enrolled in course successfully', [
-                'enrollment_id' => $enrollment->id,
+            Log::info('Paid course enrollment transaction created', [
                 'user_id' => $user->id,
                 'course_id' => $course->id,
                 'course_title' => $course->title,
+                'transaction_id' => $transaction->id,
+                'payment_method' => $paymentMethod,
+                'access_type' => $course->access_type,
+                'note' => 'Enrollment will be created after payment confirmation',
             ]);
 
-            return $enrollment;
+            return [
+                'transaction' => $transaction,
+                'course' => $course,
+                'is_free' => false,
+            ];
         } catch (InvalidArgumentException $e) {
             DB::rollBack();
             Log::warning('Enrollment failed: validation error', [
@@ -95,23 +141,8 @@ class EnrollmentService
 
             $enrollment->progress = $progress;
             
-            // Auto-complete if progress is 100%
-            if ($progress >= 100) {
-                $enrollment->completed = true;
-                
-                // Generate Certificate
-                $certificateUrl = $this->generateCertificate($enrollment);
-                if ($certificateUrl) {
-                    $enrollment->certificate_url = $certificateUrl;
-                }
-
-                Log::info('Course completed and certificate generated', [
-                    'enrollment_id' => $enrollment->id,
-                    'user_id' => $enrollment->user_id,
-                    'course_id' => $enrollment->course_id,
-                    'certificate_url' => $certificateUrl,
-                ]);
-            }
+            // Check for completion and generate certificate
+            $this->checkAndCompleteEnrollment($enrollment);
             
             $enrollment->save();
 
@@ -134,6 +165,77 @@ class EnrollmentService
             throw new \RuntimeException('Failed to update progress. Please try again later.');
         }
     }
+
+    /**
+     * Mark a curriculum as completed and update progress
+     * 
+     * @param Enrollment $enrollment
+     * @param int $curriculumId
+     * @return array
+     */
+    public function markCurriculumCompleted(Enrollment $enrollment, int $curriculumId): array
+    {
+        try {
+            DB::beginTransaction();
+
+            // Delegate to model for the database update
+            $curriculumProgress = $enrollment->markCurriculumCompleted($curriculumId);
+            
+            // Check for course completion
+            $this->checkAndCompleteEnrollment($enrollment);
+            
+            $enrollment->save();
+            DB::commit();
+
+            return [
+                'curriculum_progress' => $curriculumProgress,
+                'enrollment' => $enrollment->fresh()
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to mark curriculum completed', [
+                'enrollment_id' => $enrollment->id,
+                'curriculum_id' => $curriculumId,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Check if enrollment is complete and generate certificate if needed
+     * 
+     * @param Enrollment $enrollment
+     * @return void
+     */
+    private function checkAndCompleteEnrollment(Enrollment $enrollment): void
+    {
+        // 1. Check progress threshold
+        if ($enrollment->progress < 100) {
+            return;
+        }
+
+        // 2. Avoid regenerating if already completed and has certificate
+        if ($enrollment->completed && $enrollment->certificate_url) {
+            return;
+        }
+
+        // 3. Mark as completed
+        $enrollment->completed = true;
+        
+        // 4. Generate Certificate
+        $certificateUrl = $this->generateCertificate($enrollment);
+        if ($certificateUrl) {
+            $enrollment->certificate_url = $certificateUrl;
+        }
+        
+        Log::info('Course completed and certificate generated', [
+            'enrollment_id' => $enrollment->id,
+            'user_id' => $enrollment->user_id,
+            'course_id' => $enrollment->course_id,
+            'certificate_url' => $certificateUrl,
+        ]);
+    }
     
     /**
      * Check if user has access to enroll in course
@@ -149,8 +251,8 @@ class EnrollmentService
             return true;
         }
         
-        // Get user's active subscription
-        $subscription = $user->subscriptions()->where('status', 'active')->latest()->first();
+        // Get user's active subscription using helper method
+        $subscription = $user->activeSubscription();
         
         if (!$subscription) {
             return false;

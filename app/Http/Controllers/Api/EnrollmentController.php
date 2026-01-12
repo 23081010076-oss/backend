@@ -63,19 +63,29 @@ class EnrollmentController extends Controller
     /**
      * Daftar ke kursus
      */
-    public function enroll(int $courseId): JsonResponse
+    public function enroll(Request $request, int $courseId): JsonResponse
     {
         $this->authorize('create', Enrollment::class);
 
         $course = Course::findOrFail($courseId);
         $user = Auth::user();
+        $paymentMethod = $request->input('payment_method', 'manual');
 
         try {
-            $enrollment = $this->enrollmentService->enrollUserToCourse($user, $course);
+            $result = $this->enrollmentService->enrollUserToCourse($user, $course, $paymentMethod);
 
+            // Free course - langsung enrolled
+            if (isset($result['is_free']) && $result['is_free'] === true) {
+                return $this->createdResponse(
+                    $result,
+                    'Berhasil mendaftar ke kursus gratis! Anda sudah bisa mengakses kursus di My Courses.'
+                );
+            }
+
+            // Paid course - perlu payment
             return $this->createdResponse(
-                $enrollment->load('course'),
-                'Berhasil mendaftar ke kursus'
+                $result,
+                'Transaksi berhasil dibuat. Silakan upload bukti pembayaran dan tunggu konfirmasi admin untuk mengakses kursus.'
             );
         } catch (\InvalidArgumentException $e) {
             $statusCode = str_contains($e->getMessage(), 'already enrolled') ? 422 : 403;
@@ -93,13 +103,22 @@ class EnrollmentController extends Controller
     /**
      * Lihat kursus yang diikuti user
      */
-    public function myCourses(): JsonResponse
+    public function myCourses(Request $request): JsonResponse
     {
         $user = Auth::user();
-        $enrollments = Enrollment::with('course')
-            ->where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+
+        $query = Enrollment::with('course')
+            ->where('user_id', $user->id);
+
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->whereHas('course', function ($q) use ($searchTerm) {
+                $q->where('title', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        $enrollments = $query->orderBy('created_at', 'desc')
+            ->paginate(4);
 
         return $this->paginatedResponse($enrollments, 'Kursus Anda berhasil diambil');
     }
@@ -184,6 +203,84 @@ class EnrollmentController extends Controller
                 'error' => $e->getMessage(),
             ]);
             return $this->serverErrorResponse('Gagal menghapus enrollment');
+        }
+    }
+
+    /**
+     * Mark a curriculum item as completed
+     * Progress will be auto-calculated
+     */
+    public function markCurriculumCompleted(int $enrollmentId, int $curriculumId): JsonResponse
+    {
+        $enrollment = Enrollment::findOrFail($enrollmentId);
+
+        // Ensure user owns this enrollment
+        if ($enrollment->user_id !== Auth::id()) {
+            return $this->forbiddenResponse('Anda tidak memiliki akses ke enrollment ini');
+        }
+
+        // Verify curriculum belongs to the course
+        $course = $enrollment->course;
+        $curriculumExists = $course->curriculums()->where('id', $curriculumId)->exists();
+
+        if (!$curriculumExists) {
+            return $this->notFoundResponse('Materi tidak ditemukan dalam kursus ini');
+        }
+
+        try {
+            $result = $this->enrollmentService->markCurriculumCompleted($enrollment, $curriculumId);
+
+            return $this->successResponse($result, 'Materi berhasil ditandai selesai');
+        } catch (\Exception $e) {
+            Log::error('Mark curriculum completed failed', [
+                'enrollment_id' => $enrollmentId,
+                'curriculum_id' => $curriculumId,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Gagal menandai materi selesai');
+        }
+    }
+
+    /**
+     * Generate certificate for completed enrollment
+     */
+    public function generateCertificate(int $id): JsonResponse
+    {
+        $enrollment = Enrollment::with(['user', 'course'])->findOrFail($id);
+        $this->authorize('view', $enrollment);
+
+        // Check if enrollment is completed
+        if (!$enrollment->completed) {
+            return $this->errorResponse('Kursus belum selesai, sertifikat tidak dapat dibuat', 422);
+        }
+
+        // Check if certificate already exists
+        if ($enrollment->certificate_url) {
+            return $this->successResponse([
+                'certificate_url' => $enrollment->certificate_url,
+            ], 'Sertifikat sudah ada');
+        }
+
+        try {
+            $certificateUrl = $this->enrollmentService->generateCertificate($enrollment);
+
+            if ($certificateUrl) {
+                $enrollment->certificate_url = $certificateUrl;
+                $enrollment->save();
+
+                return $this->successResponse([
+                    'certificate_url' => $certificateUrl,
+                ], 'Sertifikat berhasil dibuat');
+            } else {
+                return $this->serverErrorResponse('Gagal membuat sertifikat');
+            }
+        } catch (\Exception $e) {
+            Log::error('Certificate generation failed in controller', [
+                'enrollment_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+            return $this->serverErrorResponse('Gagal membuat sertifikat');
         }
     }
 }

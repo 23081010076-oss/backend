@@ -179,4 +179,16 @@ class ArticleController extends Controller
 
         return $this->paginatedResponse($articles, "Artikel kategori '{$category}' berhasil diambil");
     }
+
+    /**
+     * Artikel milik user yang login (untuk corporate/mentor melihat artikel sendiri)
+     */
+    public function myArticles(Request $request): JsonResponse
+    {
+        $articles = Article::where('author_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->paginate($request->get('per_page', 15));
+
+        return $this->paginatedResponse($articles, 'Artikel Anda berhasil diambil');
+    }
 }

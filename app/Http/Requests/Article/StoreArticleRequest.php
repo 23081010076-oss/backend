@@ -42,6 +42,7 @@ class StoreArticleRequest extends FormRequest
             // FIELD OPSIONAL
             'category' => 'nullable|string|max:100',
             'author'   => 'nullable|string|max:255',
+            'image'    => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // Max 5MB
         ];
     }
 
@@ -56,6 +57,9 @@ class StoreArticleRequest extends FormRequest
             'content.required' => 'Isi artikel wajib diisi',
             'category.max'     => 'Kategori maksimal 100 karakter',
             'author.max'       => 'Nama penulis maksimal 255 karakter',
+            'image.image'      => 'File harus berupa gambar',
+            'image.mimes'      => 'Format gambar harus jpeg, jpg, png, gif, atau webp',
+            'image.max'        => 'Ukuran gambar maksimal 5MB',
         ];
     }
 }

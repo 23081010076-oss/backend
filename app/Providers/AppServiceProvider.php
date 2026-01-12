@@ -37,9 +37,9 @@ use App\Policies\UserPolicy;
  * ==========================================================================
  * APP SERVICE PROVIDER
  * ==========================================================================
- * 
+ *
  * FUNGSI: Tempat untuk mendaftarkan service-service aplikasi.
- * 
+ *
  * DI SINI KITA DAFTARKAN:
  * 1. Policies - Aturan akses untuk setiap Model
  * 2. Gate definitions - Aturan akses custom
@@ -48,11 +48,11 @@ class AppServiceProvider extends ServiceProvider
 {
     /**
      * Daftar Policy untuk setiap Model
-     * 
+     *
      * PENJELASAN:
      * - Key (kiri): Nama Model
      * - Value (kanan): Nama Policy yang mengatur model tersebut
-     * 
+     *
      * Contoh: Achievement::class => AchievementPolicy::class
      * Artinya: Model Achievement diatur oleh AchievementPolicy
      */
@@ -89,6 +89,16 @@ class AppServiceProvider extends ServiceProvider
 
         // Daftarkan Gate untuk admin
         $this->defineAdminGate();
+
+        if ($this->app->runningInConsole()) {
+            $command = $_SERVER['argv'][1] ?? null;
+
+            if ($command === 'serve') {
+                echo "\n========Dokumentasi Rekanesia (Swagger)=================\n";
+                echo "  Silakan akses: http://localhost:8000/api/documentation\n";
+                echo "========================================================\n\n";
+            }
+        }
     }
 
     /**
@@ -103,7 +113,7 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Mendefinisikan Gate untuk admin
-     * 
+     *
      * PENGGUNAAN:
      * - Gate::allows('admin') → return true jika user adalah admin
      * - @can('admin') di Blade

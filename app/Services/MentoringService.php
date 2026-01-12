@@ -6,6 +6,7 @@ use App\Models\MentoringSession;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * ==========================================================================
@@ -21,23 +22,42 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class MentoringService
 {
+    protected TransactionService $transactionService;
+
+    public function __construct(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
     /**
      * Ambil sesi mentoring berdasarkan user/mentor
+     * 
+     * @param User $user User yang sedang login
+     * @param array $filters Filter tambahan (status, type)
+     * @param int $perPage Jumlah per halaman
+     * @param bool $onlyMine Jika true, hanya tampilkan sesi milik user (untuk my-sessions)
      */
-    public function getSessions(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function getSessions(User $user, array $filters = [], int $perPage = 15, bool $onlyMine = false): LengthAwarePaginator
     {
         $query = MentoringSession::with(['member', 'mentor']);
 
-        // Filter berdasarkan role user
-        if ($user->role === 'mentor') {
-            $query->where('mentor_id', $user->id);
-        } else {
-            $query->where('member_id', $user->id);
+        // Jika $onlyMine = true, filter berdasarkan user yang login
+        if ($onlyMine) {
+            if ($user->role === 'mentor') {
+                $query->where('mentor_id', $user->id);
+            } else {
+                $query->where('member_id', $user->id);
+            }
         }
+        // Jika $onlyMine = false, semua user bisa lihat semua sesi
 
         // Filter berdasarkan status
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
+        }
+
+        // Filter berdasarkan tipe (academic/life_plan)
+        if (!empty($filters['type'])) {
+            $query->where('type', $filters['type']);
         }
 
         return $query->orderBy('schedule', 'desc')->paginate($perPage);
@@ -46,14 +66,34 @@ class MentoringService
     /**
      * Buat sesi mentoring baru
      */
-    public function createSession(array $data, User $user): MentoringSession
+    public function createSession(array $data, User $user): array
     {
-        $data['member_id'] = $user->id;
-        $data['status'] = 'pending';
+        try {
+            DB::beginTransaction();
 
-        $session = MentoringSession::create($data);
-        
-        return $session->load(['member', 'mentor']);
+            $data['member_id'] = $user->id;
+            $data['status'] = 'pending';
+            $paymentMethod = $data['payment_method'] ?? 'manual';
+
+            $session = MentoringSession::create($data);
+            
+            // Create transaction
+            $transaction = $this->transactionService->createMentoringTransaction(
+                $session,
+                $user,
+                $paymentMethod
+            );
+
+            DB::commit();
+
+            return [
+                'session' => $session->load(['member', 'mentor']),
+                'transaction' => $transaction,
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     /**
@@ -85,19 +125,24 @@ class MentoringService
     }
 
     /**
-     * Berikan feedback
+     * Berikan feedback/review
      * 
      * @throws \Exception jika sesi belum selesai
      */
-    public function giveFeedback(MentoringSession $session, array $feedbackData): MentoringSession
+    public function giveFeedback(MentoringSession $session, array $feedbackData, User $user): MentoringSession
     {
         if ($session->status !== 'completed') {
             throw new \Exception('Feedback hanya bisa diberikan untuk sesi yang sudah selesai');
         }
 
-        $session->update($feedbackData);
+        // Simpan ke tabel reviews menggunakan polymorphic relationship
+        $session->reviews()->create([
+            'user_id' => $user->id,
+            'rating' => $feedbackData['rating'],
+            'comment' => $feedbackData['feedback'] ?? null, // Map 'feedback' to 'comment'
+        ]);
         
-        return $session->fresh()->load(['member', 'mentor']);
+        return $session->fresh()->load(['member', 'mentor', 'reviews']);
     }
 
     /**

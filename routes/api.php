@@ -17,34 +17,11 @@ use App\Http\Controllers\Api\CorporateContactController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\NeedAssessmentController;
 use App\Http\Controllers\Api\CoachingFileController;
+use App\Http\Controllers\Api\CourseCurriculumController;
 use App\Http\Controllers\Auth\GoogleAuthController;
-use App\Http\Controllers\Api\MidtransWebhookController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Semua route API menggunakan prefix /api/ (otomatis dari Laravel)
-| Contoh: POST /api/register, GET /api/courses
-|
-| Struktur Route:
-| - Public Routes: Bisa diakses tanpa login
-| - Protected Routes: Butuh JWT token (auth:api)
-| - Role-based Routes: Butuh role tertentu (admin, mentor, corporate)
-|
-*/
 
-// ==========================================================================
-// WEBHOOK ROUTES (Public - untuk callback dari payment gateway)
-// ==========================================================================
-
-Route::post('/midtrans/webhook', [MidtransWebhookController::class, 'handleNotification'])
-    ->name('midtrans.webhook');
-
-// ==========================================================================
 // PUBLIC ROUTES (Tanpa Autentikasi)
-// ==========================================================================
 
 // Authentication
 Route::post('/register', [AuthController::class, 'register'])
@@ -66,26 +43,31 @@ Route::get('/courses', [CourseController::class, 'index'])->name('courses.index'
 Route::get('/courses/{id}', [CourseController::class, 'show'])->name('courses.show');
 
 Route::get('/scholarships', [ScholarshipController::class, 'index'])->name('scholarships.index');
+Route::get('/scholarships/recommendations', [ScholarshipController::class, 'recommendations'])->middleware('auth:api')->name('scholarships.recommendations');
 Route::get('/scholarships/{id}', [ScholarshipController::class, 'show'])->name('scholarships.show');
 
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
+Route::get('/articles/popular', [ArticleController::class, 'popular'])->name('articles.popular');
+Route::get('/articles/category/{category}', [ArticleController::class, 'byCategory'])->name('articles.by-category');
 Route::get('/articles/{id}', [ArticleController::class, 'show'])->name('articles.show');
 
 Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+
+// Public Mentors (untuk landing page)
+Route::get('/mentors', [UserController::class, 'listMentors'])->name('mentors.index');
+Route::get('/mentors/{id}', [UserController::class, 'showMentor'])->name('mentors.show');
 
 // Corporate Contact (public - perusahaan bisa submit inquiry)
 Route::post('/corporate-contact', [CorporateContactController::class, 'store'])
     ->name('corporate-contact.store');
 
-// ==========================================================================
 // PROTECTED ROUTES (Butuh Autentikasi)
-// ==========================================================================
 
 Route::middleware('auth:api')->group(function () {
 
-    // ======================================================================
+    
     // AUTH & PROFILE MANAGEMENT
-    // ======================================================================
+    
     Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/me', [AuthController::class, 'me'])->name('me');
@@ -99,14 +81,15 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/profile/cv', [AuthController::class, 'uploadCv'])
             ->middleware('throttle:uploads')
             ->name('upload-cv');
+        Route::get('/profile/cv', [AuthController::class, 'getCv'])->name('get-cv');
         Route::get('/recommendations', [AuthController::class, 'recommendations'])->name('recommendations');
         Route::get('/portfolio', [AuthController::class, 'portfolio'])->name('portfolio');
         Route::get('/activity-history', [AuthController::class, 'activityHistory'])->name('activity-history');
     });
 
-    // ======================================================================
+    
     // USER MANAGEMENT (Admin Only)
-    // ======================================================================
+    
     Route::middleware('role:admin')->prefix('admin/users')->name('admin.users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::post('/', [UserController::class, 'store'])->name('store');
@@ -120,9 +103,9 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/{id}/activate', [UserController::class, 'activate'])->name('activate');
     });
 
-    // ======================================================================
+    
     // PORTFOLIO: ACHIEVEMENTS, EXPERIENCES, ORGANIZATIONS
-    // ======================================================================
+    
     Route::apiResource('achievements', AchievementController::class);
     Route::match(['post', 'put'], '/achievements/{id}/certificate', [AchievementController::class, 'uploadCertificate'])
         ->middleware('throttle:uploads')
@@ -137,6 +120,10 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/experiences/{id}/certificate', [ExperienceController::class, 'deleteCertificate'])
         ->name('experiences.delete-certificate');
 
+    // Public Organizations List (katalog publik)
+    Route::get('/organizations/list/all', [OrganizationController::class, 'listAll'])
+        ->name('organizations.list-all');
+    
     Route::apiResource('organizations', OrganizationController::class);
     
     // Organization Logo Upload
@@ -146,26 +133,54 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/organizations/{id}/logo', [OrganizationController::class, 'deleteLogo'])
         ->name('organizations.delete-logo');
 
-    // ======================================================================
+    
     // SUBSCRIPTIONS
-    // ======================================================================
+    
+    Route::get('/my-subscriptions', [SubscriptionController::class, 'mySubscriptions'])->name('my-subscriptions');
+    Route::get('/subscription-status', [SubscriptionController::class, 'checkStatus'])->name('subscription-status');
+    
+    // Simplified upgrade endpoint (automatically finds active subscription)
+    Route::post('/subscription/upgrade', [SubscriptionController::class, 'upgradeMySubscription'])
+        ->name('subscription.upgrade-simple');
+    
     Route::apiResource('subscriptions', SubscriptionController::class);
     Route::post('/subscriptions/{id}/upgrade', [SubscriptionController::class, 'upgrade'])
         ->name('subscriptions.upgrade');
+    
+    // Admin only: Activate subscription after payment verification
+    Route::post('/subscriptions/{id}/activate', [SubscriptionController::class, 'activate'])
+        ->middleware('role:admin')
+        ->name('subscriptions.activate');
 
-    // ======================================================================
+    
     // REVIEWS
-    // ======================================================================
+    
     Route::apiResource('reviews', ReviewController::class)->only(['store', 'show', 'update', 'destroy']);
 
-    // ======================================================================
+    
     // COURSES & ENROLLMENT
-    // ======================================================================
+    
     // Course CRUD (Admin Only)
     Route::middleware('role:admin')->group(function () {
         Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
         Route::put('/courses/{id}', [CourseController::class, 'update'])->name('courses.update');
         Route::delete('/courses/{id}', [CourseController::class, 'destroy'])->name('courses.destroy');
+    });
+
+    // Course Curriculum (Materi Pembelajaran)
+    Route::prefix('courses/{courseId}/curriculums')->name('courses.curriculums.')->group(function () {
+        // Public - list dan detail kurikulum
+        Route::get('/', [CourseCurriculumController::class, 'index'])->name('index');
+        Route::get('/{id}', [CourseCurriculumController::class, 'show'])->name('show');
+        
+        // Admin Only - CRUD kurikulum
+        Route::middleware('role:admin')->group(function () {
+            Route::post('/', [CourseCurriculumController::class, 'store'])->name('store');
+            Route::post('/bulk', [CourseCurriculumController::class, 'bulkStore'])->name('bulk-store');
+            Route::put('/{id}', [CourseCurriculumController::class, 'update'])->name('update');
+            Route::delete('/{id}', [CourseCurriculumController::class, 'destroy'])->name('destroy');
+            Route::put('/reorder', [CourseCurriculumController::class, 'reorder'])->name('reorder');
+        });
     });
 
     // Enrollment
@@ -174,10 +189,21 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('enrollments', EnrollmentController::class);
     Route::put('/enrollments/{id}/progress', [EnrollmentController::class, 'updateProgress'])
         ->name('enrollments.update-progress');
+    Route::post('/enrollments/{id}/generate-certificate', [EnrollmentController::class, 'generateCertificate'])
+        ->name('enrollments.generate-certificate');
+    
+    // NEW: Curriculum Progress Tracking
+    Route::get('/courses/{courseId}/progress', [App\Http\Controllers\Api\CurriculumProgressController::class, 'index'])
+        ->name('curriculum.progress.index');
+    Route::post('/curriculums/{curriculumId}/complete', [App\Http\Controllers\Api\CurriculumProgressController::class, 'markCompleted'])
+        ->name('curriculum.progress.complete');
 
-    // ======================================================================
+    
     // SCHOLARSHIPS
-    // ======================================================================
+    
+    // User's own scholarships (untuk corporate melihat beasiswa sendiri)
+    Route::get('/my-scholarships', [ScholarshipController::class, 'myScholarships'])->name('my-scholarships');
+    
     // Scholarship CRUD (Admin/Corporate)
     Route::middleware('role:admin,corporate')->group(function () {
         Route::post('/scholarships', [ScholarshipController::class, 'store'])->name('scholarships.store');
@@ -185,25 +211,54 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/scholarships/{id}', [ScholarshipController::class, 'destroy'])->name('scholarships.destroy');
     });
 
-    // Scholarship Application
+    // Scholarship Application Flow
+    // Step 1: Save draft dengan dokumen
+    Route::post('/scholarships/{id}/draft', [ScholarshipController::class, 'saveDraft'])->name('scholarships.save-draft');
+    
+    // Step 2: Pre-assessment form
+    Route::put('/scholarship-applications/{id}/assessment', [ScholarshipController::class, 'updateAssessment'])->name('scholarship-applications.update-assessment');
+    
+    // Step 3: Review - get detail & update draft
+    Route::get('/scholarship-applications/{id}', [ScholarshipController::class, 'getApplication'])->name('scholarship-applications.show');
+    Route::put('/scholarship-applications/{id}/draft', [ScholarshipController::class, 'updateDraft'])->name('scholarship-applications.update-draft');
+    
+    // Step 4: Submit application
+    Route::post('/scholarship-applications/{id}/submit', [ScholarshipController::class, 'submitApplication'])->name('scholarship-applications.submit');
+    
     Route::post('/scholarships/{id}/apply', [ScholarshipController::class, 'apply'])->name('scholarships.apply');
     Route::get('/my-applications', [ScholarshipController::class, 'myApplications'])->name('my-applications');
-    Route::put('/scholarship-applications/{id}/status', [ScholarshipController::class, 'updateStatus'])
-        ->middleware('role:admin,corporate')
-        ->name('scholarship-applications.update-status');
+    Route::get('/scholarships/{id}/my-application', [ScholarshipController::class, 'myApplicationForScholarship'])->name('scholarships.my-application');
+    
+    // Admin/Corporate: Manage all applications
+    Route::middleware('role:admin,corporate')->group(function () {
+        Route::get('/scholarship-applications', [ScholarshipController::class, 'allApplications'])
+            ->name('scholarship-applications.index');
+        Route::get('/scholarship-applications/{id}/detail', [ScholarshipController::class, 'showApplicationDetail'])
+            ->name('scholarship-applications.detail');
+        Route::put('/scholarship-applications/{id}/status', [ScholarshipController::class, 'updateStatus'])
+            ->name('scholarship-applications.update-status');
+    });
 
-    // ======================================================================
+    
     // MENTORING SESSIONS
-    // ======================================================================
+    
     Route::apiResource('mentoring-sessions', MentoringSessionController::class);
     Route::get('/mentoring-sessions/{mentorId}/schedule', [MentoringSessionController::class, 'schedule'])
         ->name('mentoring-sessions.schedule');
+    Route::get('/mentors/{id}/schedule', [MentoringSessionController::class, 'schedule'])
+        ->name('mentors.schedule');
     Route::put('/mentoring-sessions/{id}/status', [MentoringSessionController::class, 'updateStatus'])
         ->name('mentoring-sessions.update-status');
     Route::post('/mentoring-sessions/{id}/feedback', [MentoringSessionController::class, 'feedback'])
         ->name('mentoring-sessions.feedback');
     Route::get('/my-mentoring-sessions', [MentoringSessionController::class, 'mySessions'])
         ->name('my-mentoring-sessions');
+    Route::put('/mentoring-sessions/{id}/status', [MentoringSessionController::class, 'updateStatus'])
+        ->name('mentoring-sessions.update-status');
+    Route::post('/mentoring-sessions/{id}/feedback', [MentoringSessionController::class, 'feedback'])
+        ->name('mentoring-sessions.feedback');
+    Route::get('/mentors/{id}/schedule', [MentoringSessionController::class, 'schedule'])
+        ->name('mentors.schedule');
 
     // Need Assessment (nested under mentoring sessions)
     Route::prefix('mentoring-sessions/{mentoringSessionId}/need-assessments')->name('need-assessments.')->group(function () {
@@ -224,22 +279,21 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/', [CoachingFileController::class, 'destroyAll'])->name('destroy-all');
     });
 
-    // ======================================================================
+    
     // ARTICLES (Admin/Corporate)
-    // ======================================================================
+    
+    // User's own articles (untuk corporate/mentor melihat artikel sendiri)
+    Route::get('/my-articles', [ArticleController::class, 'myArticles'])->name('my-articles');
+    
     Route::middleware('role:admin,corporate')->group(function () {
         Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
         Route::put('/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
         Route::delete('/articles/{id}', [ArticleController::class, 'destroy'])->name('articles.destroy');
     });
 
-    // Article additional routes (authenticated)
-    Route::get('/articles/popular', [ArticleController::class, 'popular'])->name('articles.popular');
-    Route::get('/articles/category/{category}', [ArticleController::class, 'byCategory'])->name('articles.by-category');
-
-    // ======================================================================
+    
     // CORPORATE CONTACT MANAGEMENT (Admin Only)
-    // ======================================================================
+    
     Route::middleware('role:admin')->prefix('corporate-contacts')->name('corporate-contacts.')->group(function () {
         Route::get('/', [CorporateContactController::class, 'index'])->name('index');
         Route::get('/statistics', [CorporateContactController::class, 'statistics'])->name('statistics');
@@ -249,14 +303,21 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/{id}', [CorporateContactController::class, 'destroy'])->name('destroy');
     });
 
-    // ======================================================================
+    
     // TRANSACTIONS
-    // ======================================================================
+    
     Route::prefix('transactions')->name('transactions.')->group(function () {
         Route::get('/', [TransactionController::class, 'index'])->name('index');
+        
+        // Get transactions by type
+        Route::get('/courses', [TransactionController::class, 'getCourseTransactions'])->name('courses');
+        Route::get('/subscriptions', [TransactionController::class, 'getSubscriptionTransactions'])->name('subscriptions');
+        Route::get('/mentoring-sessions', [TransactionController::class, 'getMentoringTransactions'])->name('mentoring-sessions');
 
         // Admin Only - harus di atas route dengan parameter {id}
         Route::middleware('role:admin')->group(function () {
+            Route::get('/admin/all', [TransactionController::class, 'adminIndex'])->name('admin.index');
+            Route::get('/admin/pending-verification', [TransactionController::class, 'pendingVerification'])->name('admin.pending-verification');
             Route::get('/statistics', [TransactionController::class, 'statistics'])->name('statistics');
         });
 
@@ -264,10 +325,13 @@ Route::middleware('auth:api')->group(function () {
 
         // Create Transactions
         Route::post('/courses/{courseId}', [TransactionController::class, 'createCourseTransaction'])
+            ->middleware('throttle:60,1')
             ->name('course.store');
         Route::post('/subscriptions', [TransactionController::class, 'createSubscriptionTransaction'])
+            ->middleware('throttle:60,1')
             ->name('subscription.store');
         Route::post('/mentoring-sessions/{sessionId}', [TransactionController::class, 'createMentoringTransaction'])
+            ->middleware('throttle:60,1')
             ->name('mentoring.store');
 
         // Payment Operations
@@ -281,5 +345,4 @@ Route::middleware('auth:api')->group(function () {
             Route::post('/{id}/confirm', [TransactionController::class, 'confirmPayment'])->name('confirm-payment');
         });
     });
-
 });

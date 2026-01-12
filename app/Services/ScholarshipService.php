@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Cache;
  * ==========================================================================
  * SCHOLARSHIP SERVICE (Service untuk Beasiswa)
  * ==========================================================================
- * 
+ *
  * FUNGSI: Menangani logika bisnis untuk beasiswa dan lamaran.
- * 
+ *
  * KENAPA PAKAI SERVICE?
  * - Logika upload file dokumen terpusat
  * - Validasi bisnis ada di sini
@@ -30,13 +30,26 @@ class ScholarshipService
     {
         // Generate cache key berdasarkan filter
         $cacheKey = 'scholarships:' . md5(json_encode($filters) . $perPage . request('page', 1));
-        
+
+        // Track cache key untuk bisa di-clear nanti
+        $cacheKeys = Cache::get('scholarships:cache_keys', []);
+        if (!in_array($cacheKey, $cacheKeys)) {
+            $cacheKeys[] = $cacheKey;
+            Cache::put('scholarships:cache_keys', $cacheKeys, 86400); // 24 jam
+        }
+
         return Cache::remember($cacheKey, 600, function () use ($filters, $perPage) {
-            $query = Scholarship::with(['organization']);
+            $query = Scholarship::with(['organization'])
+                ->withCount('applications'); // Hitung jumlah aplikasi untuk popularity
 
             // Filter berdasarkan status
             if (!empty($filters['status'])) {
                 $query->where('status', $filters['status']);
+            }
+
+             // Filter recommended
+            if (!empty($filters['is_recommended'])) {
+                $query->where('is_recommended', $filters['is_recommended'] === 'true' || $filters['is_recommended'] === '1');
             }
 
             // Filter berdasarkan lokasi
@@ -58,6 +71,14 @@ class ScholarshipService
                 });
             }
 
+            // Sorting berdasarkan parameter
+            $sort = $filters['sort'] ?? 'latest';
+            match ($sort) {
+                'popular'  => $query->orderByDesc('applications_count'),
+                'deadline' => $query->orderBy('deadline', 'asc'),
+                default    => $query->latest(),
+            };
+
             return $query->paginate($perPage);
         });
     }
@@ -67,11 +88,16 @@ class ScholarshipService
      */
     public function createScholarship(array $data): Scholarship
     {
+        // Handle image upload if exists
+        if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
+            $data['image'] = $data['image']->store('scholarship-images', 'public');
+        }
+
         $scholarship = Scholarship::create($data);
-        
+
         // Clear cache setelah create
         $this->clearCache();
-        
+
         return $scholarship->load('organization');
     }
 
@@ -80,11 +106,20 @@ class ScholarshipService
      */
     public function updateScholarship(Scholarship $scholarship, array $data): Scholarship
     {
+        // Handle image upload if exists
+        if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
+            // Delete old image if exists
+            if ($scholarship->image) {
+                Storage::disk('public')->delete($scholarship->image);
+            }
+            $data['image'] = $data['image']->store('scholarship-images', 'public');
+        }
+
         $scholarship->update($data);
-        
+
         // Clear cache setelah update
         $this->clearCache();
-        
+
         return $scholarship->fresh()->load('organization');
     }
 
@@ -94,16 +129,16 @@ class ScholarshipService
     public function deleteScholarship(Scholarship $scholarship): bool
     {
         $result = $scholarship->delete();
-        
+
         // Clear cache setelah delete
         $this->clearCache();
-        
+
         return $result;
     }
 
     /**
      * Lamar beasiswa
-     * 
+     *
      * @throws \Exception jika validasi gagal
      */
     public function applyScholarship(Scholarship $scholarship, User $user, array $files = []): ScholarshipApplication
@@ -158,12 +193,59 @@ class ScholarshipService
     }
 
     /**
+     * Ambil semua lamaran beasiswa (untuk admin/corporate)
+     */
+    public function getAllApplications(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    {
+        $query = ScholarshipApplication::with(['scholarship', 'user']);
+
+        // Filter berdasarkan status
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Filter berdasarkan scholarship_id
+        if (!empty($filters['scholarship_id'])) {
+            $query->where('scholarship_id', $filters['scholarship_id']);
+        }
+
+        // Filter berdasarkan user_id
+        if (!empty($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
+        }
+
+        // Filter berdasarkan array scholarship_ids (untuk corporate)
+        if (!empty($filters['scholarship_ids'])) {
+            $query->whereIn('scholarship_id', $filters['scholarship_ids']);
+        }
+
+        // Pencarian berdasarkan nama user
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+    }
+
+    /**
+     * Ambil detail lamaran by ID (untuk admin/corporate)
+     */
+    public function getApplicationById(int $applicationId): ?ScholarshipApplication
+    {
+        return ScholarshipApplication::with(['scholarship', 'user'])->find($applicationId);
+    }
+
+    /**
      * Update status lamaran
      */
     public function updateApplicationStatus(ScholarshipApplication $application, string $status): ScholarshipApplication
     {
         $application->update(['status' => $status]);
-        
+
         return $application->fresh();
     }
 
@@ -180,6 +262,7 @@ class ScholarshipService
                 'closed'      => Scholarship::where('status', 'closed')->count(),
                 'applications' => [
                     'total'    => ScholarshipApplication::count(),
+                    'draft'    => ScholarshipApplication::where('status', 'draft')->count(),
                     'submitted'=> ScholarshipApplication::where('status', 'submitted')->count(),
                     'review'   => ScholarshipApplication::where('status', 'review')->count(),
                     'accepted' => ScholarshipApplication::where('status', 'accepted')->count(),
@@ -189,11 +272,350 @@ class ScholarshipService
         });
     }
 
+    /*
+     Scholarship Application Flow Methods
+    /**
+     * Step 1: Simpan draft lamaran dengan dokumen
+     *
+     * @throws \Exception jika sudah ada lamaran
+     */
+    public function saveDraft(Scholarship $scholarship, User $user, array $files = [], array $data = []): ScholarshipApplication
+    {
+        // Validasi: beasiswa harus open
+        if ($scholarship->status !== 'open') {
+            throw new \Exception('Beasiswa ini tidak sedang menerima lamaran');
+        }
+
+        // Cek apakah sudah ada draft atau lamaran
+        $existing = ScholarshipApplication::where('user_id', $user->id)
+            ->where('scholarship_id', $scholarship->id)
+            ->first();
+
+        if ($existing) {
+            throw new \Exception('Anda sudah memiliki lamaran untuk beasiswa ini');
+        }
+
+        $applicationData = [
+            'user_id'        => $user->id,
+            'scholarship_id' => $scholarship->id,
+            'status'         => 'draft',
+        ];
+
+        // Handle CV from profile
+        if (!empty($data['cv_from_profile']) && $data['cv_from_profile'] === true || $data['cv_from_profile'] === 'true' || $data['cv_from_profile'] === '1') {
+            if (!empty($user->cv_path)) {
+                $applicationData['cv_path'] = $user->cv_path;
+            } else {
+                throw new \Exception('CV belum tersedia di profil Anda. Silakan upload CV di profil terlebih dahulu.');
+            }
+        } elseif (!empty($files['cv_path'])) {
+            $applicationData['cv_path'] = $files['cv_path']->store('scholarship-docs', 'public');
+        }
+
+        // Handle file uploads
+        if (!empty($files['transcript_path'])) {
+            $applicationData['transcript_path'] = $files['transcript_path']->store('scholarship-docs', 'public');
+        }
+        if (!empty($files['recommendation_path'])) {
+            $applicationData['recommendation_path'] = $files['recommendation_path']->store('scholarship-docs', 'public');
+        }
+        if (!empty($files['motivation_letter'])) {
+            $applicationData['motivation_letter'] = $files['motivation_letter']->store('scholarship-docs', 'public');
+        }
+
+        // Handle motivation letter text
+        if (!empty($data['motivation_letter_text'])) {
+            $applicationData['motivation_letter_text'] = $data['motivation_letter_text'];
+        }
+
+        return ScholarshipApplication::create($applicationData);
+    }
+
+    /**
+     * Step 1b: Update draft dengan dokumen baru
+     *
+     * @throws \Exception jika bukan draft
+     */
+    public function updateDraft(ScholarshipApplication $application, array $files = [], array $data = [], ?User $user = null): ScholarshipApplication
+    {
+        if ($application->status !== 'draft') {
+            throw new \Exception('Hanya draft yang bisa diupdate');
+        }
+
+        $updateData = [];
+
+        // Handle CV from profile
+        if (!empty($data['cv_from_profile']) && ($data['cv_from_profile'] === true || $data['cv_from_profile'] === 'true' || $data['cv_from_profile'] === '1')) {
+            $user = $user ?? User::find($application->user_id);
+            if (!empty($user->cv_path)) {
+                // Don't delete old file if it's from profile (shared file)
+                $updateData['cv_path'] = $user->cv_path;
+            } else {
+                throw new \Exception('CV belum tersedia di profil Anda. Silakan upload CV di profil terlebih dahulu.');
+            }
+        } elseif (!empty($files['cv_path'])) {
+            // Delete old file if exists and it's not a profile CV
+            if ($application->cv_path && !$this->isProfileCv($application)) {
+                Storage::disk('public')->delete($application->cv_path);
+            }
+            $updateData['cv_path'] = $files['cv_path']->store('scholarship-docs', 'public');
+        }
+
+        // Handle file uploads (replace old files)
+        if (!empty($files['transcript_path'])) {
+            if ($application->transcript_path) {
+                Storage::disk('public')->delete($application->transcript_path);
+            }
+            $updateData['transcript_path'] = $files['transcript_path']->store('scholarship-docs', 'public');
+        }
+        if (!empty($files['recommendation_path'])) {
+            if ($application->recommendation_path) {
+                Storage::disk('public')->delete($application->recommendation_path);
+            }
+            $updateData['recommendation_path'] = $files['recommendation_path']->store('scholarship-docs', 'public');
+        }
+        if (!empty($files['motivation_letter'])) {
+            if ($application->motivation_letter) {
+                Storage::disk('public')->delete($application->motivation_letter);
+            }
+            $updateData['motivation_letter'] = $files['motivation_letter']->store('scholarship-docs', 'public');
+        }
+
+        // Handle motivation letter text
+        if (array_key_exists('motivation_letter_text', $data)) {
+            $updateData['motivation_letter_text'] = $data['motivation_letter_text'];
+        }
+
+        if (!empty($updateData)) {
+            $application->update($updateData);
+        }
+
+        return $application->fresh();
+    }
+
+    /**
+     * Check if application CV is from user profile
+     */
+    private function isProfileCv(ScholarshipApplication $application): bool
+    {
+        $user = User::find($application->user_id);
+        return $user && $user->cv_path === $application->cv_path;
+    }
+
+    /**
+     * Step 2: Update pre-assessment data
+     *
+     * @throws \Exception jika bukan draft
+     */
+    public function updateAssessment(ScholarshipApplication $application, array $data): ScholarshipApplication
+    {
+        if ($application->status !== 'draft') {
+            throw new \Exception('Hanya draft yang bisa diupdate');
+        }
+
+        $assessmentData = [];
+
+        if (array_key_exists('gpa', $data)) {
+            $assessmentData['gpa'] = $data['gpa'];
+        }
+        if (array_key_exists('has_other_scholarship', $data)) {
+            $assessmentData['has_other_scholarship'] = $data['has_other_scholarship'];
+        }
+        if (array_key_exists('parent_income', $data)) {
+            $assessmentData['parent_income'] = $data['parent_income'];
+        }
+        if (array_key_exists('university', $data)) {
+            $assessmentData['university'] = $data['university'];
+        }
+
+        if (!empty($assessmentData)) {
+            $application->update($assessmentData);
+        }
+
+        return $application->fresh();
+    }
+
+    /**
+     * Step 3: Get application detail untuk review
+     */
+    public function getApplication(int $applicationId, int $userId): ?ScholarshipApplication
+    {
+        return ScholarshipApplication::with('scholarship')
+            ->where('id', $applicationId)
+            ->where('user_id', $userId)
+            ->first();
+    }
+
+    /**
+     * Get user's application for a specific scholarship
+     * Used for checking existing application and determining current step
+     */
+    public function getUserApplicationForScholarship(int $scholarshipId, int $userId): ?ScholarshipApplication
+    {
+        return ScholarshipApplication::with('scholarship')
+            ->where('scholarship_id', $scholarshipId)
+            ->where('user_id', $userId)
+            ->first();
+    }
+
+    /**
+     * Step 4: Submit draft menjadi lamaran resmi
+     *
+     * @throws \Exception jika bukan draft atau dokumen belum lengkap
+     */
+    public function submitApplication(ScholarshipApplication $application): ScholarshipApplication
+    {
+        if ($application->status !== 'draft') {
+            throw new \Exception('Hanya draft yang bisa disubmit');
+        }
+
+        // Validasi minimal dokumen (CV wajib)
+        if (empty($application->cv_path)) {
+            throw new \Exception('CV harus diupload sebelum submit');
+        }
+
+        $application->update([
+            'status'       => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        return $application->fresh();
+    }
+
+    /**
+     * Dapatkan rekomendasi beasiswa berdasarkan:
+     * 1. Status open (prioritas utama), coming_soon (prioritas terakhir)
+     * 2. Terbaru (created_at DESC)
+     * 3. Relevansi dengan specialization user (match study_field)
+     * 4. Exclude yang sudah dilamar dan yang closed
+     * 
+     * @param User $user
+     * @param int $limit
+     * @return array [scholarships, criteria]
+     */
+    public function getRecommendations(User $user, int $limit = 5): array
+    {
+        // Get scholarship IDs yang sudah dilamar user
+        $appliedScholarshipIds = ScholarshipApplication::where('user_id', $user->id)
+            ->pluck('scholarship_id')
+            ->toArray();
+        
+        // Get user specialization untuk matching
+        $specializations = $user->specialization ?? [];
+        $major = $user->major;
+        
+        // Build query dasar - hanya scholarship yang open atau coming_soon, exclude closed dan yang sudah dilamar
+        $query = Scholarship::with(['organization'])
+            ->withCount('applications')
+            ->whereIn('status', ['open', 'coming_soon'])
+            ->whereNotIn('id', $appliedScholarshipIds);
+        
+        // Jika user punya specialization, gunakan scoring system
+        if (!empty($specializations) || $major) {
+            // Build CASE WHEN untuk scoring
+            $caseClauses = [];
+            $bindings = [];
+            
+            // Specialization matching (prioritas tinggi: 100-80 points)
+            if (!empty($specializations)) {
+                foreach ($specializations as $index => $spec) {
+                    $score = 100 - ($index * 10); // 100, 90, 80, ...
+                    
+                    // Match di study_field (exact atau partial)
+                    $caseClauses[] = "WHEN LOWER(study_field) LIKE ? THEN {$score}";
+                    $bindings[] = '%' . strtolower($spec) . '%';
+                    
+                    // Match di name
+                    $caseClauses[] = "WHEN LOWER(name) LIKE ? THEN " . ($score - 10);
+                    $bindings[] = '%' . strtolower($spec) . '%';
+                    
+                    // Match di description
+                    $caseClauses[] = "WHEN LOWER(description) LIKE ? THEN " . ($score - 20);
+                    $bindings[] = '%' . strtolower($spec) . '%';
+                }
+            }
+            
+            // Major matching (prioritas sedang: 50-30 points)
+            if ($major) {
+                $caseClauses[] = "WHEN LOWER(study_field) LIKE ? THEN 50";
+                $bindings[] = '%' . strtolower($major) . '%';
+                
+                $caseClauses[] = "WHEN LOWER(name) LIKE ? THEN 40";
+                $bindings[] = '%' . strtolower($major) . '%';
+                
+                $caseClauses[] = "WHEN LOWER(description) LIKE ? THEN 30";
+                $bindings[] = '%' . strtolower($major) . '%';
+            }
+            
+            if (!empty($caseClauses)) {
+                $caseStatement = "CASE " . implode(" ", $caseClauses) . " ELSE 0 END";
+                
+                $recommendations = $query
+                    ->selectRaw("scholarships.*, ({$caseStatement}) as relevance_score", $bindings)
+                    ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END") // Open dulu, coming_soon terakhir
+                    ->orderByRaw('relevance_score DESC')
+                    ->orderBy('created_at', 'desc') // Terbaru sebagai prioritas kedua
+                    ->orderBy('applications_count', 'desc') // Popularity sebagai prioritas ketiga
+                    ->limit($limit)
+                    ->get();
+            } else {
+                $recommendations = $query
+                    ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END") // Open dulu, coming_soon terakhir
+                    ->orderBy('created_at', 'desc')
+                    ->orderBy('applications_count', 'desc')
+                    ->limit($limit)
+                    ->get();
+            }
+        } else {
+            // Jika tidak ada specialization/major, urutkan berdasarkan status, terbaru dan popularity
+            $recommendations = $query
+                ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END") // Open dulu, coming_soon terakhir
+                ->orderBy('created_at', 'desc')
+                ->orderBy('applications_count', 'desc')
+                ->limit($limit)
+                ->get();
+        }
+        
+        // Fallback jika tidak ada hasil
+        if ($recommendations->isEmpty()) {
+            $recommendations = Scholarship::with(['organization'])
+                ->withCount('applications')
+                ->whereIn('status', ['open', 'coming_soon'])
+                ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END") // Open dulu, coming_soon terakhir
+                ->orderBy('created_at', 'desc')
+                ->orderBy('applications_count', 'desc')
+                ->limit($limit)
+                ->get();
+        }
+        
+        return [
+            'recommendations' => $recommendations,
+            'criteria' => [
+                'specializations' => $specializations,
+                'major' => $major ?? 'not_specified',
+                'excluded_applied' => count($appliedScholarshipIds),
+                'status_filter' => 'open, coming_soon',
+                'status_priority' => 'open first, coming_soon last',
+                'algorithm' => 'status_priority + specialization_score + recency + popularity',
+            ],
+        ];
+    }
+
     /**
      * Clear semua cache scholarships
      */
     public function clearCache(): void
     {
+        // Clear statistics cache
         Cache::forget('scholarships:statistics');
+        
+        // Clear all scholarship list caches (with different filters and pages)
+        // Karena cache key menggunakan md5 hash dari filters, kita perlu clear semua
+        // yang dimulai dengan 'scholarships:'
+        $cacheKeys = Cache::get('scholarships:cache_keys', []);
+        foreach ($cacheKeys as $key) {
+            Cache::forget($key);
+        }
+        Cache::forget('scholarships:cache_keys');
     }
 }

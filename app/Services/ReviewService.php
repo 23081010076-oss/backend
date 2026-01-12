@@ -35,6 +35,11 @@ class ReviewService
             if ($this->checkDuplicateReview($user, $data['reviewable_id'], $data['reviewable_type'])) {
                 throw new InvalidArgumentException('You have already reviewed this item');
             }
+
+            // ✅ FIX: Validate user has access to review (enrolled or subscribed)
+            if ($data['reviewable_type'] === 'App\\Models\\Course') {
+                $this->validateCourseReviewAccess($user, $data['reviewable_id']);
+            }
             
             $data['user_id'] = $user->id;
             $review = Review::create($data);
@@ -159,5 +164,57 @@ class ReviewService
             'average_rating' => round($averageRating, 2),
             'rating_distribution' => $distribution,
         ];
+    }
+
+    /**
+     * ✅ NEW: Validate user has access to review course
+     * User must either:
+     * 1. Be enrolled in the course (bought it)
+     * 2. Have active subscription that covers this course
+     *
+     * @param User $user
+     * @param int $courseId
+     * @throws InvalidArgumentException
+     */
+    private function validateCourseReviewAccess(User $user, int $courseId): void
+    {
+        // Check if user is enrolled in this course
+        $isEnrolled = $user->enrollments()
+            ->where('course_id', $courseId)
+            ->exists();
+
+        if ($isEnrolled) {
+            return; // User has access via enrollment
+        }
+
+        // Check if user has active subscription
+        $course = \App\Models\Course::findOrFail($courseId);
+        
+        // Free courses can be reviewed by anyone
+        if ($course->access_type === 'free') {
+            return;
+        }
+
+        // Check subscription access
+        $subscription = $user->subscriptions()
+            ->where('status', 'active')
+            ->where('end_date', '>=', now())
+            ->first();
+
+        if (!$subscription) {
+            throw new InvalidArgumentException('You must enroll in this course or have an active subscription to leave a review');
+        }
+
+        // Premium subscription can review all courses
+        if ($subscription->plan === 'premium') {
+            return;
+        }
+
+        // Regular subscription can review regular and free courses
+        if ($subscription->plan === 'regular' && $course->access_type !== 'premium') {
+            return;
+        }
+
+        throw new InvalidArgumentException('Your subscription does not cover this course. Please enroll or upgrade your subscription');
     }
 }

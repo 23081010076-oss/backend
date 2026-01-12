@@ -63,6 +63,33 @@ class OrganizationController extends Controller
     }
 
     /**
+     * Display all organizations (public access)
+     * 
+     * Endpoint untuk melihat semua organizations (katalog publik)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function listAll(Request $request): JsonResponse
+    {
+        $query = Organization::query();
+
+        // Filter by type if provided
+        if ($request->has('type')) {
+            $query->where('type', $request->type);
+        }
+
+        // Search by name
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $organizations = $query->orderBy('name', 'asc')->paginate(15);
+        
+        return $this->paginatedResponse($organizations, 'All organizations retrieved successfully');
+    }
+
+    /**
      * Store a new organization
      *
      * @param StoreOrganizationRequest $request

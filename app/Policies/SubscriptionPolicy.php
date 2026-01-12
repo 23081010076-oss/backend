@@ -90,7 +90,7 @@ class SubscriptionPolicy
      */
     public function upgrade(User $user, Subscription $subscription): bool
     {
-        // Only the owner can upgrade their subscription
-        return $user->id === $subscription->user_id;
+        // Owner can upgrade their own subscription or admin can upgrade any
+        return $user->id === $subscription->user_id || $user->role === 'admin';
     }
 }

@@ -30,7 +30,7 @@ class CreateCourseTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'payment_method' => 'required|in:qris,bank_transfer,virtual_account,credit_card,manual',
+            'payment_method' => 'required|in:manual,bank_transfer,qris,virtual_account,credit_card',
         ];
     }
 
@@ -41,7 +41,7 @@ class CreateCourseTransactionRequest extends FormRequest
     {
         return [
             'payment_method.required' => 'Metode pembayaran wajib dipilih',
-            'payment_method.in'       => 'Metode pembayaran tidak valid (pilih: qris/bank_transfer/virtual_account/credit_card/manual)',
+            'payment_method.in'       => 'Metode pembayaran tidak valid',
         ];
     }
 }

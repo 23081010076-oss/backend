@@ -16,6 +16,9 @@ use App\Http\Requests\Transaction\CreateCourseTransactionRequest;
 use App\Http\Requests\Transaction\CreateSubscriptionTransactionRequest;
 use App\Http\Requests\Transaction\UploadPaymentProofRequest;
 
+// Import Resource
+use App\Http\Resources\TransactionResource;
+
 /**
  * ==========================================================================
  * TRANSACTION CONTROLLER (Controller untuk Transaksi)
@@ -62,7 +65,118 @@ class TransactionController extends Controller
             $request->all()
         );
 
-        return $this->paginatedResponse($transactions, 'Daftar transaksi berhasil diambil');
+        // Transform items with TransactionResource
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
+        return $this->paginatedResponse(
+            $transactions,
+            'Daftar transaksi berhasil diambil'
+        );
+    }
+
+    /**
+     * Tampilkan semua transaksi (Admin only)
+     */
+    public function adminIndex(Request $request): JsonResponse
+    {
+        // Cek akses dengan Policy
+        $this->authorize('viewStatistics', Transaction::class);
+
+        $transactions = $this->transactionService->getAllTransactions(
+            $request->all()
+        );
+
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
+        return $this->paginatedResponse(
+            $transactions,
+            'Daftar semua transaksi berhasil diambil'
+        );
+    }
+
+    /**
+     * Tampilkan transaksi yang perlu diverifikasi (Admin only)
+     * Menampilkan transaksi pending yang sudah upload bukti pembayaran
+     */
+    public function pendingVerification(Request $request): JsonResponse
+    {
+        // Cek akses dengan Policy
+        $this->authorize('viewStatistics', Transaction::class);
+
+        $transactions = $this->transactionService->getPendingVerificationTransactions();
+
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
+        return $this->paginatedResponse(
+            $transactions,
+            'Daftar transaksi yang perlu diverifikasi berhasil diambil'
+        );
+    }
+
+    /**
+     * Tampilkan daftar transaksi course enrollment user
+     */
+    public function getCourseTransactions(Request $request): JsonResponse
+    {
+        $transactions = $this->transactionService->getUserTransactions(
+            $request->user()->id,
+            ['type' => 'course_enrollment']
+        );
+
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
+        return $this->paginatedResponse(
+            $transactions,
+            'Daftar transaksi course berhasil diambil'
+        );
+    }
+
+    /**
+     * Tampilkan daftar transaksi subscription user
+     */
+    public function getSubscriptionTransactions(Request $request): JsonResponse
+    {
+        $transactions = $this->transactionService->getUserTransactions(
+            $request->user()->id,
+            ['type' => 'subscription']
+        );
+
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
+        return $this->paginatedResponse(
+            $transactions,
+            'Daftar transaksi subscription berhasil diambil'
+        );
+    }
+
+    /**
+     * Tampilkan daftar transaksi mentoring user
+     */
+    public function getMentoringTransactions(Request $request): JsonResponse
+    {
+        $transactions = $this->transactionService->getUserTransactions(
+            $request->user()->id,
+            ['type' => 'mentoring_session']
+        );
+
+        $transactions->getCollection()->transform(function ($transaction) {
+            return new TransactionResource($transaction);
+        });
+
+        return $this->paginatedResponse(
+            $transactions,
+            'Daftar transaksi mentoring berhasil diambil'
+        );
     }
 
     /**
@@ -75,7 +189,10 @@ class TransactionController extends Controller
         // Cek akses dengan Policy
         $this->authorize('view', $transaction);
 
-        return $this->successResponse($transaction, 'Detail transaksi berhasil diambil');
+        return $this->successResponse(
+            new TransactionResource($transaction),
+            'Detail transaksi berhasil diambil'
+        );
     }
 
     /*
@@ -104,7 +221,10 @@ class TransactionController extends Controller
                 $validated['payment_method']
             );
 
-            return $this->createdResponse($result, 'Transaksi berhasil dibuat');
+            return $this->createdResponse([
+                'transaction' => new TransactionResource($result['transaction']),
+                'instructions' => $result['instructions'],
+            ], 'Transaksi berhasil dibuat');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 422);
         }
@@ -135,7 +255,11 @@ class TransactionController extends Controller
                 $validated['payment_method']
             );
 
-            return $this->createdResponse($result, 'Transaksi langganan berhasil dibuat');
+            return $this->createdResponse([
+                'transaction' => new TransactionResource($result['transaction']),
+                'subscription' => $result['subscription'],
+                'instructions' => $result['instructions'],
+            ], 'Transaksi langganan berhasil dibuat');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 422);
         }
@@ -153,14 +277,11 @@ class TransactionController extends Controller
     public function createMentoringTransaction(Request $request, int $sessionId): JsonResponse
     {
         $validated = $request->validate([
-            'payment_method' => 'required|in:qris,bank_transfer,virtual_account,credit_card,manual',
+            'payment_method' => 'required|in:manual,bank_transfer',
         ], [
             'payment_method.required' => 'Metode pembayaran harus diisi',
             'payment_method.in'       => 'Metode pembayaran tidak valid',
         ]);
-
-        // Cek akses dengan Policy
-        $this->authorize('create', Transaction::class);
 
         try {
             $session = MentoringSession::findOrFail($sessionId);
@@ -171,7 +292,10 @@ class TransactionController extends Controller
                 $validated['payment_method']
             );
 
-            return $this->createdResponse($result, 'Transaksi mentoring berhasil dibuat');
+            return $this->createdResponse([
+                'transaction' => new TransactionResource($result['transaction']),
+                'instructions' => $result['instructions'],
+            ], 'Transaksi mentoring berhasil dibuat');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 422);
         }
@@ -195,12 +319,19 @@ class TransactionController extends Controller
         // Cek akses dengan Policy
         $this->authorize('uploadProof', $transaction);
 
-        $transaction = $this->transactionService->uploadPaymentProof(
-            $transaction,
-            $request->file('payment_proof')
-        );
+        try {
+            $transaction = $this->transactionService->uploadPaymentProof(
+                $transaction,
+                $request->file('payment_proof')
+            );
 
-        return $this->successResponse($transaction, 'Bukti pembayaran berhasil diupload');
+            return $this->successResponse(
+                new TransactionResource($transaction->load(['user', 'transactionable'])),
+                'Bukti pembayaran berhasil diupload'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        }
     }
 
     /**
@@ -215,7 +346,10 @@ class TransactionController extends Controller
 
         $transaction = $this->transactionService->confirmPayment($transaction);
 
-        return $this->successResponse($transaction, 'Pembayaran berhasil dikonfirmasi');
+        return $this->successResponse(
+            new TransactionResource($transaction->load(['user', 'transactionable'])),
+            'Pembayaran berhasil dikonfirmasi'
+        );
     }
 
     /**
@@ -240,7 +374,10 @@ class TransactionController extends Controller
             $validated['reason']
         );
 
-        return $this->successResponse($transaction, 'Pengembalian dana berhasil diajukan');
+        return $this->successResponse(
+            new TransactionResource($transaction->load(['user', 'transactionable'])),
+            'Pengembalian dana berhasil diajukan'
+        );
     }
 
     /*

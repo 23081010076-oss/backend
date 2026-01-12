@@ -20,6 +20,8 @@ class Transaction extends Model
         'status',
         'payment_details',
         'payment_proof',
+        'qr_code_url',
+        'qr_string',
         'paid_at',
         'expired_at',
     ];

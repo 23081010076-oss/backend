@@ -62,6 +62,14 @@ class UserResource extends JsonResource
             'institution'     => $this->institution,      // Nama institusi/sekolah/kampus
             'major'           => $this->major,            // Jurusan/program studi
             'education_level' => $this->education_level,  // Jenjang: SMA/D3/S1/S2/S3
+            'specialization'  => $this->specialization,   // Spesialisasi (array)
+            
+            // ============================================================
+            // DATA MENTOR (khusus untuk role mentor)
+            // ============================================================
+            'coaching_types'  => $this->when($this->role === 'mentor', $this->coaching_types), // Tipe coaching yang tersedia
+            'academic_sessions_count' => $this->when($this->role === 'mentor', $this->academic_sessions_count ?? 0), // Jumlah sesi academic coaching
+            'life_plan_sessions_count' => $this->when($this->role === 'mentor', $this->life_plan_sessions_count ?? 0), // Jumlah sesi life plan coaching
             
             // ============================================================
             // DATA PROFIL

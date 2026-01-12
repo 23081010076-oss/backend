@@ -19,7 +19,8 @@ return new class extends Migration
             $table->enum('type', ['academic', 'life_plan'])->default('academic');
             $table->datetime('schedule')->nullable();
             $table->string('meeting_link')->nullable();
-            $table->enum('payment_method', ['qris', 'bank', 'va', 'manual'])->nullable();
+            $table->enum('payment_method', ['manual', 'bank_transfer'])->nullable();
+            $table->text('notes')->nullable();
             $table->enum('status', ['pending', 'completed', 'refunded', 'scheduled', 'cancelled'])->default('pending');
             $table->enum('need_assessment_status', ['pending', 'completed'])->default('pending');
             $table->timestamps();

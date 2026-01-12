@@ -22,8 +22,9 @@ return [
     | Path yang diizinkan untuk cross-origin request.
     | 'api/*' = semua endpoint yang dimulai dengan /api/
     | 'sanctum/csrf-cookie' = untuk Laravel Sanctum (jika digunakan)
+    | 'storage/*' = untuk file sertifikat dan upload lainnya
     */
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'storage/*'],
 
     /*
     |--------------------------------------------------------------------------

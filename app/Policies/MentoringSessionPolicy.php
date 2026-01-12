@@ -34,7 +34,7 @@ class MentoringSessionPolicy
      */
     public function view(User $user, MentoringSession $session): bool
     {
-        return $user->id === $session->user_id 
+        return $user->id === $session->member_id 
             || $user->id === $session->mentor_id 
             || $user->role === 'admin';
     }
@@ -54,7 +54,7 @@ class MentoringSessionPolicy
      */
     public function update(User $user, MentoringSession $session): bool
     {
-        return $user->id === $session->user_id 
+        return $user->id === $session->member_id 
             || $user->id === $session->mentor_id 
             || $user->role === 'admin';
     }
@@ -65,7 +65,7 @@ class MentoringSessionPolicy
      */
     public function delete(User $user, MentoringSession $session): bool
     {
-        return $user->id === $session->user_id 
+        return $user->id === $session->member_id 
             || $user->role === 'admin';
     }
 
@@ -85,7 +85,7 @@ class MentoringSessionPolicy
      */
     public function giveFeedback(User $user, MentoringSession $session): bool
     {
-        return $user->id === $session->user_id 
+        return $user->id === $session->member_id 
             || $user->id === $session->mentor_id;
     }
 }

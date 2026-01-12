@@ -76,10 +76,10 @@ class ScholarshipPolicy
 
     /**
      * Apakah user boleh mengupdate status lamaran?
-     * → Hanya admin boleh
+     * → Admin atau corporate boleh
      */
     public function updateApplicationStatus(User $user, Scholarship $scholarship): bool
     {
-        return $user->role === 'admin';
+        return in_array($user->role, ['admin', 'corporate']);
     }
 }

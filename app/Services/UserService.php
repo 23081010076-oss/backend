@@ -139,10 +139,27 @@ class UserService
     public function getMentors(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         $query = User::where('role', 'mentor')
-            ->where('status', 'active');
+            ->where('status', 'active')
+            ->withCount([
+                'mentoringSessionsAsMentor as academic_sessions_count' => function($q) {
+                    $q->where('type', 'academic');
+                },
+                'mentoringSessionsAsMentor as life_plan_sessions_count' => function($q) {
+                    $q->where('type', 'life_plan');
+                }
+            ]);
 
+        // Search by name
         if (!empty($filters['search'])) {
             $query->where('name', 'like', '%' . $filters['search'] . '%');
+        }
+
+        // Filter by coaching type (academic atau life_plan)
+        if (!empty($filters['coaching_type'])) {
+            $coachingType = $filters['coaching_type'];
+            $query->whereHas('mentoringSessionsAsMentor', function($q) use ($coachingType) {
+                $q->where('type', $coachingType);
+            });
         }
 
         return $query->paginate($perPage);
