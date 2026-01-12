@@ -22,7 +22,7 @@ Backend REST API untuk **Student App PT Resultan Karya Indonesia** - Platform ed
 | Muhamad Rizki Ramadhan Siregar |  Frontend, UI Design |
 | Al Hadid Aditya Abidin |  Frontend, UI Design |
 | Luqy Muhammad Avif |  Frontend |
-| Bima Adnandita | Backend, Frontend |
+| Bima Adnandita | Frontend, UI Design |
 | Ahmad Zidan Ali |  Frontend, UI Design |
 
 ---
