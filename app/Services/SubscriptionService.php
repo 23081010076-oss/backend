@@ -39,14 +39,14 @@ class SubscriptionService
         try {
             DB::beginTransaction();
 
-            // ✅ FIX: Check for duplicate active subscription
+            // Check for duplicate active subscription
             $existingSubscription = $user->subscriptions()
                 ->where('status', 'active')
                 ->where('end_date', '>=', now())
                 ->first();
 
             if ($existingSubscription) {
-                // ✅ EXCEPTION: Allow upgrading from Free plan by creating new subscription
+                // EXCEPTION: Allow upgrading from Free plan by creating new subscription
                 // Free plan can be replaced because it's a default/trial plan
                 if ($existingSubscription->plan === 'free') {
                     // Cancel old Free subscription before creating new one
@@ -69,7 +69,7 @@ class SubscriptionService
             }
 
             $data['user_id'] = $user->id;
-            $data['status'] = 'pending'; // ✅ FIX: Start as pending, activate after payment
+            $data['status'] = 'pending'; // Start as pending, activate after payment
             
             // Validate course selection for single_course package
             if ($data['package_type'] === 'single_course') {
@@ -172,14 +172,14 @@ class SubscriptionService
             
             $oldPlan = $subscription->plan;
             
-            // ✅ FIX: Status tetap pending sampai admin konfirmasi pembayaran upgrade
+            // Status tetap pending sampai admin konfirmasi pembayaran upgrade
             $subscription->update([
                 'plan' => $plan,
                 'status' => 'pending',
                 'end_date' => $newEndDate,
             ]);
 
-            // ⚠️ CATATAN: AUTO-ENROLL tidak dilakukan di sini
+            // CATATAN: AUTO-ENROLL tidak dilakukan di sini
             // Auto-enroll akan dilakukan di TransactionService->confirmPayment()
             // setelah admin mengkonfirmasi pembayaran upgrade
 

@@ -312,7 +312,10 @@ class TransactionSeeder extends Seeder
         }
 
         foreach ($transactions as $transactionData) {
-            Transaction::create($transactionData);
+            Transaction::firstOrCreate(
+                ['transaction_code' => $transactionData['transaction_code']],
+                $transactionData
+            );
         }
 
         $this->command->info('Transaction seeder completed successfully!');

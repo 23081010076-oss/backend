@@ -73,14 +73,8 @@ class EnrollmentService
                 ];
             }
             
-            // ⚠️ PAID COURSE: Cek subscription access dulu
-            // Check access permission based on subscription
-            if (!$this->checkEnrollmentAccess($user, $course)) {
-                $requiredPlan = $course->access_type === 'premium' ? 'Premium' : 'Regular atau Premium';
-                throw new InvalidArgumentException("Perlu subscription {$requiredPlan} untuk mengakses kursus ini");
-            }
-            
-            // ⚠️ PAID COURSE: Buat transaksi, enrollment dibuat setelah payment confirmed
+            // ✅ PAID COURSE: User dapat membeli course secara individual tanpa subscription
+            // Buat transaksi, enrollment dibuat setelah payment confirmed
             // Enrollment akan dibuat di TransactionService->confirmPayment()
             // setelah admin mengkonfirmasi pembayaran
             
